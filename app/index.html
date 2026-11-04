@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chambito · prototipo Auto + Market</title>
+<meta name="description" content="Prototipo navegable de Chambito Auto y Chambito Market.">
+<meta name="theme-color" content="#141414">
+<link rel="icon" type="image/png" sizes="192x192" href="./pwa/icon-192.png">
+<link rel="apple-touch-icon" href="./pwa/apple-touch-icon.png">
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Chambito">
+<script>
+  // apply the saved page theme before React loads, so a light page never flashes dark
+  try {
+    var ui = JSON.parse(localStorage.getItem('chambito:v1:ui') || 'null');
+    document.documentElement.dataset.ui = ui || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+  } catch (e) {}
+</script>
+</head>
+<body>
+<div id="root"></div>
+<script type="module" src="/src/main.tsx"></script>
+</body>
+</html>
