@@ -71,7 +71,7 @@ export function AutoMap({ variant, drop, offsetY = 0, heat, panX = 0, panY = 0, 
         {hasOrigin && drop && (
           <g transform={`translate(${o.x},${o.y})`}>
             <path d={PIN} fill={GREEN} stroke={c.bg} strokeWidth="2" />
-            <circle cx="0" cy="-24" r="4.5" fill="#000000" />
+            <circle cx="0" cy="-24" r="4.5" fill="#FFFFFF" />
           </g>
         )}
         {hasDest && !drop && <rect x="288" y="63" width="14" height="14" rx="2" fill={c.dest} stroke={c.bg} strokeWidth="3" />}
@@ -91,7 +91,7 @@ export function MapPinSvg({ kind, stroke }: { kind: 'origin' | 'dest'; stroke: s
   return (
     <svg width="28" height="42" viewBox="-14 -40 28 42" style={{ display: 'block' }}>
       <path d={PIN} fill={kind === 'origin' ? GREEN : t.map.dest} stroke={stroke} strokeWidth="2" />
-      {kind === 'origin' ? <circle cx="0" cy="-24" r="4.5" fill="#000000" /> : <rect x="-4.5" y="-28.5" width="9" height="9" rx="1.5" fill={stroke} />}
+      {kind === 'origin' ? <circle cx="0" cy="-24" r="4.5" fill="#FFFFFF" /> : <rect x="-4.5" y="-28.5" width="9" height="9" rx="1.5" fill={stroke} />}
     </svg>
   );
 }

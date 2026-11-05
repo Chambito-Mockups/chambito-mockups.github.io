@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useApp } from '../store';
 import { P, R } from '../theme';
-import { Button, Icon } from '../ui/kit';
+import { BrandPattern, Button, Icon } from '../ui/kit';
 import { FloatingNav } from '../screens/common';
 import { CATEGORIES, CATEGORY_ICON, CONSULTAS, Listing, LISTINGS, priceFor, QUICK_REPLIES, REPORT_REASONS, SELLERS } from './data';
 import { DEFAULT_FILTERS, Filters, useMarket } from './state';
@@ -104,8 +104,8 @@ export function M01() {
         </div>
       </MScreen>
       {!empty && (
-        <button className="press" onClick={vender} style={{ position: 'absolute', right: 20, bottom: stacked ? 40 : 108, height: 52, borderRadius: 26, background: t.green, color: '#000000', display: 'flex', alignItems: 'center', gap: 8, padding: '0 22px 0 18px', font: P(16), zIndex: 25, boxShadow: '0 6px 18px rgba(0,0,0,.18)' }}>
-          <Icon name="plus" size={20} color="#000000" />
+        <button className="press" onClick={vender} style={{ position: 'absolute', right: 20, bottom: stacked ? 40 : 108, height: 52, borderRadius: 26, background: t.green, color: t.onGreen, display: 'flex', alignItems: 'center', gap: 8, padding: '0 22px 0 18px', font: P(16), zIndex: 25, boxShadow: '0 6px 18px rgba(0,0,0,.18)' }}>
+          <Icon name="plus" size={20} color={t.onGreen} />
           Vender
         </button>
       )}
@@ -477,7 +477,7 @@ export function M06() {
                 <span style={{ font: R(15, 500) }}>¿Necesitás que {l.category === 'Hogar' ? 'la instalen' : 'lo configuren'}?</span>
                 <span style={{ font: R(14, 500), color: t.link }}>Pedí un técnico</span>
               </div>
-              <span style={{ font: R(12, 500), color: '#000000', background: t.warn, borderRadius: 10, padding: '2px 8px' }}>Fase 2</span>
+              <span style={{ font: R(12, 500), color: t.name === 'dark' ? '#000000' : '#FFFFFF', background: t.warn, borderRadius: 10, padding: '2px 8px' }}>Fase 2</span>
             </button>
           )}
           <SellerRow id={l.seller} onClick={() => { setSellerId(l.seller); go('M09'); }} />
@@ -569,7 +569,7 @@ export function M10() {
               <input value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && send()} placeholder="Escribí un mensaje" aria-label="Mensaje" style={{ font: R(15), color: t.text }} />
             </label>
             <button aria-label="Enviar" className="press" onClick={send} style={{ width: 48, height: 48, borderRadius: 24, background: text.trim() ? t.green : t.mChip, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background .15s' }}>
-              <Icon name="send" size={20} color={text.trim() ? '#000000' : t.text3} />
+              <Icon name="send" size={20} color={text.trim() ? t.onGreen : t.text3} />
             </button>
           </div>
         </div>
@@ -594,18 +594,19 @@ export function M10() {
           <Icon name="chevronRight" size={18} color={t.text2} />
         </button>
       </div>
-      <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <span style={{ alignSelf: 'center', font: R(12, 500), color: t.text2, background: t.mSurface, borderRadius: 10, padding: '3px 10px' }}>Hoy</span>
+      <div style={{ position: 'relative', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <BrandPattern />
+        <span style={{ alignSelf: 'center', font: R(12, 500), color: t.text2, background: t.mSurface, borderRadius: 12, padding: '3px 10px' }}>Hoy</span>
         {msgs.map((m, i) =>
           m.from === 'system' ? (
-            <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: '4px 8px' }}>
+            <div key={i} style={{ position: 'relative', alignSelf: 'center', display: 'flex', gap: 6, alignItems: 'center', maxWidth: '90%', padding: '6px 12px', borderRadius: 16, background: t.mSurface }}>
               <Icon name="shield" size={16} color={t.text2} />
-              <span style={{ font: R(13), color: t.text2, ...pretty }}>{m.text}</span>
+              <span style={{ font: R(13), color: t.text2, textAlign: 'center', ...pretty }}>{m.text}</span>
             </div>
           ) : (
-            <div key={i} className="pop-in" style={{ alignSelf: m.from === 'me' ? 'flex-end' : 'flex-start', maxWidth: '78%', background: m.from === 'me' ? t.greenSoft : theirBg, borderRadius: m.from === 'me' ? '18px 18px 4px 18px' : '18px 18px 18px 4px', padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <div key={i} className="pop-in" style={{ alignSelf: m.from === 'me' ? 'flex-end' : 'flex-start', maxWidth: '78%', position: 'relative', background: m.from === 'me' ? t.green : theirBg, color: m.from === 'me' ? t.onGreen : t.text, borderRadius: m.from === 'me' ? '16px 16px 4px 16px' : '16px 16px 16px 4px', padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: 2 }}>
               <span style={{ font: R(15), ...pretty }}>{m.text}</span>
-              <span style={{ font: R(11), color: t.text2, alignSelf: 'flex-end' }}>{m.time}</span>
+              <span style={{ font: R(12), color: m.from === 'me' ? t.onGreen : t.text2, opacity: m.from === 'me' ? 0.85 : 1, alignSelf: 'flex-end' }}>{m.time}</span>
             </div>
           ),
         )}
@@ -764,14 +765,14 @@ export function ConsultasList() {
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ font: P(15) }}>{s.name}</span>
-                <span style={{ font: R(11, 500), color: t.text2, background: t.mChip, borderRadius: 8, padding: '1px 6px' }}>Tienda</span>
+                <span style={{ font: R(12, 500), color: t.text2, background: t.mChip, borderRadius: 8, padding: '1px 6px' }}>Tienda</span>
               </div>
               <span style={{ font: R(13, 500), whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.title.split(',')[0]}</span>
               <span style={{ font: R(13), color: t.text2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{last && last.from !== 'system' ? (last.from === 'me' ? 'Vos: ' : '') + last.text : c.last}</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
               <span style={{ font: R(12), color: t.text2 }}>{c.time}</span>
-              {!!c.unread && <span style={{ minWidth: 20, height: 20, borderRadius: 10, background: t.green, color: '#000000', font: P(11), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{c.unread}</span>}
+              {!!c.unread && <span style={{ minWidth: 20, height: 20, borderRadius: 10, background: t.green, color: t.onGreen, font: P(12), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{c.unread}</span>}
             </div>
           </button>
         );

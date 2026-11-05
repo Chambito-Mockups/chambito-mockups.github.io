@@ -256,7 +256,7 @@ export function A3() {
       {/* fixed pin at the center; lifts while dragging */}
       <svg width="28" height="42" viewBox="-14 -40 28 42" style={{ position: 'absolute', left: 181, top: 330, zIndex: 5, pointerEvents: 'none', transform: drag ? 'translateY(-10px)' : 'none', transition: 'transform .15s' }}>
         <path d="M0,0 C-3,-7 -12,-13 -12,-24 A12,12 0 1 1 12,-24 C12,-13 3,-7 0,0Z" fill={t.green} stroke={t.map.bg === '#111111' ? '#000000' : t.map.bg} strokeWidth="2" />
-        <circle cx="0" cy="-24" r="4.5" fill="#000000" />
+        <circle cx="0" cy="-24" r="4.5" fill="#FFFFFF" />
       </svg>
       <Sheet>
         <LocationFab onClick={() => { setPan({ x: 0, y: 0 }); setIdx(0); showToast('Centrado en tu ubicación'); }} />
@@ -441,7 +441,7 @@ export function A6() {
 
 /* ================= A7 Tu conductor llegó ================= */
 export function A7() {
-  const { t, d, trip, setTrip, go, showToast, autoRoot } = useApp();
+  const { t, d, trip, setTrip, go, autoRoot } = useApp();
   const secs = useSeconds();
   const left = Math.max(0, 161 - secs);
   const [chat, setChat] = useState(false);
@@ -468,7 +468,8 @@ export function A7() {
           <span style={{ font: R(14, 500), color: t.text2 }}>Tu PIN de inicio</span>
           <PinBoxes pin={d.pin} size="lg" />
         </div>
-        <Button kind="secondary" icon="phone" onClick={() => showToast('Llamando con número enmascarado…')}>Llamar a {d.driver.first}</Button>
+        {/* no calls in Chambito: contact is by chat only (brand guide §1) */}
+        <Button kind="secondary" icon="messageCircle" onClick={() => setChat(true)}>Escribile a {d.driver.first}</Button>
       </Sheet>
       {chat && <TripChat side="passenger" onClose={() => setChat(false)} />}
     </>

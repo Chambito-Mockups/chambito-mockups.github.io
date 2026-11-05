@@ -185,13 +185,12 @@ describe('toolbar and keyboard', () => {
     for (const p of ['Casa', 'Trabajo', 'Favoritos']) expect(within(cliente()).getByRole('button', { name: p })).toBeInTheDocument();
     fireEvent.click(within(cliente()).getByRole('button', { name: 'Atrás' }));
     expect(within(cliente()).getByRole('heading', { name: '¿Qué necesitás hoy?' })).toBeInTheDocument();
-    // Market: categories, launch carousel and products you can save
+    // Market: categories, a neutral launch notice (no promotional banners) and products you can save
     fireEvent.click(within(cliente()).getByRole('button', { name: /^Market: Comprá y vendé cerca tuyo/ }));
     expect(within(cliente()).getByRole('heading', { name: 'Market' })).toBeInTheDocument();
-    const carousel = within(cliente()).getByRole('region', { name: 'Ofertas' });
-    expect(within(carousel).getByRole('button', { name: /Hasta 30% OFF, 1 de 3/ })).toBeInTheDocument();
-    fireEvent.click(within(carousel).getByRole('button', { name: 'Oferta 2' }));
-    expect(within(carousel).getByRole('button', { name: /2 de 3/ })).toBeInTheDocument();
+    expect(within(cliente()).queryByRole('region', { name: 'Ofertas' })).not.toBeInTheDocument();
+    expect(within(cliente()).getByRole('note')).toHaveTextContent('Market es nuevo en tu zona');
+    for (const c of ['Tecnología', 'Hogar', 'Moda', 'Más']) expect(within(cliente()).getByRole('button', { name: c })).toBeInTheDocument();
     const save = within(cliente()).getAllByRole('button', { name: /^Guardar / })[0];
     fireEvent.click(save);
     expect(save).toHaveAttribute('aria-pressed', 'true');

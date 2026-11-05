@@ -1,4 +1,5 @@
-// Tokens taken from "Chambito Auto v3.dc.html" (brief v3: DESIGN_SYSTEM v1.6.0 colors).
+// Tokens from Chambito design-system/TOKENS.json v1.27.0 (semantic + component) and the brand guide of
+// 05/11/2026 (GUIA-MARCA-mockups-e-imagenes). Where they differ, TOKENS.json wins.
 export type ThemeName = 'dark' | 'light';
 
 export interface Theme {
@@ -37,6 +38,16 @@ export interface Theme {
   scrimOffer: string;
   dashed: string;
   // Chambito Market (Tienda): screen bg, surfaces and photo placeholders
+  // brand rules (TOKENS.json)
+  onGreen: string; // text.onBrand: white on solid green, bold or >= 16
+  greenPressed: string; // bg.brandPressed
+  iconBrand: string; // icon.brand: green icons and active tab
+  switchOn: string; // selection.switchOn
+  border: string; // border.default (switch off, secondary button)
+  borderSubtle: string; // border.subtle (dividers, bar outline)
+  shadowCard: string; // elevation.1 (none in dark)
+  shadowFloat: string; // elevation.3 (floating bar)
+  favorite: string; // favorite.on (amber star)
   mBg: string;
   mSurface: string;
   mChip: string;
@@ -63,8 +74,8 @@ export const dark: Theme = {
   dividerStrong: '#4D4D4D',
   text: '#FFFFFF',
   text2: '#B3B3B3',
-  text3: '#808080',
-  link: GREEN,
+  text3: '#9E9E9E',
+  link: '#7CCB7F',
   success: '#7CCB7F',
   error: '#FF6B6B',
   warn: '#FFB547',
@@ -72,9 +83,9 @@ export const dark: Theme = {
   greenSoft: 'rgba(75,172,79,0.2)',
   icon: '#FFFFFF',
   navBg: '#333333',
-  navOutline: 'none',
+  navOutline: '1px solid #4D4D4D',
   navInactive: '#B3B3B3',
-  navActive: GREEN,
+  navActive: '#7CCB7F',
   chipSelBg: '#FFFFFF',
   chipSelText: '#000000',
   sosBg: '#FF6B6B',
@@ -82,6 +93,15 @@ export const dark: Theme = {
   scrimDialog: 'rgba(0,0,0,0.7)',
   scrimOffer: 'rgba(0,0,0,0.5)',
   dashed: '#808080',
+  onGreen: '#FFFFFF',
+  greenPressed: '#3E9642',
+  iconBrand: GREEN,
+  switchOn: GREEN,
+  border: '#4D4D4D',
+  borderSubtle: '#333333',
+  shadowCard: 'none',
+  shadowFloat: '0 16px 48px rgba(0,0,0,.5)',
+  favorite: '#FFB547',
   mBg: '#000000',
   mSurface: '#1A1A1A',
   mChip: '#333333',
@@ -102,7 +122,7 @@ export const light: Theme = {
   handle: '#CCCCCC',
   track: '#EBEBEB',
   barTrack: '#EBEBEB',
-  divider: '#CCCCCC',
+  divider: '#EBEBEB',
   dividerStrong: '#CCCCCC',
   text: '#000000',
   text2: '#5C5C5C',
@@ -115,7 +135,7 @@ export const light: Theme = {
   greenSoft: 'rgba(75,172,79,0.2)',
   icon: '#000000',
   navBg: '#FFFFFF',
-  navOutline: '1px solid #E0E0E0',
+  navOutline: '1px solid #EBEBEB',
   navInactive: '#5C5C5C',
   navActive: '#2F7A33',
   chipSelBg: '#000000',
@@ -125,6 +145,15 @@ export const light: Theme = {
   scrimDialog: 'rgba(0,0,0,0.5)',
   scrimOffer: 'rgba(0,0,0,0.35)',
   dashed: '#707070',
+  onGreen: '#FFFFFF',
+  greenPressed: '#3E9642',
+  iconBrand: '#2F7A33',
+  switchOn: '#2F7A33',
+  border: '#CCCCCC',
+  borderSubtle: '#EBEBEB',
+  shadowCard: '0 1px 2px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.04)',
+  shadowFloat: '0 16px 48px rgba(0,0,0,.18)',
+  favorite: '#FFB547',
   mBg: '#FFFFFF',
   mSurface: '#F5F5F5',
   mChip: '#EBEBEB',
@@ -135,6 +164,6 @@ export const light: Theme = {
 
 export const themes = { dark, light };
 
-/** CSS `font` shorthand helpers matching the design (Poppins Bold / Roboto). */
-export const P = (size: number) => `700 ${size}px Poppins, sans-serif`;
-export const R = (size: number, weight: 400 | 500 = 400) => `${weight} ${size}px Roboto, sans-serif`;
+/** CSS `font` shorthand helpers: Poppins only Bold; Roboto Light (>= 18), Regular or Medium, never Bold. Nothing under 12. */
+export const P = (size: number) => `700 ${Math.max(size, 12)}px Poppins, sans-serif`;
+export const R = (size: number, weight: 300 | 400 | 500 = 400) => `${weight} ${Math.max(size, 12)}px Roboto, sans-serif`;

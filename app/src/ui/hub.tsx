@@ -15,10 +15,10 @@ const MODULES: ModuleKey[] = ['servicios', 'auto', 'market'];
 /* ---------- What a card or a row belongs to ---------- */
 export type Kind = ModuleKey | 'entrega' | 'venta' | 'pago' | 'calificacion';
 export const KIND_META: Record<Kind, { label: string; icon: string }> = {
-  servicios: { label: 'Servicio', icon: 'wrench' },
+  servicios: { label: 'Servicio', icon: 'limpieza' },
   auto: { label: 'Auto', icon: 'car' },
-  market: { label: 'Market', icon: 'cart' },
-  entrega: { label: 'Entrega', icon: 'cart' },
+  market: { label: 'Market', icon: 'shoppingBag' },
+  entrega: { label: 'Entrega', icon: 'shoppingBag' },
   venta: { label: 'Venta', icon: 'tag' },
   pago: { label: 'Pago', icon: 'wallet' },
   calificacion: { label: 'Calificación', icon: 'star' },
@@ -31,8 +31,8 @@ export function ModuleTag({ kind, prefix }: { kind: Kind; prefix?: string }) {
   const { t } = useApp();
   const m = KIND_META[kind];
   return (
-    <span style={{ alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', gap: 4, height: 22, borderRadius: 11, padding: '0 8px', background: t.mChip, font: R(11, 500), color: t.text, letterSpacing: 0.4, whiteSpace: 'nowrap' }}>
-      <Icon name={m.icon} size={12} color={t.success} />
+    <span style={{ alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', gap: 4, height: 24, borderRadius: 12, padding: '0 8px', background: t.mChip, font: R(11, 500), color: t.text, letterSpacing: 0.4, whiteSpace: 'nowrap' }}>
+      <Icon name={m.icon} size={12} color={t.iconBrand} />
       {prefix ? `${prefix} · ${m.label.toUpperCase()}` : m.label}
     </span>
   );
@@ -51,7 +51,7 @@ export function ModuleFilter({ value, onChange, counts, label = 'Filtrar por mó
         const n = counts?.[f];
         return (
           <button key={f} role="tab" aria-selected={on} className="press" onClick={() => onChange(f)}
-            style={{ height: 36, borderRadius: 18, padding: '0 12px', flex: 'none', display: 'flex', alignItems: 'center', gap: 6, background: on ? t.chipSelBg : t.card, color: on ? t.chipSelText : t.text, font: R(14, 500) }}>
+            style={{ height: 36, borderRadius: 18, padding: '0 12px', flex: 'none', display: 'flex', alignItems: 'center', gap: 6, background: on ? t.chipSelBg : t.cardOnBg, color: on ? t.chipSelText : t.text, font: R(14, 500) }}>
             {f !== 'todo' && <Icon name={MODULE_META[f].icon} size={15} color={on ? t.chipSelText : t.success} />}
             {f === 'todo' ? 'Todo' : MODULE_META[f].label}
             {!!n && <span style={{ font: R(12, 500), opacity: 0.7 }}>{n}</span>}
@@ -91,20 +91,20 @@ export function UnifiedSearch({ placeholder = 'Buscar servicios, destinos o prod
   const groups = MODULES.map((k) => [k, hits.filter((h) => h.kind === k)] as const).filter(([, l]) => l.length);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <label style={{ height: 48, borderRadius: 24, background: t.card, display: 'flex', alignItems: 'center', gap: 10, padding: '0 16px', outline: q ? `2px solid ${t.green}` : 'none', outlineOffset: -2 }}>
+      <label style={{ height: 48, borderRadius: 24, background: t.cardOnBg, boxShadow: t.shadowCard, display: 'flex', alignItems: 'center', gap: 10, padding: '0 16px', outline: q ? `2px solid ${t.iconBrand}` : 'none', outlineOffset: -2 }}>
         <Icon name="search" size={18} color={t.text2} />
         <input aria-label={placeholder} value={q} onChange={(e) => setQ(e.target.value)} placeholder={placeholder} style={{ flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none', font: R(15), color: t.text }} />
         {q && <button aria-label="Borrar búsqueda" onClick={() => setQ('')}><Icon name="close" size={16} color={t.text2} /></button>}
       </label>
       {q.trim().length >= 2 && (
-        <div aria-label="Resultados" style={{ background: t.card, borderRadius: 18, padding: 6, display: 'flex', flexDirection: 'column' }}>
+        <div aria-label="Resultados" style={{ background: t.cardOnBg, boxShadow: t.shadowCard, borderRadius: 18, padding: 6, display: 'flex', flexDirection: 'column' }}>
           {groups.length === 0 && <span style={{ font: R(13), color: t.text2, padding: 10, ...pretty }}>Sin resultados. Probá «plomero», «Costanera» o «ventilador».</span>}
           {groups.map(([k, list]) => (
             <section key={k} aria-label={`Resultados de ${MODULE_META[k].label}`} style={{ display: 'flex', flexDirection: 'column' }}>
               <span style={{ font: R(11, 500), color: t.text2, padding: '8px 10px 2px', letterSpacing: 0.6 }}>{MODULE_META[k].label.toUpperCase()}</span>
               {list.map((h) => (
                 <button key={h.title} className="press" onClick={() => onPick?.(h)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 12, textAlign: 'left', width: '100%' }}>
-                  <Icon name={MODULE_META[k].icon} size={18} color={t.success} />
+                  <Icon name={MODULE_META[k].icon} size={18} color={t.iconBrand} />
                   <span style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
                     <span style={{ font: R(14, 500) }}>{h.title}</span>
                     <span style={{ font: R(12), color: t.text2 }}>{h.hint}</span>
@@ -126,21 +126,21 @@ export function FeedCard({ item, onClick }: { item: FeedItem; onClick?: () => vo
   const { t } = useApp();
   const tag = KIND_MODULE[item.kind] === 'market' && item.kind !== 'market' ? `Market · ${KIND_META[item.kind].label}` : KIND_META[item.kind].label;
   return (
-    <button className="press" onClick={onClick} aria-label={`${tag}, ${item.status.toLowerCase()}: ${item.title}, ${item.meta}, ${item.price}`} style={{ borderRadius: 18, background: t.card, padding: 14, display: 'flex', flexDirection: 'column', gap: 8, textAlign: 'left', width: '100%' }}>
+    <button className="press" onClick={onClick} aria-label={`${tag}, ${item.status.toLowerCase()}: ${item.title}, ${item.meta}, ${item.price}`} style={{ borderRadius: 16, background: t.cardOnBg, boxShadow: t.shadowCard, padding: 16, display: 'flex', flexDirection: 'column', gap: 8, textAlign: 'left', width: '100%' }}>
       <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, width: '100%' }}>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, height: 22, borderRadius: 11, padding: '0 8px', background: t.greenSoft, color: t.success, font: R(12, 500) }}>
-          <Icon name={KIND_META[item.kind].icon} size={12} color={t.success} />{tag}
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, height: 24, borderRadius: 12, padding: '0 8px', background: t.mChip, color: t.text, font: R(12, 500) }}>
+          <Icon name={KIND_META[item.kind].icon} size={16} color={t.iconBrand} />{tag}
         </span>
         <span style={{ font: R(12), color: t.text2 }}>{item.ago ?? (item.status === 'NUEVO' ? 'Nuevo' : 'Disponible')}</span>
       </span>
       <span style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%' }}>
-        <span style={{ width: 44, height: 44, borderRadius: 14, background: t.greenSoft, display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}><Icon name={KIND_META[item.kind].icon} size={22} color={t.success} /></span>
+        <span style={{ width: 40, height: 40, borderRadius: 12, background: t.greenSoft, display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}><Icon name={KIND_META[item.kind].icon} size={24} color={t.iconBrand} /></span>
         <span style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
           <span style={{ font: P(16) }}>{item.title}</span>
           <span style={{ font: R(13), color: t.text2 }}>{item.meta} · <b style={{ color: t.text, fontWeight: 500 }}>{item.price}</b></span>
         </span>
-        <span aria-hidden style={{ width: 34, height: 34, borderRadius: 17, background: t.green, display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}>
-          <Icon name="arrowLeft" size={16} color="#000000" style={{ transform: 'rotate(180deg)' }} />
+        <span aria-hidden style={{ width: 36, height: 36, borderRadius: 18, background: t.mChip, display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}>
+          <Icon name="chevronRight" size={20} color={t.text} />
         </span>
       </span>
     </button>
@@ -158,10 +158,10 @@ export function ActivityTimeline({ items, onOpen }: { items: ActivityItem[]; onO
       {days.map((d) => (
         <section key={d} aria-label={d} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <h4 style={{ margin: 0, font: R(13, 500), color: t.text2 }}>{d}</h4>
-          <div style={{ background: t.card, borderRadius: 18, overflow: 'hidden' }}>
+          <div style={{ background: t.cardOnBg, boxShadow: t.shadowCard, borderRadius: 16, overflow: 'hidden' }}>
             {items.filter((i) => i.when === d).map((a, idx) => (
-              <button key={a.id} className="press" onClick={() => onOpen?.(a)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', width: '100%', textAlign: 'left', borderTop: idx ? `1px solid ${t.name === 'dark' ? '#262626' : '#E6E6E6'}` : 'none' }}>
-                <span style={{ width: 36, height: 36, borderRadius: 12, background: t.greenSoft, display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}><Icon name={KIND_META[a.kind].icon} size={18} color={t.success} /></span>
+              <button key={a.id} className="press" onClick={() => onOpen?.(a)} style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 72, padding: '12px 16px', width: '100%', textAlign: 'left', borderTop: idx ? `1px solid ${t.borderSubtle}` : 'none' }}>
+                <span style={{ width: 40, height: 40, borderRadius: 12, background: t.greenSoft, display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}><Icon name={KIND_META[a.kind].icon} size={24} color={t.iconBrand} /></span>
                 <span style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
                   <span style={{ font: R(14, 500) }}>{a.title}</span>
                   <span style={{ font: R(12), color: t.text2 }}>{KIND_META[a.kind].label} · {a.meta}</span>
@@ -214,8 +214,8 @@ export function AvailabilityPanel({ value, onChange }: { value: Availability; on
               <span style={{ font: R(14, 500) }}>{title}{on && <span style={{ color: t.success }}> · {onLabel}</span>}</span>
               <span style={{ font: R(12), color: t.text2 }}>{on ? onText : offText}</span>
             </span>
-            <span aria-hidden style={{ width: 44, height: 26, borderRadius: 13, background: on ? t.green : t.mChip, position: 'relative', transition: 'background .2s', flex: 'none' }}>
-              <span style={{ position: 'absolute', top: 3, left: on ? 21 : 3, width: 20, height: 20, borderRadius: 10, background: '#FFFFFF', transition: 'left .2s' }} />
+            <span aria-hidden style={{ width: 52, height: 32, borderRadius: 16, background: on ? t.switchOn : t.border, position: 'relative', transition: 'background .2s', flex: 'none' }}>
+              <span style={{ position: 'absolute', top: 4, left: on ? 24 : 4, width: 24, height: 24, borderRadius: 12, background: '#FFFFFF', transition: 'left .2s' }} />
             </span>
           </button>
         );
@@ -228,13 +228,13 @@ export function AvailabilityPanel({ value, onChange }: { value: Availability; on
 export function ActivateModuleCard({ icon, title, text, cta = 'Activar módulo', tag, onClick }: { icon: string; title: string; text: string; cta?: string; tag?: string; onClick?: () => void }) {
   const { t } = useApp();
   return (
-    <div style={{ borderRadius: 20, background: t.card, padding: 14, display: 'flex', alignItems: 'center', gap: 12, outline: `1px dashed ${t.green}`, outlineOffset: -1 }}>
-      <span style={{ width: 44, height: 44, borderRadius: 14, background: t.greenSoft, display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}><Icon name={icon} size={22} color={t.success} /></span>
+    <div style={{ borderRadius: 16, background: t.cardOnBg, boxShadow: t.shadowCard, padding: 16, display: 'flex', alignItems: 'center', gap: 12, outline: `1px dashed ${t.border}`, outlineOffset: -1 }}>
+      <span style={{ width: 40, height: 40, borderRadius: 12, background: t.greenSoft, display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}><Icon name={icon} size={24} color={t.iconBrand} /></span>
       <span style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
-        <span style={{ font: R(15, 500), display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>{title}{tag && <span style={{ font: R(11, 500), color: t.success, background: t.greenSoft, borderRadius: 8, padding: '1px 7px' }}>{tag}</span>}</span>
+        <span style={{ font: R(15, 500), display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>{title}{tag && <span style={{ font: R(12, 500), color: t.success, background: t.greenSoft, borderRadius: 12, padding: '2px 8px' }}>{tag}</span>}</span>
         <span style={{ font: R(12), color: t.text2, ...pretty }}>{text}</span>
       </span>
-      <button className="press" onClick={onClick} style={{ height: 34, borderRadius: 17, padding: '0 12px', background: t.green, color: '#000000', font: R(13, 500), flex: 'none' }}>{cta}</button>
+      <button className="press" onClick={onClick} style={{ height: 36, borderRadius: 18, padding: '0 16px', background: t.cardOnBg, color: t.text, boxShadow: `inset 0 0 0 1px ${t.border}`, font: P(14), flex: 'none' }}>{cta}</button>
     </div>
   );
 }

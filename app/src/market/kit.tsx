@@ -227,9 +227,9 @@ export function UnderlineTabs<T extends string>({ tabs, value, onChange, counts 
 export function Segmented<T extends string>({ options, value, onChange }: { options: T[]; value: T; onChange: (v: T) => void }) {
   const { t } = useApp();
   return (
-    <div role="radiogroup" style={{ display: 'grid', gridTemplateColumns: `repeat(${options.length},1fr)`, background: t.mSurface, borderRadius: 14, padding: 4, gap: 4 }}>
+    <div role="radiogroup" style={{ display: 'grid', gridTemplateColumns: `repeat(${options.length},1fr)`, background: t.mChip, borderRadius: 20, padding: 4, gap: 4 }}>
       {options.map((o) => (
-        <button key={o} role="radio" aria-checked={o === value} onClick={() => onChange(o)} style={{ height: 40, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', font: R(15, 500), background: o === value ? t.mBg : 'transparent', color: o === value ? t.text : t.text2, boxShadow: o === value ? '0 1px 3px rgba(0,0,0,.12)' : 'none', transition: 'background .15s' }}>
+        <button key={o} role="radio" aria-checked={o === value} onClick={() => onChange(o)} style={{ height: 32, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', font: R(14, 500), background: o === value ? t.chipSelBg : 'transparent', color: o === value ? t.chipSelText : t.text2, transition: 'background .15s' }}>
           {o}
         </button>
       ))}

@@ -6,6 +6,7 @@ import { Icon } from './icon';
 import { TopBar } from './nav';
 
 export { Icon } from './icon';
+export { BrandPattern } from './pattern';
 export { BottomNavBar, Dot, MenuGroup, MenuItem, NAV_META, NavIconButton, navItems, QuickAccess, TopBar } from './nav';
 export type { NavBadges, NavKey, QuickTile } from './nav';
 
@@ -29,17 +30,18 @@ export function HomeIndicator() {
 
 /* ---------- Buttons ---------- */
 type BtnKind = 'primary' | 'secondary' | 'danger' | 'disabled';
-export function Button({ kind = 'primary', children, onClick, icon, height = 52, style, label }: { kind?: BtnKind; children: ReactNode; onClick?: () => void; icon?: string; height?: number; style?: CSSProperties; label?: string }) {
+export function Button({ kind = 'primary', children, onClick, icon, height = 56, style, label }: { kind?: BtnKind; children: ReactNode; onClick?: () => void; icon?: string; height?: number; style?: CSSProperties; label?: string }) {
   const { t } = useApp();
-  const bg = kind === 'primary' ? t.green : kind === 'danger' ? t.sosBg : t.btn2;
-  const fg = kind === 'primary' ? '#000000' : kind === 'danger' ? t.sosText : kind === 'disabled' ? t.text3 : t.text;
+  // TOKENS.json component.button: primary green with white text; secondary surface with border; no glow
+  const bg = kind === 'primary' ? t.green : kind === 'danger' ? t.sosBg : kind === 'secondary' ? t.cardOnBg : t.btn2;
+  const fg = kind === 'primary' ? t.onGreen : kind === 'danger' ? t.sosText : kind === 'disabled' ? t.text3 : t.text;
   return (
     <button
       className={`press btn btn-${kind}`}
       disabled={kind === 'disabled'}
       aria-label={label}
       onClick={onClick}
-      style={{ height, borderRadius: height / 2, background: bg, color: fg, font: P(16), cursor: kind === 'disabled' ? 'not-allowed' : 'pointer', boxShadow: kind === 'primary' ? '0 4px 14px rgba(75,172,79,.28)' : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', ...style }}
+      style={{ height, borderRadius: height / 2, background: bg, color: fg, font: P(16), cursor: kind === 'disabled' ? 'not-allowed' : 'pointer', boxShadow: kind === 'secondary' ? `inset 0 0 0 1px ${t.border}` : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', ...style }}
     >
       {icon && <Icon name={icon} size={18} color={fg} />}
       {children}
@@ -308,7 +310,7 @@ export function SlideToConfirm({ label, onConfirm }: { label: string; onConfirm:
         }}
         style={{ position: 'absolute', left: 4 + x, top: 4, width: 52, height: 52, borderRadius: 26, background: t.green, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'grab', transition: drag === null ? 'left .25s' : 'none' }}
       >
-        <Icon name="chevronRight" size={22} color="#000000" />
+        <Icon name="chevronRight" size={22} color={t.onGreen} />
       </span>
     </div>
   );
@@ -384,3 +386,4 @@ export function Row({ label, value, labelColor, valueColor, strong }: { label: s
     </div>
   );
 }
+

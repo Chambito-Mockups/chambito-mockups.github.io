@@ -3,6 +3,7 @@ import { ReactNode, useEffect, useRef, useState } from 'react';
 import { useApp } from '../store';
 import { P, R } from '../theme';
 import { Icon } from './icon';
+import { BrandPattern } from './pattern';
 
 /** Modal bottom sheet over the phone. Escape and the scrim close it. */
 export function BottomSheet({ children, onClose, label, title }: { children: ReactNode; onClose: () => void; label: string; title?: string }) {
@@ -70,12 +71,15 @@ export function QuickChatSheet({ name, initials, replies, answer, onClose }: { n
           <Icon name="close" size={16} />
         </button>
       </div>
-      <div ref={list} role="log" aria-live="polite" className="scroll" style={{ minHeight: 120, maxHeight: 260, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', margin: '0 -4px' }}>
+      <BrandPattern />
+      <div ref={list} role="log" aria-live="polite" className="scroll" style={{ position: 'relative', minHeight: 120, maxHeight: 260, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8, padding: 4 }}>
         {msgs.length === 0 && <span style={{ font: R(14), color: t.text2, textAlign: 'center', padding: '24px 0' }}>Elegí una respuesta rápida o escribí un mensaje.</span>}
         {msgs.map((m) => (
-          <span key={m.id} className="pop-in" style={{ alignSelf: m.me ? 'flex-end' : 'flex-start', maxWidth: '80%', background: m.me ? t.greenSoft : t.mChip, borderRadius: m.me ? '16px 16px 4px 16px' : '16px 16px 16px 4px', padding: '8px 12px', font: R(14) }}>{m.text}</span>
+          <span key={m.id} className="pop-in" style={{ alignSelf: m.me ? 'flex-end' : 'flex-start', maxWidth: '80%', background: m.me ? t.green : t.mChip, color: m.me ? t.onGreen : t.text, borderRadius: m.me ? '16px 16px 4px 16px' : '16px 16px 16px 4px', padding: '8px 12px', font: R(14) }}>{m.text}</span>
         ))}
         {typing && <span aria-label="Escribiendo" style={{ alignSelf: 'flex-start', background: t.mChip, borderRadius: 16, padding: '8px 14px', font: P(14), letterSpacing: 2 }} className="blink">•••</span>}
+      </div>
       </div>
       <div className="scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto', margin: '0 -20px', padding: '0 20px' }}>
         {replies.map((r) => (
@@ -85,7 +89,7 @@ export function QuickChatSheet({ name, initials, replies, answer, onClose }: { n
       <form onSubmit={(e) => { e.preventDefault(); send(text); }} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
         <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Escribí un mensaje" aria-label="Mensaje" style={{ flex: 1, height: 44, borderRadius: 22, background: t.mChip, padding: '0 16px', font: R(15), color: t.text }} />
         <button type="submit" aria-label="Enviar" disabled={!text.trim()} className="press" style={{ width: 44, height: 44, borderRadius: 22, background: text.trim() ? t.green : t.mChip, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: text.trim() ? 'pointer' : 'not-allowed' }}>
-          <Icon name="send" size={18} color={text.trim() ? '#000000' : t.text3} />
+          <Icon name="send" size={18} color={text.trim() ? t.onGreen : t.text3} />
         </button>
       </form>
     </BottomSheet>
@@ -125,8 +129,8 @@ export function SwitchRow({ label, hint, on, onChange }: { label: string; hint?:
         <span style={{ font: R(15, 500) }}>{label}</span>
         {hint && <span style={{ font: R(13), color: t.text2 }}>{hint}</span>}
       </span>
-      <span style={{ width: 44, height: 26, borderRadius: 13, background: on ? t.green : t.dividerStrong, padding: 3, boxSizing: 'border-box', transition: 'background .15s', flex: 'none' }}>
-        <span style={{ display: 'block', width: 20, height: 20, borderRadius: 10, background: on ? '#000000' : '#FFFFFF', transform: `translateX(${on ? 18 : 0}px)`, transition: 'transform .15s' }} />
+      <span style={{ width: 52, height: 32, borderRadius: 16, background: on ? t.switchOn : t.border, padding: 4, boxSizing: 'border-box', transition: 'background .15s', flex: 'none' }}>
+        <span style={{ display: 'block', width: 24, height: 24, borderRadius: 12, background: '#FFFFFF', transform: `translateX(${on ? 20 : 0}px)`, transition: 'transform .15s' }} />
       </span>
     </button>
   );

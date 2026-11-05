@@ -186,9 +186,9 @@ export function D3() {
           aria-checked={on}
           aria-label="Disponible para viajes"
           onClick={() => setDriverAvailable(!on)}
-          style={{ width: 56, height: 34, borderRadius: 17, background: on ? t.green : t.dividerStrong, display: 'flex', alignItems: 'center', padding: 3, boxSizing: 'border-box', flex: 'none', transition: 'background .2s' }}
+          style={{ width: 52, height: 32, borderRadius: 16, background: on ? t.switchOn : t.border, display: 'flex', alignItems: 'center', padding: 4, boxSizing: 'border-box', flex: 'none', transition: 'background .2s' }}
         >
-          <span style={{ width: 28, height: 28, borderRadius: 14, background: on ? '#000000' : t.sheet, transform: `translateX(${on ? 22 : 0}px)`, transition: 'transform .2s' }} />
+          <span style={{ width: 24, height: 24, borderRadius: 12, background: '#FFFFFF', transform: `translateX(${on ? 20 : 0}px)`, transition: 'transform .2s' }} />
         </button>
       </div>
       {heat && on && <span className="fade-in" style={{ position: 'absolute', top: 200, left: 118, font: P(13), color: t.success, zIndex: 2 }}>×1,4</span>}
@@ -293,7 +293,7 @@ function NavCard({ icon, distance, instruction, voice }: { icon: string; distanc
 
 /* ================= D5 Ir a buscar ================= */
 export function D5() {
-  const { t, d, go, showToast, settings } = useApp();
+  const { t, d, go, settings } = useApp();
   const [chat, setChat] = useState(false);
   const secs = useSeconds();
   const m = Math.max(10, 200 - secs * 15);
@@ -309,7 +309,6 @@ export function D5() {
             <span style={{ font: R(13), color: t.text2 }}>{d.passenger.pickup} · {d.offer.toPickup}</span>
           </div>
           <CircleButton icon="messageCircle" bg={t.btn2} label="Chat" onClick={() => setChat(true)} />
-          <CircleButton icon="phone" bg={t.btn2} label="Llamar" onClick={() => showToast('Llamando con número enmascarado…')} />
         </div>
         <span style={{ font: R(14), color: t.text2 }}>Referencia: {d.passenger.reference}</span>
         <Button onClick={() => go('D6', { replace: true })}>Llegué</Button>

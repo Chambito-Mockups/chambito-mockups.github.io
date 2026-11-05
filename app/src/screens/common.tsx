@@ -44,7 +44,7 @@ export function FloatingNav({ active, band }: { active: NavKey; band?: boolean }
   return (
     <>
       {/* on scrolling screens, a fade keeps content from showing around the floating bar */}
-      {band && <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 116, background: `linear-gradient(to bottom, transparent, ${t.mBg} 28%)`, zIndex: 29, pointerEvents: 'none' }} />}
+      {band && <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 116, background: t.mBg /* solid: no gradients (brand guide §3.5) */, zIndex: 29, pointerEvents: 'none' }} />}
       <div style={{ position: 'absolute', left: 20, right: 20, bottom: 28, zIndex: 30 }}>
         <BottomNavBar items={navItems(settings.autoEnabled, settings.teams, settings.tiendaEntry === 'tab')} active={active} onSelect={onSelect} badges={badges} />
       </div>

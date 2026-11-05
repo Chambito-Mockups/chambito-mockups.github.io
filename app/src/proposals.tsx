@@ -16,7 +16,7 @@ const pretty = { textWrap: 'pretty' } as CSSProperties;
 export type ProposalId = 'estable' | 'mix' | 'op1' | 'op2' | 'op3';
 type Side = 'prestador' | 'cliente';
 
-const POPULAR: [string, string][] = [['wrench', 'Plomería'], ['bolt', 'Electricidad'], ['roller', 'Pintura'], ['sparkle', 'Limpieza']];
+const POPULAR: [string, string][] = [['wrench', 'Plomería'], ['bolt', 'Electricidad'], ['roller', 'Pintura'], ['limpieza', 'Limpieza']];
 const PERSON = { name: 'Dario Gimenez', initials: 'DG', verified: true };
 
 /** Bar of each proposal; the tab in Inicio is the active one, except where the design marks another. */
@@ -44,26 +44,26 @@ function Prestador({ id, say }: { id: ProposalId; say: (m: string) => void }) {
   if (id === 'op3')
     return (
       <>
-        <HomeHeader title="Hola, Dario 👋" sub="Prestador en Chambito" bell={2} onBell={() => say('Notificaciones')} onChat={() => say('Mensajes')} />
-        <ProviderCard stats={[{ value: '12', label: 'oportunidades', icon: 'inbox' }, { value: '3', label: 'activas', icon: 'bolt' }, { value: '97%', label: 'valoración', icon: 'star' }]} available={on} onAvailable={setOn} availableText="Recibís oportunidades en Servicios, Auto y Market." />
+        <HomeHeader title="Hola, Dario" sub="Prestador en Chambito" bell={2} onBell={() => say('Notificaciones')} onChat={() => say('Mensajes')} />
+        <ProviderCard stats={[{ value: '12', label: 'oportunidades', icon: 'inbox' }, { value: '3', label: 'activas', icon: 'clock' }, { value: '97%', label: 'valoración', icon: 'star' }]} available={on} onAvailable={setOn} availableText="Recibís oportunidades en Servicios, Auto y Market." />
         <SectionTitle title="Tus módulos" />
         <ModuleTiles items={[
-          { key: 's', icon: 'wrench', title: 'Servicios', text: 'Ofrecé tus servicios y recibí solicitudes.', onClick: opp('servicios') },
+          { key: 's', icon: 'limpieza', title: 'Servicios', text: 'Ofrecé tus servicios y recibí solicitudes.', onClick: opp('servicios') },
           { key: 'a', icon: 'car', title: 'Auto', text: 'Hacé viajes y generá ingresos.', onClick: opp('auto') },
-          { key: 'm', icon: 'cart', title: 'Market', text: 'Vendé productos y gestioná pedidos.', onClick: opp('market') },
+          { key: 'm', icon: 'shoppingBag', title: 'Market', text: 'Vendé productos y gestioná pedidos.', onClick: opp('market') },
         ]} />
         <SectionTitle title="Oportunidades para vos" />
         <ModuleList items={[
-          { key: 's', icon: 'wrench', title: 'Servicios · 5 nuevas', text: 'Solicitudes cerca de tu zona.', onClick: opp('servicios') },
+          { key: 's', icon: 'limpieza', title: 'Servicios · 5 nuevas', text: 'Solicitudes cerca de tu zona.', onClick: opp('servicios') },
           { key: 'a', icon: 'car', title: 'Auto · 3 nuevas', text: 'Viajes disponibles ahora.', onClick: opp('auto') },
-          { key: 'm', icon: 'cart', title: 'Market · 4 nuevas', text: 'Pedidos y consultas de clientes.', onClick: opp('market') },
+          { key: 'm', icon: 'shoppingBag', title: 'Market · 4 nuevas', text: 'Pedidos y consultas de clientes.', onClick: opp('market') },
         ]} />
       </>
     );
 
   if (id === 'mix') {
     const list = {
-      servicios: [{ key: '1', icon: 'limpieza', title: 'Limpieza · Villa Morra', text: 'Hoy 15:00 · 3 h · Gs. 180.000' }, { key: '2', icon: 'sparkle', title: 'Limpieza profunda · Recoleta', text: 'Mañana 9:00 · 5 h · Gs. 300.000' }, { key: '3', icon: 'wrench', title: 'Ver las 3 solicitudes', text: 'Ordenadas por cercanía' }],
+      servicios: [{ key: '1', icon: 'limpieza', title: 'Limpieza · Villa Morra', text: 'Hoy 15:00 · 3 h · Gs. 180.000' }, { key: '2', icon: 'limpieza', title: 'Limpieza profunda · Recoleta', text: 'Mañana 9:00 · 5 h · Gs. 300.000' }, { key: '3', icon: 'wrench', title: 'Ver las 3 solicitudes', text: 'Ordenadas por cercanía' }],
       auto: [{ key: '1', icon: 'car', title: 'Modo conductor', text: 'Zona de alta demanda a 1,2 km' }, { key: '2', icon: 'wallet', title: 'Ganado hoy', text: 'Gs. 145.000 en 6 viajes' }],
       market: [{ key: '1', icon: 'message', title: '2 consultas sin responder', text: 'Bicicleta Trek rodado 29' }, { key: '2', icon: 'tag', title: 'Mis publicaciones', text: '3 activas · 1 en revisión' }, { key: '3', icon: 'plus', title: 'Publicar un producto', text: 'Publicar es gratis' }],
     }[mod].map((x) => ({ ...x, onClick: () => say(`Abre: ${x.title}`) }));
@@ -87,15 +87,15 @@ function Prestador({ id, say }: { id: ProposalId; say: (m: string) => void }) {
       <SectionTitle title="Oportunidades por módulo" caps={id === 'op2'} />
       {id === 'op1' ? (
         <ModuleTiles items={[
-          { key: 's', icon: 'wrench', title: 'Servicios', text: 'Nuevas solicitudes cerca de ti', highlight: true, onClick: opp('servicios') },
+          { key: 's', icon: 'limpieza', title: 'Servicios', text: 'Nuevas solicitudes cerca de ti', highlight: true, onClick: opp('servicios') },
           { key: 'a', icon: 'car', title: 'Auto', text: 'Conductores solicitados', onClick: opp('auto') },
-          { key: 'm', icon: 'cart', title: 'Market', text: 'Pedidos y entregas', onClick: opp('market') },
+          { key: 'm', icon: 'shoppingBag', title: 'Market', text: 'Pedidos y entregas', onClick: opp('market') },
         ]} />
       ) : (
         <ModuleList items={[
-          { key: 's', icon: 'wrench', title: 'Servicios', count: 3, text: 'solicitudes cerca tuyo', onClick: opp('servicios') },
+          { key: 's', icon: 'limpieza', title: 'Servicios', count: 3, text: 'solicitudes cerca tuyo', onClick: opp('servicios') },
           { key: 'a', icon: 'car', title: 'Auto', count: 2, text: 'viajes disponibles', onClick: opp('auto') },
-          { key: 'm', icon: 'cart', title: 'Market', count: 5, text: 'pedidos / ventas pendientes', onClick: opp('market') },
+          { key: 'm', icon: 'shoppingBag', title: 'Market', count: 5, text: 'pedidos / ventas pendientes', onClick: opp('market') },
         ]} />
       )}
     </>
@@ -105,13 +105,13 @@ function Prestador({ id, say }: { id: ProposalId; say: (m: string) => void }) {
 /* ---------------- Client ---------------- */
 function Cliente({ id, say }: { id: ProposalId; say: (m: string) => void }) {
   const [mod, setMod] = useState<ModuleKey>('servicios');
-  const header = <HomeHeader title={id === 'op3' || id === 'mix' ? 'Hola, Ana 👋' : 'Inicio'} sub={id === 'op3' || id === 'mix' ? '¿Qué necesitás hoy?' : undefined} bell={1} onBell={() => say('Notificaciones')} onChat={() => say('Mensajes')} />;
+  const header = <HomeHeader title={id === 'op3' || id === 'mix' ? 'Hola, Ana' : 'Inicio'} sub={id === 'op3' || id === 'mix' ? '¿Qué necesitás hoy?' : undefined} bell={1} onBell={() => say('Notificaciones')} onChat={() => say('Mensajes')} />;
   const recent = (
     <>
       <SectionTitle title="Tu actividad reciente" />
       <ModuleList items={[
         { key: 'v', icon: 'car', title: 'Viaje completado', text: 'Ayer · Gs. 26.000', onClick: () => say('Abre el recibo del viaje') },
-        { key: 'p', icon: 'cart', title: 'Pedido entregado', text: 'Mar, 21 ene · Gs. 85.000', onClick: () => say('Abre el pedido') },
+        { key: 'p', icon: 'shoppingBag', title: 'Pedido entregado', text: 'Mar, 21 ene · Gs. 85.000', onClick: () => say('Abre el pedido') },
       ]} />
     </>
   );
@@ -121,9 +121,9 @@ function Cliente({ id, say }: { id: ProposalId; say: (m: string) => void }) {
       <>
         {header}
         <ModuleSwitcher value={mod} onChange={setMod} variant="tiles" />
-        <ModuleHero green tag="Servicios" title="Solicitá un servicio" text="Encontrá profesionales cerca tuyo." cta="Buscar servicio" icon="wrench" onClick={() => say('Abre la búsqueda de servicios')} />
+        <ModuleHero green tag="Servicios" title="Solicitá un servicio" text="Encontrá profesionales cerca tuyo." cta="Buscar servicio" icon="limpieza" onClick={() => say('Abre la búsqueda de servicios')} />
         <ModuleHero tag="Auto" title="¿A dónde vas?" text="Solicitá un viaje y llegá fácil y seguro." cta="Ingresar destino" icon="car" onClick={() => say('Abre Auto (A2)')} />
-        <ModuleHero tag="Market" title="Explorá el Market" text="Productos y ofertas de tu zona." cta="Ver categorías" icon="cart" onClick={() => say('Abre la Tienda (M01)')} />
+        <ModuleHero tag="Market" title="Explorá el Market" text="Productos y ofertas de tu zona." cta="Ver categorías" icon="shoppingBag" onClick={() => say('Abre la Tienda (M01)')} />
       </>
     );
 
@@ -134,12 +134,12 @@ function Cliente({ id, say }: { id: ProposalId; say: (m: string) => void }) {
         <LocationPicker value="Asunción, Paraguay" onClick={() => say('Cambia la ubicación')} />
         <SearchBar placeholder="Buscar servicios, viajes o productos…" onClick={() => say('Búsqueda en los tres módulos')} />
         <ModuleTiles items={[
-          { key: 's', icon: 'wrench', title: 'Pedir un servicio', text: 'Hogar, reparaciones, limpieza y más.', onClick: () => say('Abre Servicios') },
+          { key: 's', icon: 'limpieza', title: 'Pedir un servicio', text: 'Hogar, reparaciones, limpieza y más.', onClick: () => say('Abre Servicios') },
           { key: 'a', icon: 'car', title: 'Pedir un viaje', text: 'Movete de forma segura y rápida.', onClick: () => say('Abre Auto (A2)') },
-          { key: 'm', icon: 'cart', title: 'Comprar productos', text: 'Encontrá lo que necesitás cerca.', onClick: () => say('Abre la Tienda (M01)') },
+          { key: 'm', icon: 'shoppingBag', title: 'Comprar productos', text: 'Encontrá lo que necesitás cerca.', onClick: () => say('Abre la Tienda (M01)') },
         ]} />
         <SectionTitle title="Acciones rápidas" />
-        <QuickChips items={[{ icon: 'heart', label: 'Favoritos', onClick: () => say('Guardados') }, { icon: 'tag', label: 'Promos', onClick: () => say('Promociones') }, { icon: 'history', label: 'Historial', onClick: () => say('Historial') }]} />
+        <QuickChips items={[{ icon: 'heart', label: 'Favoritos', onClick: () => say('Guardados') }, { icon: 'tag', label: 'Promos', onClick: () => say('Promociones') }, { icon: 'clock', label: 'Historial', onClick: () => say('Historial') }]} />
         {recent}
       </>
     );
@@ -158,7 +158,7 @@ function Cliente({ id, say }: { id: ProposalId; say: (m: string) => void }) {
           <SearchBar placeholder="¿A dónde vas?" onClick={() => say('Abre Auto con el destino (A2)')} />
           <ModuleList items={[
             { key: 'c', icon: 'home', title: 'Casa', text: 'Av. España 1240', onClick: () => say('Viaje a Casa') },
-            { key: 't', icon: 'briefcase', title: 'Trabajo', text: 'Paseo La Galería', onClick: () => say('Viaje al Trabajo') },
+            { key: 't', icon: 'flag', title: 'Trabajo', text: 'Paseo La Galería', onClick: () => say('Viaje al Trabajo') },
           ]} />
         </>
       ),
@@ -193,7 +193,7 @@ function Cliente({ id, say }: { id: ProposalId; say: (m: string) => void }) {
       <ServiceGrid items={POPULAR} onPick={(l) => say(`Pide ${l.toLowerCase()} (flujo actual)`)} />
       <ModuleList items={[
         { key: 'a', icon: 'car', title: 'Auto', text: 'Solicitá un viaje de forma rápida', onClick: () => say('Abre Auto (A0)') },
-        { key: 'm', icon: 'cart', title: 'Market', text: 'Comprá productos de comercios cercanos', onClick: () => say('Abre la Tienda (M01)') },
+        { key: 'm', icon: 'shoppingBag', title: 'Market', text: 'Comprá productos de comercios cercanos', onClick: () => say('Abre la Tienda (M01)') },
       ]} />
     </>
   );
@@ -278,7 +278,7 @@ export function ProposalsSection() {
         <span style={{ flex: 1 }} />
         {id === 'estable' && (
           <div role="radiogroup" aria-label="Barra" style={{ display: 'flex', gap: 8 }}>
-            {(['docked', 'pill'] as const).map((v) => <button key={v} role="radio" aria-checked={bar === v} className="press" onClick={() => setBar(v)} style={chip(bar === v)} title={v === 'docked' ? 'Como el mockup: fija abajo, pestaña activa en verde' : 'Como el resto del prototipo: píldora flotante'}>{v === 'docked' ? 'Barra fija' : 'Barra flotante'}</button>)}
+            {(['docked', 'pill'] as const).map((v) => <button key={v} role="radio" aria-checked={bar === v} className="press" onClick={() => setBar(v)} style={chip(bar === v)} title={v === 'docked' ? 'Como el mockup: fija al borde de abajo' : 'Como TOKENS.json: isla flotante de 72, radio 16'}>{v === 'docked' ? 'Barra fija' : 'Barra flotante'}</button>)}
           </div>
         )}
         <div role="radiogroup" aria-label="Tema de los teléfonos" style={{ display: 'flex', gap: 8 }}>

@@ -56,13 +56,18 @@ npm test         # Vitest: registry, navigation, every screen in both themes/cou
 - **Actividad**: Servicios | Tienda selector (Mis consultas + Mis pedidos, Phase 2). **Notificaciones**: the 4 of the brief.
 - Phase 2 (protected purchase) is not built: the design marks it «después».
 
-### Changes from the design (improvements to validate)
+### Brand (guide of 05/11/2026 + `design-system/TOKENS.json` v1.27.0; where they differ, TOKENS wins)
 
-- Active tab: solid green with black icon and label, for both Auto and Tienda (the Integración proposal, applied to Auto too).
-- One button system: 52 px height everywhere (Tienda used 48) and 20 px side margins (Tienda used 16).
-- One solid green per screen: my chat bubbles are soft green instead of solid; the send button is the only solid green and stays grey while the field is empty.
-- Categories use set icons instead of the generic image placeholder.
-- Content fades under the floating bar on scrolling screens.
+- **Text and icons on green are white** (COL-03), in bold or ≥ 16. One green button per screen; green is the signal, not decoration.
+- **Bottom bar**: floating island of 72, radius 16, with outline (TOKENS `bottomNav`). Icon 24 and name on every tab; the active one in `icon.brand` (#2F7A33 light / #7CCB7F dark), no pill and no sliding.
+- **Buttons**: primary 56, green with white text, no glow; secondary on the surface with a border; chips and segmented selection inverted (black/white), never green.
+- **Switches** 52 × 32 with a white thumb, on #2F7A33 (light) / #4BAC4F (dark).
+- **Cards** radius 16, on the surface with a very soft shadow in light and none in dark; icon boxes of 40 (radius 12); list items 56 / 72.
+- **Icons**: the official set of the brand kit (86, `public/ic`). Not in the set yet, to validate: `car`, `wrench`, `bolt`, `roller`.
+- **Logo**: the official horizontal one (`public/brand`), only in Inicio. **Fonts**: the official TTFs (Poppins Bold; Roboto Light, Regular, Medium), nothing under 12.
+- **Chat**: my bubble solid green with white text, the brand pattern at 4 % behind the thread, system messages in a grey pill.
+- **Not in Chambito** and removed: call buttons (contact is by chat; «Llamar al 911» stays in SOS), promotional banners, emojis in titles, gradients.
+- `src/test/brand.test.tsx` checks these rules on every screen.
 
 ## Structure
 

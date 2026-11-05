@@ -349,14 +349,14 @@ function Architecture() {
 const MOCKUP_COMPONENTS: [string, string, string][] = [
   ['BrandHeader · BackHeader', 'ui/modules.tsx', 'Logo «Chambito» con la campana en Inicio; flecha y título en las pantallas de módulo (Chambito Auto, Market, Disponibilidad).'],
   ['EntryTiles', 'ui/modules.tsx', 'Servicios · Auto · Market en verde suave, ícono arriba y texto centrado. Servicios abre Explorar filtrado; Auto y Market abren su pantalla.'],
-  ['OnlineCard · StatRow', 'ui/modules.tsx', 'Tarjeta verde «Disponibilidad · En línea» con interruptor general y el enlace «Elegir módulos»; debajo, 3 · 1 · ★ 4,8.'],
+  ['OnlineCard · StatRow · StatusBadge', 'ui/modules.tsx', 'Disponibilidad en superficie con la insignia «En línea» (verde 20 % con punto que late), el interruptor general y el enlace «Elegir módulos»; debajo, 3 · 1 · ★ 4,8.'],
   ['AvailabilityList · InfoBanner', 'ui/modules.tsx', 'Pantalla Disponibilidad: una tarjeta con interruptor por módulo (Servicios, Auto, Market Entregas) y la nota de arriba.'],
   ['RouteMap · PlaceShortcuts', 'ui/modules.tsx', 'Chambito Auto: mapa con la ruta, «¿A dónde vas?» y los atajos Casa · Trabajo · Favoritos.'],
   ['InlineBanner', 'ui/modules.tsx', 'Tarjeta suave que lleva a un módulo: «Movete con Chambito Auto · Viajes rápidos y seguros».'],
   ['CategoryRow · PromoCarousel', 'ui/modules.tsx', 'Market: Tecnología · Hogar · Moda · Más y el carrusel «Ofertas de lanzamiento» con puntos (sin avance automático).'],
   ['ProductCard · Rail', 'ui/modules.tsx', 'Producto con foto, precio y corazón para guardar; fila horizontal para «Ofertas del Market».'],
   ['FeedCard (nueva versión)', 'ui/hub.tsx', 'Etiqueta «Servicio» / «Market · Entrega», «Hace 2 min», ícono, distancia y precio, y la flecha verde para abrir.'],
-  ['BottomNavBar variant="docked"', 'ui/nav.tsx', 'Barra fija abajo como en el mockup: pestaña activa en verde con una raya arriba. La flotante sigue siendo la del resto del prototipo.'],
+  ['BottomNavBar variant="docked"', 'ui/nav.tsx', 'La misma barra de TOKENS.json pero fija al borde de abajo, como en el mockup. La flotante (isla de 72, radio 16) es la predeterminada.'],
 ];
 
 /* ---------- contrast (WCAG) to check the mockup palette ---------- */
@@ -384,7 +384,7 @@ function Palette() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <span style={{ font: P(18) }}>Paleta del mockup vs. el prototipo</span>
       <span style={{ font: R(14), color: 'var(--fg2)', maxWidth: 900, ...pretty }}>
-        El contraste se calcula sobre blanco. Los colores del prototipo no cambian hasta que se decida: el verde del mockup es más saturado, pero tampoco llega a 4,5:1 como texto, así que «Ver todos» y los montos en verde conviene dejarlos en el verde de texto del prototipo (#24602A, 7:1) o en negro.
+        El contraste se calcula sobre blanco. Decidido por la guía de marca (05/11/2026) y TOKENS.json: el prototipo usa la paleta del manual (#4BAC4F), no la del mockup; los verdes de Figma están descartados. Texto sobre verde en blanco y en negrita; enlaces en #2F7A33 (claro) / #7CCB7F (oscuro) y éxito en #24602A.
       </span>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 10, maxWidth: 1240 }}>
         {PALETTE.map(([name, mock, ours, use]) => {
@@ -440,7 +440,7 @@ function NavVariants() {
 }
 
 const COMPONENTS: [string, string, string][] = [
-  ['BottomNavBar', 'ui/nav.tsx', 'Barra flotante, máximo 5 destinos. La misma para cliente y prestador: cambia el contenido, no la barra.'],
+  ['BottomNavBar', 'ui/nav.tsx', 'Isla flotante de 72, radio 16, con borde (TOKENS bottomNav). Ícono 24 y nombre siempre visibles; la activa en verde (#2F7A33 / #7CCB7F), sin pastilla. Máximo 5 destinos.'],
   ['navItems()', 'ui/nav.tsx', 'Decide los destinos según Auto habilitado, Equipos y si la Tienda es pestaña. Si pasan de 5, Equipos va a Perfil.'],
   ['Dot / NavBadges', 'ui/nav.tsx', 'Punto o número. Solo en Actividad (viaje en curso, pedidos nuevos); nunca en la pestaña activa.'],
   ['TopBar · HubTopChrome', 'ui/nav.tsx · ui/kit.tsx', 'Búsqueda + accesos. En lanzamiento suma el ícono de Tienda junto a Perfil.'],
@@ -452,7 +452,7 @@ const COMPONENTS: [string, string, string][] = [
 const HOME_COMPONENTS: [string, string, string][] = [
   ['HomeHeader', 'ui/home.tsx', 'Título o saludo, con campana y mensajes con contador. Opciones 1, 2 y 3.'],
   ['ModuleSwitcher', 'ui/home.tsx', 'Servicios · Auto · Market siempre arriba. Variante «pill» (Opción 1) o «tiles» (Opción 2); contador por módulo.'],
-  ['ProviderCard', 'ui/home.tsx', 'Tarjeta verde del prestador: destacado con foto (1 y 2) o fila de números (3), con el interruptor de disponibilidad.'],
+  ['ProviderCard', 'ui/home.tsx', 'Tarjeta del prestador de las Opciones 1 a 3: cabecera verde con texto blanco (destacado o números) y el interruptor de disponibilidad.'],
   ['ModuleTiles', 'ui/home.tsx', 'Tres tarjetas lado a lado: «Oportunidades por módulo», «Tus módulos», «Pedir un servicio / viaje / Comprar».'],
   ['ModuleList', 'ui/home.tsx', 'Filas con ícono y número en verde: «3 solicitudes cerca tuyo», actividad reciente, lugares guardados.'],
   ['SearchBar · LocationPicker', 'ui/home.tsx', 'Búsqueda (de un módulo o de los tres) y ubicación actual del cliente.'],
@@ -588,7 +588,7 @@ export function IntegrationPage() {
         ]} />
         <Rule title="Simplicidad" items={[
           'Un solo kit de navegación (ui/nav.tsx) para los tres módulos: mismas barras, botones y menús.',
-          'Una regla de color: la pestaña activa es verde sólido con ícono y texto negros, en todos los módulos.',
+          'Una regla de color (guía de marca): el verde es la señal, no decora. Un solo botón verde por pantalla, texto blanco sobre verde, selección en negro/blanco y la pestaña activa en verde sin pastilla.',
           'El rol no se elige al entrar: todos son clientes; prestar o manejar se activa desde Perfil.',
         ]} />
       </div>

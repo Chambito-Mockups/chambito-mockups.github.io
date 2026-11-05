@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { BottomNavBar, MenuGroup, MenuItem, NavKey } from './ui/kit';
 import { HomeFrame, ModuleList, SearchBar, SectionTitle, ServiceGrid } from './ui/home';
 import { ActivateModuleCard, ActivityItem, ActivityTimeline, Availability, FeedCard, FeedItem, Filter, KIND_MODULE, ModuleFilter, PageTitle, UnifiedSearch } from './ui/hub';
-import { AvailabilityList, BackHeader, BrandHeader, CategoryRow, EntryTiles, InfoBanner, InlineBanner, OnlineCard, PlaceShortcuts, ProductCard, PromoCarousel, Rail, RouteMap, StatRow } from './ui/modules';
+import { AvailabilityList, BackHeader, BrandHeader, CategoryRow, EntryTiles, InfoBanner, InlineBanner, OnlineCard, PlaceShortcuts, ProductCard, Rail, RouteMap, StatRow } from './ui/modules';
 import { LISTINGS } from './market/data';
 import { Photo, useMoney } from './market/kit';
 import { P, R } from './theme';
@@ -57,7 +57,7 @@ function ClienteInicio({ say, explore, open, toActivity }: { say: Say; explore: 
   return (
     <>
       <BrandHeader bell={1} onBell={() => say('Notificaciones')} />
-      <h2 style={{ margin: 0, font: P(24) }}>¿Qué necesitás hoy?</h2>
+      <h2 style={{ margin: 0, font: P(22) }}>¿Qué necesitás hoy?</h2>
       <UnifiedSearch placeholder="Buscar servicios, viajes o productos" onPick={(h) => (h.kind === 'auto' ? open('auto') : h.kind === 'market' ? open('market') : say(`Abre ${h.title}`))} />
       <EntryTiles items={[
         { key: 'servicios', title: 'Servicios', text: 'Profesionales verificados', onClick: () => explore('servicios') },
@@ -68,7 +68,7 @@ function ClienteInicio({ say, explore, open, toActivity }: { say: Say; explore: 
       <ModuleList items={[
         { key: 'l', icon: 'home', title: 'Limpieza del hogar', text: 'Mañana, 10:00', onClick: () => say('Abre la solicitud') },
         { key: 'v', icon: 'car', title: 'Viaje al centro', text: 'Ayer, completo', onClick: () => say('Abre el recibo del viaje') },
-        { key: 'p', icon: 'cart', title: 'Pedido en camino', text: 'Llega hoy, 15:00', onClick: () => say('Abre el seguimiento del pedido') },
+        { key: 'p', icon: 'shoppingBag', title: 'Pedido en camino', text: 'Llega hoy, 15:00', onClick: () => say('Abre el seguimiento del pedido') },
       ]} />
     </>
   );
@@ -106,8 +106,8 @@ function ClienteExplorar({ say, filter, setFilter, open }: { say: Say; filter: F
           {filter === 'auto' && (
             <ModuleList items={[
               { key: 'c', icon: 'home', title: 'Casa', text: 'Av. España 1240', onClick: () => open('auto') },
-              { key: 't', icon: 'briefcase', title: 'Trabajo', text: 'Paseo La Galería', onClick: () => open('auto') },
-              { key: 'r', icon: 'history', title: 'Costanera de Asunción', text: 'Destino reciente', onClick: () => open('auto') },
+              { key: 't', icon: 'flag', title: 'Trabajo', text: 'Paseo La Galería', onClick: () => open('auto') },
+              { key: 'r', icon: 'clock', title: 'Costanera de Asunción', text: 'Destino reciente', onClick: () => open('auto') },
             ]} />
           )}
         </>
@@ -136,7 +136,7 @@ function AutoHome({ say, back }: { say: Say; back: () => void }) {
         <SearchBar placeholder="Ingresá tu destino" onClick={() => say('Abre el destino (A2)')} />
         <PlaceShortcuts items={[
           { icon: 'home', label: 'Casa', onClick: () => say('Pide un viaje a Casa') },
-          { icon: 'briefcase', label: 'Trabajo', onClick: () => say('Pide un viaje al Trabajo') },
+          { icon: 'flag', label: 'Trabajo', onClick: () => say('Pide un viaje al Trabajo') },
           { icon: 'star', label: 'Favoritos', onClick: () => say('Abre tus lugares favoritos') },
         ]} />
       </div>
@@ -150,14 +150,8 @@ function MarketHome({ say, back }: { say: Say; back: () => void }) {
       <BackHeader title="Market" onBack={back} />
       <SearchBar placeholder="Buscar productos, marcas o tiendas" onClick={() => say('Abre la búsqueda de la Tienda (M03)')} />
       <CategoryRow items={[['phone', 'Tecnología'], ['home', 'Hogar'], ['tag', 'Moda'], ['more', 'Más']]} onPick={(c) => say(`Abre la categoría ${c}`)} />
-      <PromoCarousel
-        slides={[
-          { eyebrow: 'Ofertas de lanzamiento', title: 'Hasta 30% OFF', icon: 'volumeOn' },
-          { eyebrow: 'Disponible en tu zona', title: 'Comprá cerca tuyo', icon: 'mapPin' },
-          { eyebrow: 'Vendé gratis', title: 'Publicá en 2 minutos', icon: 'plus' },
-        ]}
-        onOpen={(s) => say(`Abre: ${s.title}`)}
-      />
+      {/* no promotional banners in Chambito (brand guide §1): a neutral notice of the launch stage instead */}
+      <InfoBanner icon="mapPin">Market es nuevo en tu zona: todavía hay pocos productos. Publicar es gratis.</InfoBanner>
       <SectionTitle title="Destacados" action="Ver todos" onAction={() => say('Abre la Tienda (M01)')} />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,minmax(0,1fr))', gap: 10 }}><Products say={say} /></div>
     </>
@@ -171,16 +165,16 @@ function PrestadorInicio({ say, work, avail, setAvail, open }: { say: Say; work:
     <>
       <BrandHeader bell={2} onBell={() => say('Notificaciones')} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <h2 style={{ margin: 0, font: P(24) }}>Hola, Dario 👋</h2>
+        <h2 style={{ margin: 0, font: P(22) }}>Hola, Dario</h2>
         <span style={{ font: R(14), color: t.text2 }}>Gestioná tu trabajo y oportunidades.</span>
       </div>
       <OnlineCard value={avail} onChange={setAvail} onManage={() => open('disponibilidad')} />
       <StatRow stats={[{ value: '3', label: 'Oportunidades' }, { value: '1', label: 'Actividad hoy' }, { value: '4,8', label: 'Calificación', icon: 'star' }]} />
       <SectionTitle title="Tus módulos" />
       <ModuleList items={[
-        { key: 's', icon: 'wrench', title: 'Servicios', text: avail.servicios ? '3 solicitudes nuevas' : 'Pausado · no recibís solicitudes', onClick: () => work('servicios') },
+        { key: 's', icon: 'limpieza', title: 'Servicios', text: avail.servicios ? '3 solicitudes nuevas' : 'Pausado · no recibís solicitudes', onClick: () => work('servicios') },
         { key: 'a', icon: 'car', title: 'Auto', text: avail.auto ? 'Disponible para viajes' : 'Desconectado · no recibís viajes', onClick: () => work('auto') },
-        { key: 'm', icon: 'cart', title: 'Market', text: avail.market ? '4 pedidos nuevos' : 'Pausado · no recibís pedidos', onClick: () => work('market') },
+        { key: 'm', icon: 'shoppingBag', title: 'Market', text: avail.market ? '4 pedidos nuevos' : 'Pausado · no recibís pedidos', onClick: () => work('market') },
       ]} />
     </>
   );
@@ -203,7 +197,7 @@ function Disponibilidad({ back, avail, setAvail }: { back: () => void; avail: Av
   return (
     <>
       <BackHeader title="Disponibilidad" onBack={back} />
-      <InfoBanner icon="bolt">Gestioná en qué módulos querés trabajar.</InfoBanner>
+      <InfoBanner icon="info">Gestioná en qué módulos querés trabajar.</InfoBanner>
       <AvailabilityList value={avail} onChange={setAvail} />
     </>
   );
@@ -233,8 +227,8 @@ function Perfil({ side, say, open }: { side: Side; say: Say; open: (s: Sub) => v
       </MenuGroup>
       {side === 'prestador' ? (
         <MenuGroup title="Mis actividades">
-          <MenuItem icon="bolt" label="Disponibilidad" hint="Elegí en qué módulos trabajás" accent onClick={() => open('disponibilidad')} />
-          <MenuItem icon="wrench" label="Profesiones y rubros" hint="Limpieza" onClick={s('Rubros')} />
+          <MenuItem icon="success" label="Disponibilidad" hint="Elegí en qué módulos trabajás" accent onClick={() => open('disponibilidad')} />
+          <MenuItem icon="limpieza" label="Profesiones y rubros" hint="Limpieza" onClick={s('Rubros')} />
           <MenuItem icon="car" label="Datos del vehículo" hint="Toyota Vitz · ABCD 123" onClick={s('Vehículo (D2)')} />
           <MenuItem icon="tag" label="Productos publicados" hint="3 activos" last onClick={s('Mis publicaciones (V21)')} />
         </MenuGroup>
@@ -247,10 +241,10 @@ function Perfil({ side, say, open }: { side: Side; say: Say; open: (s: Sub) => v
       {side === 'cliente' ? (
         <>
           <ActivateModuleCard icon="car" title="Chambito Auto" text="Conducí y recibí oportunidades de viaje." onClick={s('Abre «Sumate como conductor» (D0)')} />
-          <ActivateModuleCard icon="wrench" title="Ofrecé tu oficio" text="Recibí solicitudes de clientes cerca tuyo." onClick={s('Abre el alta de prestador')} />
+          <ActivateModuleCard icon="users" title="Ofrecé tu oficio" text="Recibí solicitudes de clientes cerca tuyo." onClick={s('Abre el alta de prestador')} />
         </>
       ) : (
-        <ActivateModuleCard icon="cart" title="Mi comercio" tag="Nuevo" text="Vendé con tu comercio en el Market." onClick={s('Abre el alta de comercio')} />
+        <ActivateModuleCard icon="shoppingBag" title="Mi comercio" tag="Nuevo" text="Vendé con tu comercio en el Market." onClick={s('Abre el alta de comercio')} />
       )}
       <MenuGroup title="Configuración">
         <MenuItem icon="bell" label="Notificaciones" onClick={s('Notificaciones')} />

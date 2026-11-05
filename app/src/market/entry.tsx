@@ -105,7 +105,7 @@ function ServiceSheet({ service, onClose }: { service: (typeof SERVICES)[number]
           { value: 'semana', label: 'Esta semana', hint: 'Te muestran opciones', icon: 'calendar' },
         ]}
       />
-      <button className="press btn btn-primary" onClick={() => { onClose(); showToast(`Buscando ${service[1].toLowerCase()} para ${when === 'hoy' ? 'hoy' : when === 'manana' ? 'mañana' : 'esta semana'}`); }} style={{ height: 52, borderRadius: 26, background: t.green, color: '#000000', font: P(16), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <button className="press btn btn-primary" onClick={() => { onClose(); showToast(`Buscando ${service[1].toLowerCase()} para ${when === 'hoy' ? 'hoy' : when === 'manana' ? 'mañana' : 'esta semana'}`); }} style={{ height: 52, borderRadius: 26, background: t.green, color: t.onGreen, font: P(16), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         Pedir {service[1].toLowerCase()}
       </button>
     </BottomSheet>
@@ -184,7 +184,7 @@ function ProfileCard({ onEdit }: { onEdit: () => void }) {
       <div style={{ background: t.mSurface, borderRadius: 20, padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
         <span style={{ font: P(18) }}>Entrá a tu cuenta</span>
         <span style={{ font: R(14), color: t.text2, ...pretty }}>Para pedir viajes, consultar y publicar en la Tienda.</span>
-        <button className="press btn btn-primary" onClick={() => set({ guest: false })} style={{ height: 48, borderRadius: 24, background: t.green, color: '#000000', font: P(15), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Iniciar sesión</button>
+        <button className="press btn btn-primary" onClick={() => set({ guest: false })} style={{ height: 48, borderRadius: 24, background: t.green, color: t.onGreen, font: P(15), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Iniciar sesión</button>
       </div>
     );
   return (
@@ -220,7 +220,7 @@ function ProfileSheets({ which, onClose }: { which: Exclude<ProfileSheet, null>;
           <Verified size={13} />
           <span style={{ font: R(13), color: t.text2 }}>Identidad verificada con tu documento</span>
         </div>
-        <button className="press btn btn-primary" disabled={!name.trim()} onClick={() => { onClose(); showToast('Datos guardados'); }} style={{ height: 52, borderRadius: 26, background: name.trim() ? t.green : t.btn2, color: name.trim() ? '#000000' : t.text3, font: P(16), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Guardar</button>
+        <button className="press btn btn-primary" disabled={!name.trim()} onClick={() => { onClose(); showToast('Datos guardados'); }} style={{ height: 52, borderRadius: 26, background: name.trim() ? t.green : t.btn2, color: name.trim() ? t.onGreen : t.text3, font: P(16), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Guardar</button>
       </BottomSheet>
     );
 
@@ -315,7 +315,7 @@ export function Actividad() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ font: P(18) }}>Mis pedidos</span>
-                  <span style={{ font: R(12, 500), color: '#000000', background: t.warn, borderRadius: 10, padding: '2px 8px' }}>Fase 2</span>
+                  <span style={{ font: R(12, 500), color: t.name === 'dark' ? '#000000' : '#FFFFFF', background: t.warn, borderRadius: 10, padding: '2px 8px' }}>Fase 2</span>
                 </div>
                 <div style={{ border: `1.5px dashed ${t.dashed}`, borderRadius: 16, padding: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
                   <span style={{ font: R(14), color: t.text2, ...pretty }}>Cuando puedas comprar dentro de la app, tus pedidos van a aparecer acá.</span>

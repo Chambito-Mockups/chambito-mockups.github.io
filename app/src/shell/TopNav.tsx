@@ -33,7 +33,7 @@ export function TopNav({ module, onModule, onMenu, ui, onUi, navOn, onNav }: { m
       {onNav && (
         <nav className="modules" aria-label="Referencia">
           <button className={navOn ? 'on' : ''} aria-current={navOn ? 'page' : undefined} onClick={onNav} title="Diseños de Inicio, opciones de barra y componentes">
-            <Icon name="grid" size={18} color={navOn ? '#000000' : 'var(--fg2)'} />
+            <Icon name="layers" size={18} color={navOn ? '#000000' : 'var(--fg2)'} />
             <span>Navegación</span>
           </button>
         </nav>

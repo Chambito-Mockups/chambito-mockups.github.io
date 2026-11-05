@@ -203,8 +203,8 @@ export function V16() {
                   {p.state === 'subiendo' && <span style={{ position: 'absolute', left: 10, right: 10, bottom: 10, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.3)', overflow: 'hidden' }}><span className="grow" style={{ display: 'block', height: '100%', background: t.green }} /></span>}
                 </div>
               )}
-              {i === 0 && p.state === 'lista' && <span style={{ position: 'absolute', left: 6, bottom: 6, font: P(11), color: '#000000', background: t.green, borderRadius: 8, padding: '2px 7px', pointerEvents: 'none' }}>Portada</span>}
-              {i > 0 && p.state === 'lista' && <span style={{ position: 'absolute', top: 6, right: 6, width: 22, height: 22, borderRadius: 11, background: t.green, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}><Icon name="check" size={12} color="#000000" /></span>}
+              {i === 0 && p.state === 'lista' && <span style={{ position: 'absolute', left: 6, bottom: 6, font: P(12), color: t.onGreen, background: t.green, borderRadius: 8, padding: '2px 7px', pointerEvents: 'none' }}>Portada</span>}
+              {i > 0 && p.state === 'lista' && <span style={{ position: 'absolute', top: 6, right: 6, width: 22, height: 22, borderRadius: 11, background: t.green, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}><Icon name="check" size={12} color={t.onGreen} /></span>}
               {p.state === 'lista' && <button aria-label="Quitar foto" onClick={() => remove(p.id)} style={{ position: 'absolute', top: 4, left: 4, width: 28, height: 28, borderRadius: 14, background: 'rgba(0,0,0,.55)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="close" size={12} color="#FFFFFF" /></button>}
             </div>
           ))}

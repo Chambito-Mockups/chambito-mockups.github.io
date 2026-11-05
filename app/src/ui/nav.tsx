@@ -27,8 +27,8 @@ export const NAV_META: Record<NavKey, { label: string; icon: string }> = {
   cobros: { label: 'Cobros', icon: 'wallet' },
   mensajes: { label: 'Mensajes', icon: 'messageCircle' },
   pedir: { label: 'Pedir', icon: 'plus' },
-  modulos: { label: 'Módulos', icon: 'grid' },
-  trabajo: { label: 'Trabajo', icon: 'briefcase' },
+  modulos: { label: 'Módulos', icon: 'layers' },
+  trabajo: { label: 'Trabajo', icon: 'inbox' },
   explorar: { label: 'Explorar', icon: 'search' },
 };
 
@@ -51,62 +51,23 @@ export function navItems(autoEnabled: boolean, teams: boolean, tiendaTab = false
 export type NavBadges = Partial<Record<NavKey, number | boolean>>;
 
 /**
- * Docked bar from the «Cliente y Prestador» mockup: full width at the bottom, flat, active tab
- * as a green icon and label with no pill. Same items and badges as the floating one.
+ * Bottom bar from TOKENS.json (component.bottomNav, v1.15.0 «barra simple»): 72 tall, radius 16,
+ * bg.surfaceRaised with outline and elevation, 20 from the sides. Each tab: icon 24 over its name
+ * (Roboto Medium 12), 4 apart. Inactive in icon.secondary; active icon and name in icon.brand.
+ * No pill and no sliding: the colour changes at once.
+ * `docked` is the same bar fixed to the bottom edge (the «Cliente y Prestador» mockup).
  */
-function DockedNavBar({ items, active, onSelect, badges, style }: { items: NavKey[]; active: NavKey; onSelect?: (k: NavKey) => void; badges?: NavBadges; style?: CSSProperties }) {
-  const { t } = useApp();
-  return (
-    <nav aria-label="Navegación principal" style={{ height: 64, background: t.sheet, borderTop: `1px solid ${t.name === 'dark' ? '#262626' : '#E6E6E6'}`, display: 'grid', gridTemplateColumns: `repeat(${items.length},minmax(0,1fr))`, ...style }}>
-      {items.map((k) => {
-        const on = k === active;
-        const c = on ? t.success : t.navInactive;
-        const b = badges?.[k];
-        const label = NAV_META[k].label;
-        return (
-          <button key={k} className="nav-tab" aria-current={on ? 'page' : undefined} aria-label={b ? `${label}, ${typeof b === 'number' ? `${b} nuevas` : 'con novedades'}` : label} onClick={() => onSelect?.(k)}
-            style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, minWidth: 0 }}>
-            {on && <span aria-hidden style={{ position: 'absolute', top: 0, width: 28, height: 3, borderRadius: 2, background: t.green }} />}
-            <span style={{ position: 'relative', display: 'flex' }}>
-              <Icon name={NAV_META[k].icon} size={22} color={c} />
-              {!!b && <Dot count={typeof b === 'number' ? b : undefined} ring={t.sheet} />}
-            </span>
-            <span style={{ font: R(12, on ? 500 : 400), color: c, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{label}</span>
-          </button>
-        );
-      })}
-    </nav>
-  );
-}
-
-/** Floating pill. Active destination: solid green with black icon and label (unified rule for Auto and Tienda). */
 export function BottomNavBar({ items, active, onSelect, badges, style, variant = 'pill' }: { items: NavKey[]; active: NavKey; onSelect?: (k: NavKey) => void; badges?: NavBadges; style?: CSSProperties; variant?: 'pill' | 'docked' }) {
   const { t } = useApp();
-  if (variant === 'docked') return <DockedNavBar items={items} active={active} onSelect={onSelect} badges={badges} style={style} />;
-  const idx = items.indexOf(active);
-  const n = items.length;
-  const shadow = t.name === 'dark' ? '0 10px 30px rgba(0,0,0,.55)' : '0 8px 24px rgba(0,0,0,.12)';
+  const docked = variant === 'docked';
+  const frame: CSSProperties = docked
+    ? { height: 72, background: t.navBg, borderTop: t.navOutline }
+    : { height: 72, borderRadius: 16, background: t.navBg, outline: t.navOutline, boxShadow: t.shadowFloat };
   return (
-    <nav aria-label="Navegación principal" style={{ height: 64, borderRadius: 32, background: t.navBg, outline: t.navOutline, boxShadow: shadow, display: 'grid', gridTemplateColumns: `repeat(${n},minmax(0,1fr))`, padding: 6, boxSizing: 'border-box', gap: 4, position: 'relative', ...style }}>
-      {idx >= 0 && (
-        <span
-          aria-hidden
-          style={{
-            position: 'absolute',
-            top: 6,
-            bottom: 6,
-            left: `calc(6px + (100% - 12px - ${(n - 1) * 4}px) / ${n} * ${idx} + ${idx * 4}px)`,
-            width: `calc((100% - 12px - ${(n - 1) * 4}px) / ${n})`,
-            borderRadius: 26,
-            background: t.green,
-            boxShadow: '0 2px 8px rgba(75,172,79,.35)',
-            transition: 'left .28s cubic-bezier(.3,.7,.3,1)',
-          }}
-        />
-      )}
+    <nav aria-label="Navegación principal" style={{ ...frame, display: 'grid', gridTemplateColumns: `repeat(${items.length},minmax(0,1fr))`, padding: 8, boxSizing: 'border-box', ...style }}>
       {items.map((k) => {
         const on = k === active;
-        const c = on ? '#000000' : t.navInactive;
+        const c = on ? t.navActive : t.navInactive;
         const b = badges?.[k];
         const label = NAV_META[k].label;
         return (
@@ -116,11 +77,11 @@ export function BottomNavBar({ items, active, onSelect, badges, style, variant =
             aria-current={on ? 'page' : undefined}
             aria-label={b ? `${label}, ${typeof b === 'number' ? `${b} nuevas` : 'con novedades'}` : label}
             onClick={() => onSelect?.(k)}
-            style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, minWidth: 0, borderRadius: 26 }}
+            style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, minWidth: 0, minHeight: 48 }}
           >
             <span style={{ position: 'relative', display: 'flex' }}>
-              <Icon name={NAV_META[k].icon} size={22} color={c} />
-              {!!b && <Dot count={typeof b === 'number' ? b : undefined} ring={on ? t.green : t.navBg} />}
+              <Icon name={NAV_META[k].icon} size={24} color={c} />
+              {!!b && <Dot count={typeof b === 'number' ? b : undefined} ring={t.navBg} />}
             </span>
             <span style={{ font: R(12, 500), color: c, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{label}</span>
           </button>
@@ -152,7 +113,7 @@ export function NavIconButton({ icon, onClick, label, bg, size = 44, iconColor, 
     <button aria-label={label} title={label} className="press" onClick={onClick} style={{ position: 'relative', width: size, height: size, borderRadius: size / 2, background: bg ?? t.mSurface, display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}>
       <Icon name={icon} size={20} color={iconColor} />
       {!!badge && (
-        <span style={{ position: 'absolute', top: -2, right: -2, minWidth: 18, height: 18, borderRadius: 9, background: t.green, color: '#000000', font: P(11), display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 5px', boxSizing: 'border-box' }}>{badge}</span>
+        <span style={{ position: 'absolute', top: -2, right: -2, minWidth: 18, height: 18, borderRadius: 9, background: t.green, color: t.onGreen, font: P(12), display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 5px', boxSizing: 'border-box' }}>{badge}</span>
       )}
     </button>
   );
@@ -193,7 +154,7 @@ export function MenuGroup({ title, children, action }: { title?: string; childre
           {action}
         </div>
       )}
-      <div className="menu-group" style={{ background: t.mSurface, borderRadius: 20, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>{children}</div>
+      <div className="menu-group" style={{ background: t.mSurface, borderRadius: 16, boxShadow: t.shadowCard, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>{children}</div>
     </section>
   );
 }
@@ -205,17 +166,17 @@ export function MenuItem({ icon, label, hint, tag, tagTone = 'neutral', onClick,
   const tagStyle: Record<string, [string, string]> = { new: [t.success, t.greenSoft], neutral: [t.text2, t.mChip], warn: [t.warn, 'rgba(255,181,71,0.16)'] };
   const [tc, tb] = tagStyle[tagTone];
   return (
-    <button className="press menu-item" onClick={onClick} style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 60, padding: '8px 14px', width: '100%', textAlign: 'left', position: 'relative' }}>
-      <span style={{ width: 38, height: 38, borderRadius: 12, background: accent ? t.greenSoft : t.mChip, display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}>
-        <Icon name={icon} size={19} color={accent ? t.success : undefined} />
+    <button className="press menu-item" onClick={onClick} style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: hint ? 72 : 56, padding: '8px 16px', width: '100%', textAlign: 'left', position: 'relative' }}>
+      <span style={{ width: 40, height: 40, borderRadius: 12, background: accent ? t.greenSoft : t.mChip, display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}>
+        <Icon name={icon} size={20} color={accent ? t.iconBrand : undefined} />
       </span>
       <span style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 1, minWidth: 0 }}>
         <span style={{ font: R(15, 500) }}>{label}</span>
         {hint && <span style={{ font: R(13), color: t.text2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{hint}</span>}
       </span>
-      {tag && <span style={{ font: R(12, 500), color: tc, background: tb, borderRadius: 10, padding: '2px 8px', whiteSpace: 'nowrap' }}>{tag}</span>}
+      {tag && <span style={{ font: R(12, 500), color: tc, background: tb, borderRadius: 12, padding: '2px 8px', whiteSpace: 'nowrap' }}>{tag}</span>}
       <Icon name="chevronRight" size={18} color={t.text3} />
-      {!last && <span aria-hidden style={{ position: 'absolute', left: 64, right: 0, bottom: 0, height: 1, background: t.name === 'dark' ? '#262626' : '#E6E6E6' }} />}
+      {!last && <span aria-hidden style={{ position: 'absolute', left: 68, right: 0, bottom: 0, height: 1, background: t.borderSubtle }} />}
     </button>
   );
 }
@@ -243,18 +204,18 @@ export function QuickAccess({ tiles, surface }: { tiles: QuickTile[]; surface?: 
           className="press quick-tile"
           onClick={q.onClick}
           aria-label={`${q.label}: ${q.hint}${q.status ? `, ${q.status}` : ''}`}
-          style={{ position: 'relative', minHeight: 84, borderRadius: 18, background: surface ?? t.card, padding: 12, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, textAlign: 'left' }}
+          style={{ position: 'relative', minHeight: 84, borderRadius: 16, background: surface ?? t.card, padding: 12, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, textAlign: 'left' }}
         >
-          <span style={{ width: 34, height: 34, borderRadius: 12, background: t.greenSoft, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Icon name={q.icon} size={22} color={t.success} />
+          <span style={{ width: 40, height: 40, borderRadius: 12, background: t.greenSoft, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name={q.icon} size={24} color={t.iconBrand} />
           </span>
           <span style={{ display: 'flex', flexDirection: 'column', gap: 1, minWidth: 0, width: '100%' }}>
-            <span style={{ font: P(15) }}>{q.label}</span>
+            <span style={{ font: R(15, 500) }}>{q.label}</span>
             <span style={{ font: R(12), color: t.text2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{q.hint}</span>
           </span>
           {q.status && (
-            <span style={{ position: 'absolute', top: 12, right: 10, display: 'flex', alignItems: 'center', gap: 4, font: R(11, 500), color: '#000000', background: t.green, borderRadius: 10, padding: '2px 7px' }}>
-              <span className="blink" style={{ width: 6, height: 6, borderRadius: 3, background: '#000000' }} />
+            <span style={{ position: 'absolute', top: 12, right: 10, display: 'flex', alignItems: 'center', gap: 4, height: 24, boxSizing: 'border-box', font: R(12, 500), color: t.success, background: t.greenSoft, borderRadius: 12, padding: '0 8px' }}>
+              <span className="blink" style={{ width: 8, height: 8, borderRadius: 4, background: t.green }} />
               {q.status}
             </span>
           )}
