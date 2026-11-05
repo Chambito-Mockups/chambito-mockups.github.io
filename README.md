@@ -2,7 +2,7 @@
 
 Prototipo navegable de **Chambito Auto** (viajes: pasajero y conductor) y **Chambito Market** (Tienda: comprar y vender), con datos de prueba y sin backend.
 
-**Ver en línea:** https://esfot26.github.io/chambito-mockups/
+**Ver en línea:** https://chambito-mockups.github.io/
 
 - Dos menús, **Auto** y **Market**, cada uno con sus pantallas, ajustes y situaciones para simular.
 - **Presentar** (tecla `P`): teléfono a pantalla completa, con recorridos guiados que avanzan solos.

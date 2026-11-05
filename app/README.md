@@ -25,7 +25,7 @@ npm test         # Vitest: registry, navigation, every screen in both themes/cou
 - **Saved between visits** (localStorage): theme, country, simulation switches, Guardados, my listings, drafts, consult chats and the places added in Auto. *Restablecer demo* (bottom of the side menu) wipes it.
 - **Page theme** (☾ / ☀ in the top bar) is separate from the phone theme (phone icon).
 - **Installable** as an app (manifest + icons in `public/pwa`).
-- **Online:** https://esfot26.github.io/chambito-mockups/ — deployed by `.github/workflows/pages.yml` on every push to `main`, only if the tests pass.
+- **Online:** https://chambito-mockups.github.io/ — deployed by `.github/workflows/pages.yml` on every push to `main`, only if the tests pass.
 
 ## What's inside
 
