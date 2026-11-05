@@ -10,7 +10,7 @@ import { Tour } from '../registry';
 import { clearDemo } from '../persist';
 
 /* ---------------- Sidebar ---------------- */
-export type Page = { kind: 'screen'; key: string } | { kind: 'bar' } | { kind: 'components' };
+export type Page = { kind: 'screen'; key: string } | { kind: 'bar' } | { kind: 'components' } | { kind: 'integration' };
 
 export function SideMenu({ module, page, onJump, onPage, onModule, query, setQuery, searchRef, onStartTour }: {
   module: Module; page: Page; onJump: (e: Entry) => void; onPage: (p: Page) => void; onModule: (m: Module) => void;

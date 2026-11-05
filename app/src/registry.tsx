@@ -45,13 +45,14 @@ export interface Group {
   icon?: string;
   subtitle?: string;
   entries: Entry[];
-  page?: 'bar' | 'components';
+  page?: 'bar' | 'components' | 'integration';
   note?: string;
 }
 
 const P: Role = 'pasajero';
 export const GROUPS: Group[] = [
   { title: 'Barra inferior', module: 'auto', icon: 'menu', subtitle: 'Cómo queda la barra con Auto', page: 'bar', entries: [] },
+  { title: 'Navegación integrada', module: 'auto', icon: 'compass', subtitle: 'Servicios, Auto y Tienda en una app', page: 'integration', entries: [] },
   {
     title: 'Cliente · pedir un viaje',
     module: 'auto',
@@ -158,6 +159,7 @@ export const GROUPS: Group[] = [
     ],
   },
   { title: 'Componentes nuevos', module: 'auto', icon: 'bookmark', subtitle: 'Piezas que suma el diseño', page: 'components', entries: [] },
+  { title: 'Navegación integrada', module: 'market', icon: 'compass', subtitle: 'Servicios, Auto y Tienda en una app', page: 'integration', entries: [] },
 ];
 
 export const ALL_ENTRIES = GROUPS.flatMap((g) => g.entries);

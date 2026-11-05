@@ -40,6 +40,14 @@ npm test         # Vitest: registry, navigation, every screen in both themes/cou
 - Driver: availability switch, demand-zone layer, an offer with a 15 s countdown, pickup navigation, PIN entry (`4827` in PY, `3156` in AR; keyboard works too), slide to finish, payment and wallet.
 - New provider: "Sumate como conductor", then requirements with upload slots (tap to simulate uploading) and the review screen.
 
+## Navegación integrada (Servicios · Auto · Market)
+
+**Navegación** in the top bar (or `#navegacion`) opens a reference page with tabs, so nothing needs scrolling to find:
+
+- **Diseños de Inicio**: provider and client phones side by side. *Recomendada · navegación estable* is navigable (Inicio · Explorar/Trabajo · Actividad · Perfil, plus Chambito Auto, Market and Disponibilidad with a back arrow), with a fixed or floating bar and light/dark theme. Also the Opciones 1, 2 y 3 proposals and the module switcher in Inicio, to compare.
+- **Opciones de barra** (A–F with pros, cons and when to use each), **Arquitectura** (what lives in each of the four tabs, 4 vs 5 tabs), **Componentes** (catalogue and the mockup palette with contrast), **Probalo** and **Reglas** (usability, performance, gradual activation).
+- Pieces: `src/ui/home.tsx` (Inicio from the proposals), `src/ui/hub.tsx` (unified search, module filter, feed, activity timeline, availability), `src/ui/modules.tsx` (from the «Cliente y Prestador» mockup); screens in `src/stableNav.tsx` and `src/proposals.tsx`; page in `src/integration.tsx`.
+
 ## Chambito Market (Tienda)
 
 - **Entry**: by default *combination 2* from the design (Market card in Inicio, Tienda stacked with a back arrow, Auto keeps its tab). The sidebar switches to *combination 1* (Tienda as a tab; Equipos moves to Perfil when it doesn't fit).

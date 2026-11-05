@@ -107,4 +107,150 @@ describe('toolbar and keyboard', () => {
     fireEvent.click(screen.getByRole('button', { name: /Volver al prototipo/ }));
     expect(heading()).toHaveTextContent('Portada de Auto');
   });
+
+  it('opens the integrated navigation from the top bar, on the Inicio designs', () => {
+    start();
+    fireEvent.click(within(screen.getByRole('navigation', { name: 'Referencia' })).getByRole('button', { name: /Navegación/ }));
+    expect(window.location.hash).toBe('#navegacion');
+    expect(screen.getByRole('tab', { name: 'Diseños de Inicio' })).toHaveAttribute('aria-selected', 'true');
+    // recommended first: the stable navigation
+    expect(screen.getByRole('group', { name: 'Cliente, estable' })).toBeInTheDocument();
+    // module switcher at the top of Inicio
+    fireEvent.click(screen.getByRole('radio', { name: 'Selector en Inicio' }));
+    const cliente = screen.getByRole('group', { name: 'Cliente, mix' });
+    expect(within(cliente).getByRole('tablist', { name: 'Módulos' })).toBeInTheDocument();
+    expect(within(cliente).getByText('Servicios populares')).toBeInTheDocument();
+    fireEvent.click(within(cliente).getByRole('tab', { name: /Auto/ }));
+    expect(within(cliente).getByText('¿A dónde vas?')).toBeInTheDocument();
+    const prestador = screen.getByRole('group', { name: 'Prestador, mix' });
+    expect(within(prestador).getByRole('navigation').textContent).toContain('Trabajo');
+    fireEvent.click(within(prestador).getByRole('switch'));
+    expect(within(prestador).getByText('No disponible')).toBeInTheDocument();
+    // each of the three proposals renders both sides
+    for (const [label, id, tabName] of [['Opción 1', 'op1', 'Módulos'], ['Opción 2', 'op2', 'Comercios'], ['Opción 3', 'op3', 'Explorar']] as const) {
+      fireEvent.click(screen.getByRole('radio', { name: label }));
+      expect(screen.getByRole('group', { name: `Prestador, ${id}` })).toBeInTheDocument();
+      expect(within(screen.getByRole('group', { name: `Cliente, ${id}` })).getByRole('navigation').textContent).toContain(tabName);
+    }
+  });
+
+  it('navigates the stable proposal: one search, filters, availability per module', () => {
+    start('#navegacion');
+    const cliente = () => screen.getByRole('group', { name: 'Cliente, estable' });
+    const tabBtn = (g: HTMLElement, name: string | RegExp) => within(within(g).getByRole('navigation')).getByRole('button', { name });
+    // light theme and docked bar by default, like the mockup
+    expect(screen.getByRole('radio', { name: 'Claro' })).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByRole('radio', { name: 'Barra fija' })).toHaveAttribute('aria-checked', 'true');
+    // one search for every module
+    const search = within(cliente()).getByRole('textbox', { name: 'Buscar servicios, viajes o productos' });
+    fireEvent.change(search, { target: { value: 'plomero' } });
+    expect(within(cliente()).getByRole('region', { name: 'Resultados de Servicios' })).toHaveTextContent('Plomería');
+    fireEvent.change(search, { target: { value: 'costanera' } });
+    expect(within(cliente()).getByRole('region', { name: 'Resultados de Auto' })).toBeInTheDocument();
+    fireEvent.change(search, { target: { value: 'ventilador' } });
+    expect(within(cliente()).getByRole('region', { name: 'Resultados de Market' })).toBeInTheDocument();
+    // the Servicios tile opens Explorar already filtered
+    fireEvent.click(within(cliente()).getByRole('button', { name: /^Servicios: Profesionales verificados/ }));
+    expect(within(cliente()).getByRole('heading', { name: 'Explorar' })).toBeInTheDocument();
+    expect(within(cliente()).getByRole('tab', { name: /Servicios/ })).toHaveAttribute('aria-selected', 'true');
+    // the bar only has 4 fixed tabs; Perfil offers to activate what is not used
+    expect(within(within(cliente()).getByRole('navigation')).getAllByRole('button').length).toBe(4);
+    fireEvent.click(tabBtn(cliente(), 'Perfil'));
+    expect(within(cliente()).getByText('Chambito Auto')).toBeInTheDocument();
+
+    const prestador = () => screen.getByRole('group', { name: 'Prestador, estable' });
+    expect(within(prestador()).getByRole('switch', { name: 'En línea' })).toHaveAttribute('aria-checked', 'true');
+    // Trabajo: one feed, filtered by module, each card labelled with icon + text
+    fireEvent.click(tabBtn(prestador(), 'Trabajo'));
+    expect(within(prestador()).getByText('Market · Entrega')).toBeInTheDocument();
+    expect(within(prestador()).getByText('Hace 2 min')).toBeInTheDocument();
+    fireEvent.click(within(prestador()).getByRole('tab', { name: /Servicios/ }));
+    expect(within(prestador()).queryByText('Viaje al centro')).not.toBeInTheDocument();
+    expect(within(prestador()).getByText('Limpieza del hogar')).toBeInTheDocument();
+    // Actividad: every module in one timeline
+    fireEvent.click(tabBtn(prestador(), /Actividad/));
+    expect(within(prestador()).getByText('Pago recibido')).toBeInTheDocument();
+    fireEvent.click(within(prestador()).getByRole('tab', { name: /Auto/ }));
+    expect(within(prestador()).queryByText('Pago recibido')).not.toBeInTheDocument();
+    expect(within(prestador()).getByText('Viaje cancelado')).toBeInTheDocument();
+  });
+
+  it('opens the module screens of the mockup: Chambito Auto, Market and Disponibilidad', () => {
+    start('#navegacion');
+    const cliente = () => screen.getByRole('group', { name: 'Cliente, estable' });
+    // Auto: route map, where to and place shortcuts; back returns to Inicio
+    fireEvent.click(within(cliente()).getByRole('button', { name: /^Auto: Movete de forma segura/ }));
+    expect(within(cliente()).getByRole('heading', { name: 'Chambito Auto' })).toBeInTheDocument();
+    expect(within(cliente()).getByRole('img', { name: 'Mapa con la ruta del viaje' })).toBeInTheDocument();
+    for (const p of ['Casa', 'Trabajo', 'Favoritos']) expect(within(cliente()).getByRole('button', { name: p })).toBeInTheDocument();
+    fireEvent.click(within(cliente()).getByRole('button', { name: 'Atrás' }));
+    expect(within(cliente()).getByRole('heading', { name: '¿Qué necesitás hoy?' })).toBeInTheDocument();
+    // Market: categories, launch carousel and products you can save
+    fireEvent.click(within(cliente()).getByRole('button', { name: /^Market: Comprá y vendé cerca tuyo/ }));
+    expect(within(cliente()).getByRole('heading', { name: 'Market' })).toBeInTheDocument();
+    const carousel = within(cliente()).getByRole('region', { name: 'Ofertas' });
+    expect(within(carousel).getByRole('button', { name: /Hasta 30% OFF, 1 de 3/ })).toBeInTheDocument();
+    fireEvent.click(within(carousel).getByRole('button', { name: 'Oferta 2' }));
+    expect(within(carousel).getByRole('button', { name: /2 de 3/ })).toBeInTheDocument();
+    const save = within(cliente()).getAllByRole('button', { name: /^Guardar / })[0];
+    fireEvent.click(save);
+    expect(save).toHaveAttribute('aria-pressed', 'true');
+
+    // Disponibilidad: one switch per module; Inicio and the module rows follow it
+    const prestador = () => screen.getByRole('group', { name: 'Prestador, estable' });
+    expect(within(prestador()).getByText('Desconectado · no recibís viajes')).toBeInTheDocument();
+    fireEvent.click(within(prestador()).getByRole('button', { name: /Elegir módulos/ }));
+    expect(within(prestador()).getByRole('heading', { name: 'Disponibilidad' })).toBeInTheDocument();
+    fireEvent.click(within(prestador()).getByRole('switch', { name: 'Auto' }));
+    expect(within(prestador()).getByRole('switch', { name: 'Auto' })).toHaveAttribute('aria-checked', 'true');
+    fireEvent.click(within(prestador()).getByRole('button', { name: 'Atrás' }));
+    expect(within(prestador()).getByText('Disponible para viajes')).toBeInTheDocument();
+    expect(within(prestador()).getByText(/En 3 de 3 módulos/)).toBeInTheDocument();
+    // the master switch turns every module off
+    fireEvent.click(within(prestador()).getByRole('switch', { name: 'En línea' }));
+    expect(within(prestador()).getByText('Fuera de línea · no recibís oportunidades')).toBeInTheDocument();
+  });
+
+  it('switches the stable proposal to the floating bar', () => {
+    start('#navegacion');
+    fireEvent.click(screen.getByRole('radio', { name: 'Barra flotante' }));
+    expect(screen.getByRole('radio', { name: 'Barra flotante' })).toHaveAttribute('aria-checked', 'true');
+    expect(within(screen.getByRole('group', { name: 'Cliente, estable' })).getByRole('navigation')).toBeInTheDocument();
+  });
+
+  it('shows the architecture of the four fixed destinations', () => {
+    start('#navegacion');
+    fireEvent.click(screen.getByRole('tab', { name: 'Arquitectura' }));
+    for (const name of ['Inicio', 'Explorar / Trabajo', 'Actividad', 'Perfil']) expect(screen.getByRole('region', { name })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Opción alterna (5 pestañas)' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Componentes' }));
+    expect(screen.getByText('Paleta del mockup vs. el prototipo')).toBeInTheDocument();
+    expect(screen.getByText('CategoryRow · PromoCarousel')).toBeInTheDocument();
+  });
+
+  it('opens the integrated navigation from its link', () => {
+    start('#navegacion');
+    expect(screen.getByRole('tab', { name: 'Diseños de Inicio' })).toBeInTheDocument();
+    expect(window.location.hash).toBe('#navegacion');
+  });
+
+  it('shows the bar options and the account simulator in their tabs', () => {
+    start();
+    fireEvent.click(screen.getByRole('button', { name: /Navegación integrada/ }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Opciones de barra' }));
+    expect(screen.getAllByRole('region', { name: /^[A-F] · / }).length).toBe(6);
+    expect(within(screen.getByRole('region', { name: /^A · / })).getByText('Recomendada')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Componentes' }));
+    expect(screen.getByText('ModuleSwitcher')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Probalo' }));
+    const bar = () => within(screen.getByRole('group', { name: 'Inicio de ejemplo, tema oscuro' })).getByRole('navigation');
+    // launch: Tienda is a top icon, not a tab
+    expect(within(screen.getByRole('group', { name: 'Inicio de ejemplo, tema oscuro' })).getAllByRole('button', { name: 'Tienda' }).length).toBe(1);
+    expect(bar().textContent).not.toContain('Tienda');
+    fireEvent.click(screen.getByRole('radio', { name: 'Tienda con uso' }));
+    expect(bar().textContent).toContain('Tienda');
+    fireEvent.click(screen.getByRole('radio', { name: 'Prestador' }));
+    expect(within(screen.getByRole('group', { name: 'Inicio de ejemplo, tema claro' })).getByText('Trabajos')).toBeInTheDocument();
+    expect(screen.getByText('Mi trabajo')).toBeInTheDocument();
+  });
 });

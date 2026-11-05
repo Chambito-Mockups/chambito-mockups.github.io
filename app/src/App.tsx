@@ -3,6 +3,7 @@ import { AppProvider, Settings, useApp } from './store';
 import { ALL_ENTRIES, Entry, MODULE_OF, MODULES, Module, Tour, entriesOf } from './registry';
 import { Icon } from './ui/kit';
 import { BarPage, ComponentsPage } from './showcase';
+import { IntegrationPage } from './integration';
 import { MarketProvider, useMarket, emptyDraft } from './market/state';
 import { FitPhone } from './shell/Phone';
 import { GREEN, isTyping } from './shell/controls';
@@ -18,6 +19,9 @@ const initialKey = () => {
   return ALL_ENTRIES.some((e) => e.key === h) ? h : 'A0';
 };
 
+/** #navegacion opens the integrated navigation page */
+const NAV_HASH = 'navegacion';
+
 export function Shell() {
   const { screen, overlay, go, set, setTrip, resetTrip, setOverlay, settings, showToast } = useApp();
   const [nonce, setNonce] = useState(0); // bumps on «Reiniciar» to remount the screen
@@ -31,6 +35,7 @@ export function Shell() {
   const [ui, setUi] = usePersistent<UiTheme>('ui', () => (window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark'));
   useEffect(() => { document.documentElement.dataset.ui = ui; }, [ui]);
   const bootKey = useRef(initialKey()).current; // read before the URL is rewritten below
+  const bootHash = useRef(decodeURIComponent(window.location.hash.slice(1))).current;
   const lastKey = useRef<Record<Module, string>>({ auto: MODULES.auto.first, market: MODULES.market.first });
   // presentation mode (?presentar opens straight in it) and guided flows
   const [present, setPresent] = useState(() => new URLSearchParams(window.location.search).has('presentar') || window.innerWidth < 600); // phones open on the phone only
@@ -57,6 +62,7 @@ export function Shell() {
 
   // remember the last screen per module, and keep it in the URL for sharing
   useEffect(() => {
+    if (page.kind === 'integration') window.history.replaceState(null, '', `#${NAV_HASH}`);
     if (page.kind !== 'screen') return;
     const m = MODULE_OF[page.key];
     if (m) lastKey.current[m] = page.key;
@@ -86,14 +92,19 @@ export function Shell() {
 
   // deep link: #A6 opens that screen
   useEffect(() => {
-    if (bootKey !== 'A0') jumpKey(bootKey);
+    if (bootHash === NAV_HASH) setPage({ kind: 'integration' });
+    else if (bootKey !== 'A0') jumpKey(bootKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   // a link edited or pasted while the prototype is open also jumps there
   const jumpRef = useRef(jumpKey);
   jumpRef.current = jumpKey;
   useEffect(() => {
-    const onHash = () => jumpRef.current(decodeURIComponent(window.location.hash.slice(1)));
+    const onHash = () => {
+      const h = decodeURIComponent(window.location.hash.slice(1));
+      if (h === NAV_HASH) setPage({ kind: 'integration' });
+      else jumpRef.current(h);
+    };
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
@@ -166,7 +177,7 @@ export function Shell() {
 
   return (
     <div className={`shell${menuOpen ? ' menu-open' : ''}${present ? ' presenting' : ''}`}>
-      <TopNav module={module} onModule={switchModule} onMenu={() => setMenuOpen((o) => !o)} ui={ui} onUi={setUi} />
+      <TopNav module={module} onModule={switchModule} onMenu={() => setMenuOpen((o) => !o)} ui={ui} onUi={setUi} navOn={page.kind === 'integration'} onNav={() => { setPage({ kind: 'integration' }); setMenuOpen(false); }} />
       <div className="scrim" onClick={() => setMenuOpen(false)} />
       <SideMenu module={module} page={page} onJump={jump} onPage={(p) => { setPage(p); setMenuOpen(false); }} onModule={switchModule} query={query} setQuery={setQuery} searchRef={searchRef} onStartTour={startTour} />
       <main className="main">
@@ -183,7 +194,7 @@ export function Shell() {
             <button className="back-link" onClick={() => jumpKey(lastKey.current[module])}>
               <Icon name="arrowLeft" size={16} color={GREEN} /> Volver al prototipo
             </button>
-            {page.kind === 'bar' ? <BarPage /> : <ComponentsPage />}
+            {page.kind === 'bar' ? <BarPage /> : page.kind === 'integration' ? <IntegrationPage /> : <ComponentsPage />}
           </div>
         )}
       </main>
