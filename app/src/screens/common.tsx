@@ -25,9 +25,11 @@ export function useSeconds() {
 }
 
 export function useTabNav() {
-  const { go, autoRoot } = useApp();
+  const { go, autoRoot, settings } = useApp();
+  // explorer: Inicio is the home of the last section used (Servicios, Auto or Market)
+  const home: ScreenId = settings.navModel === 'explorer' ? (settings.lastSection === 'auto' ? autoRoot() : settings.lastSection === 'market' ? 'M01' : 'inicio') : 'inicio';
   return (k: NavKey) => {
-    const map: Record<NavKey, ScreenId> = { inicio: 'inicio', auto: autoRoot(), tienda: 'M01', actividad: 'A11', perfil: 'perfil', equipos: 'equipos', comercios: 'comercios',
+    const map: Record<NavKey, ScreenId> = { inicio: home, auto: autoRoot(), tienda: 'M01', actividad: 'A11', perfil: 'perfil', equipos: 'equipos', comercios: 'comercios',
       // alternatives only drawn in the reference page; they open the closest existing screen
       servicios: 'inicio', trabajos: 'D3', agenda: 'D3', cobros: 'D9', mensajes: 'A11', pedir: 'inicio',
       modulos: 'inicio', trabajo: 'D3', explorar: 'M03' };
@@ -41,12 +43,14 @@ export function FloatingNav({ active, band }: { active: NavKey; band?: boolean }
   const onSelect = useTabNav();
   // Actividad shows a dot while a trip is active, wherever you are in the app
   const badges = { actividad: trip.phase !== 'none' && active !== 'actividad' };
+  // explorer: the bar never changes between sections (Inicio · Actividad · Perfil)
+  const explorer = settings.navModel === 'explorer';
   return (
     <>
       {/* on scrolling screens, a fade keeps content from showing around the floating bar */}
       {band && <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 116, background: t.mBg /* solid: no gradients (brand guide §3.5) */, zIndex: 29, pointerEvents: 'none' }} />}
       <div style={{ position: 'absolute', left: 20, right: 20, bottom: 28, zIndex: 30 }}>
-        <BottomNavBar items={navItems(settings.autoEnabled, settings.teams, settings.tiendaEntry === 'tab')} active={active} onSelect={onSelect} badges={badges} />
+        <BottomNavBar items={explorer ? ['inicio', 'actividad', 'perfil'] : navItems(settings.autoEnabled, settings.teams, settings.tiendaEntry === 'tab')} active={explorer && (active === 'auto' || active === 'tienda') ? 'inicio' : active} onSelect={onSelect} badges={badges} />
       </div>
     </>
   );

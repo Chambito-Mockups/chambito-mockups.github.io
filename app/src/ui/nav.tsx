@@ -9,7 +9,7 @@ import { Icon } from './icon';
 
 /* ================= Bottom navigation (floating pill) ================= */
 export type NavKey = 'inicio' | 'auto' | 'tienda' | 'comercios' | 'equipos' | 'actividad' | 'perfil'
-  // alternatives shown in «Navegación integrada» (provider mode, central action, one tab per module)
+  // alternatives shown in «Componentes» (provider mode, central action, one tab per module)
   | 'servicios' | 'trabajos' | 'agenda' | 'cobros' | 'mensajes' | 'pedir'
   // from the three UI proposals: Módulos (Opción 1), Trabajo | Explorar (Opción 3)
   | 'modulos' | 'trabajo' | 'explorar';

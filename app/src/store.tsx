@@ -12,7 +12,8 @@ export type ScreenId =
   | 'M01' | 'M03' | 'M04' | 'M05' | 'M06' | 'M09' | 'M10' | 'M11' | 'EA4'
   | 'V14' | 'V15' | 'V16' | 'V17' | 'V18' | 'V19' | 'V21' | 'V22';
 
-export type Overlay = null | 'sos' | 'details' | 'offer' | 'cancel' | 'report' | 'guest' | 'draft' | 'actions' | 'limit';
+export type Overlay = null | 'sos' | 'details' | 'offer' | 'cancel' | 'report' | 'guest' | 'draft' | 'actions' | 'limit' | 'explorer';
+export type Section = 'servicios' | 'auto' | 'market';
 export type Role = 'pasajero' | 'prestador' | 'conductor';
 export type TripPhase = 'none' | 'searching' | 'assigned' | 'arrived' | 'ontrip';
 
@@ -29,6 +30,10 @@ export interface Settings {
   simulate: boolean;
   noDrivers: boolean;
   tiendaEntry: 'card' | 'tab';
+  /** «Prototipo Auto» explorer: a section selector in each home and a bar of Inicio · Actividad · Perfil */
+  navModel: 'tabs' | 'explorer';
+  /** last section used: Inicio opens there and the app reopens there */
+  lastSection: Section;
   almostEmpty: boolean;
   sellerStatus: 'verificado' | 'sin-verificar' | 'en-revision' | 'suspendido';
   manualReview: boolean;
@@ -85,6 +90,8 @@ export const defaultSettings: Settings = {
   simulate: true,
   noDrivers: false,
   tiendaEntry: 'card',
+  navModel: 'tabs',
+  lastSection: 'servicios',
   almostEmpty: false,
   sellerStatus: 'verificado',
   manualReview: false,

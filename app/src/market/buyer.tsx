@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useApp } from '../store';
 import { P, R } from '../theme';
-import { BrandPattern, Button, Icon } from '../ui/kit';
+import { BrandPattern, Button, Icon, SectionSelector } from '../ui/kit';
 import { FloatingNav } from '../screens/common';
 import { CATEGORIES, CATEGORY_ICON, CONSULTAS, Listing, LISTINGS, priceFor, QUICK_REPLIES, REPORT_REASONS, SELLERS } from './data';
 import { DEFAULT_FILTERS, Filters, useMarket } from './state';
@@ -29,7 +29,9 @@ export function M01() {
   const open = useOpenListing();
   const vender = useVender();
   const loading = useFirstLoad();
-  const stacked = settings.tiendaEntry === 'card';
+  const explorer = settings.navModel === 'explorer';
+  // explorer: Market is a section with the bar (Inicio · Actividad · Perfil), never stacked over Inicio
+  const stacked = settings.tiendaEntry === 'card' && !explorer;
   const near = LISTINGS.filter((l) => ['trek', 'nike', 'silla'].includes(l.id));
   const recent = LISTINGS.filter((l) => l.recent && l.status === 'activa');
   const wide = LISTINGS.filter((l) => ['heladera', 'ventilador'].includes(l.id));
@@ -50,7 +52,7 @@ export function M01() {
         <div style={{ padding: '4px 20px 0', display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, height: 48 }}>
             {stacked && <RoundBtn icon="arrowLeft" label="Volver al Inicio" onClick={back} />}
-            <span style={{ flex: 1, font: P(28) }}>Tienda</span>
+            {explorer ? <><SectionSelector section="market" /><span style={{ flex: 1 }} /></> : <span style={{ flex: 1, font: P(28) }}>Tienda</span>}
             <RoundBtn icon="heart" label="Guardados" onClick={() => go('M11')} />
             <RoundBtn icon="messageCircle" label="Mis consultas" badge={1} onClick={() => { setActivityTab('Tienda'); go('A11'); }} />
           </div>

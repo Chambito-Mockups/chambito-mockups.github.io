@@ -161,7 +161,8 @@ kbd { font: 500 11px Roboto, sans-serif; color: var(--fg2); background: var(--li
 .shortcuts kbd { margin-right: 3px; }
 
 .main { padding: 20px 28px 40px; min-width: 0; }
-.toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; max-width: 1040px; margin: 0 auto 16px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.toolbar { display: flex; flex-direction: column; gap: 10px; max-width: 1320px; margin: 0 auto 12px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.tool-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .crumbs { font: 400 12px Roboto, sans-serif; color: var(--fg3); }
 .toolbar h1 { margin: 0; font: 700 20px Poppins, sans-serif; color: var(--fg); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .code-lg { font: 700 13px Poppins, sans-serif; color: var(--on-accent); background: var(--accent); border-radius: 8px; padding: 3px 8px; }
@@ -173,7 +174,7 @@ kbd { font: 500 11px Roboto, sans-serif; color: var(--fg2); background: var(--li
 .ghost-btn { display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line2); font: 500 13px Roboto, sans-serif; color: var(--fg); }
 .ghost-btn:hover { background: var(--hover); }
 
-.stage { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 32px; align-items: start; max-width: 1040px; margin: 0 auto; }
+.stage { display: grid; grid-template-columns: 260px minmax(0, 1fr) 300px; gap: 24px; align-items: start; max-width: 1320px; margin: 0 auto; }
 .notes { position: sticky; top: 84px; display: flex; flex-direction: column; gap: 10px; }
 .note-card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
 .note-card.accent { border-color: var(--accent); background: linear-gradient(180deg, var(--accent-soft), var(--panel) 60%); }
@@ -254,3 +255,128 @@ kbd { font: 500 11px Roboto, sans-serif; color: var(--fg2); background: var(--li
 @keyframes shimmer { to { transform: translateX(100%) } }
 .grow { width: 0; animation: grow .7s ease-out forwards; }
 @keyframes grow { to { width: 100% } }
+
+/* ---------- viewer UX: less scrolling, clearer previous / next and phone theme ---------- */
+/* sidebar: module + search stay on top; the index comes first with only the current group open */
+.side-top { position: sticky; top: -18px; z-index: 3; margin: -18px -14px 0; padding: 18px 14px 10px; background: var(--bg); display: flex; flex-direction: column; gap: 12px; border-bottom: 1px solid var(--line); }
+.index-head { display: flex; align-items: center; justify-content: space-between; padding: 0 10px; margin-bottom: -6px; }
+.link-btn { font: 500 12px Roboto, sans-serif; color: var(--accent-fg); padding: 4px 6px; border-radius: 8px; }
+.link-btn:hover { background: var(--hover); }
+
+/* toolbar: phone theme as a visible two-option control */
+.theme-seg { display: flex; align-items: center; gap: 2px; height: 38px; padding: 3px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); }
+.theme-seg-label { display: flex; align-items: center; gap: 5px; padding: 0 8px 0 6px; font: 500 12px Roboto, sans-serif; color: var(--fg3); white-space: nowrap; }
+.theme-seg button { height: 30px; padding: 0 10px; border-radius: 9px; font: 500 13px Roboto, sans-serif; color: var(--fg2); white-space: nowrap; display: flex; align-items: center; gap: 4px; }
+.theme-seg button.on { background: var(--seg-on); color: var(--fg); box-shadow: 0 0 0 1px var(--line2); }
+.theme-seg button:not(.on):hover { background: var(--hover); }
+
+/* toolbar: previous / next with the name of the screen, and a progress bar */
+.tool-steps { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 12px; }
+.step-btn { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px 0 8px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); min-width: 0; text-align: left; }
+.step-btn.next { justify-content: flex-end; padding: 0 8px 0 12px; text-align: right; }
+.step-btn:hover:not(:disabled) { background: var(--hover2); border-color: var(--line2); }
+.step-btn:disabled { opacity: .4; cursor: default; }
+.step-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 13px Roboto, sans-serif; color: var(--fg2); }
+.step-text b { font: 700 12px Poppins, sans-serif; color: var(--fg); margin-right: 4px; }
+.step-progress { display: flex; flex-direction: column; align-items: center; gap: 5px; width: 120px; }
+.step-progress .pos { margin: 0; font-size: 12px; }
+.step-progress .bar { width: 100%; height: 4px; border-radius: 2px; background: var(--line2); overflow: hidden; }
+.step-progress .bar > span { display: block; height: 100%; background: var(--accent); border-radius: 2px; transition: width .25s ease; }
+
+/* big arrows on both sides of the phone */
+.phone-wrap { position: relative; }
+.side-arrow { position: absolute; top: 50%; z-index: 2; width: 48px; height: 48px; margin-top: -24px; border-radius: 24px; background: var(--panel); border: 1px solid var(--line2); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px var(--menu-shadow); transition: background .15s, transform .15s; }
+.side-arrow.left { left: 4px; }
+.side-arrow.right { right: 4px; }
+.side-arrow:hover:not(:disabled) { background: var(--hover2); transform: scale(1.06); }
+.side-arrow:disabled { opacity: .25; cursor: default; box-shadow: none; }
+
+@media (max-width: 900px) {
+  .tool-row { flex-wrap: wrap; }
+}
+@media (max-width: 600px) {
+  .theme-seg-label, .step-text { display: none; }
+  .tool-steps { grid-template-columns: auto 1fr auto; }
+  .step-progress { width: auto; }
+  .side-arrow { display: none; }
+}
+
+/* ---------- versions (v1, v2, v3): each way to navigate, with its own colour in the viewer ---------- */
+.versions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.version { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 8px 8px 9px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); text-align: left; min-width: 0; transition: border-color .15s, background .15s; }
+.version:hover { background: var(--hover); }
+.version.on { border-color: var(--v); box-shadow: inset 0 0 0 1px var(--v); background: color-mix(in srgb, var(--v) 12%, var(--panel)); }
+.v-id { font: 700 12px Poppins, sans-serif; color: #000000; background: var(--v); border-radius: 6px; padding: 1px 7px; }
+.version:not(.on) .v-id { background: transparent; color: var(--v); box-shadow: inset 0 0 0 1.5px var(--v); }
+.v-text { display: flex; flex-direction: column; min-width: 0; width: 100%; }
+.v-label { font: 500 12px Roboto, sans-serif; color: var(--fg); line-height: 1.25; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.v-hint { font: 400 11px Roboto, sans-serif; color: var(--fg3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v-chip { display: inline-block; margin-right: 8px; font: 700 11px Poppins, sans-serif; color: #000000; background: var(--v); border-radius: 6px; padding: 1px 7px; vertical-align: 1px; }
+.side-top .module-intro { padding-bottom: 0; }
+
+/* ---------- version picker next to the phone ---------- */
+.version-panel { position: sticky; top: 84px; display: flex; flex-direction: column; gap: 10px; }
+.vp-head { display: flex; flex-direction: column; gap: 2px; padding: 0 2px; }
+.vp-title { font: 700 15px Poppins, sans-serif; color: var(--fg); }
+.vp-help { font: 400 12px Roboto, sans-serif; color: var(--fg3); }
+.vp-list { display: flex; flex-direction: column; gap: 10px; }
+.vp-card { display: flex; flex-direction: column; align-items: stretch; gap: 8px; padding: 14px; border-radius: 16px; background: var(--panel); border: 1px solid var(--line); text-align: left; transition: border-color .15s, background .15s, transform .15s; }
+.vp-card:hover { border-color: var(--v); transform: translateY(-1px); }
+.vp-card.on { border-color: var(--v); box-shadow: inset 0 0 0 1px var(--v); background: color-mix(in srgb, var(--v) 12%, var(--panel)); }
+.vp-top { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.vp-id { flex: none; font: 700 14px Poppins, sans-serif; color: #000000; background: var(--v); border-radius: 8px; padding: 2px 9px; }
+.vp-card:not(.on) .vp-id { background: transparent; color: var(--v); box-shadow: inset 0 0 0 1.5px var(--v); }
+.vp-name { flex: 1; min-width: 0; font: 700 15px Poppins, sans-serif; color: var(--fg); }
+.vp-here { flex: none; font: 500 11px Roboto, sans-serif; color: var(--fg); background: var(--hover2); border-radius: 10px; padding: 2px 8px; }
+.vp-what { font: 400 13px/1.4 Roboto, sans-serif; color: var(--fg2); text-wrap: pretty; }
+.vp-bar { display: flex; gap: 4px; flex-wrap: wrap; }
+.vp-bar span { font: 500 11px Roboto, sans-serif; color: var(--fg2); background: var(--sunken); border: 1px solid var(--line); border-radius: 8px; padding: 3px 7px; }
+.vp-bar span.first { color: var(--fg); border-color: var(--v); }
+.vp-meta { font: 400 12px Roboto, sans-serif; color: var(--fg3); }
+.v-now { display: flex; align-items: center; gap: 4px; padding: 0 4px; font: 500 12px Roboto, sans-serif; color: var(--fg2); }
+
+@media (max-width: 1380px) {
+  .stage { grid-template-columns: 240px minmax(0, 1fr); }
+  .stage .notes { grid-column: 1 / -1; position: static; max-width: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+}
+@media (max-width: 1060px) {
+  .stage { grid-template-columns: 1fr; }
+  .version-panel { position: static; }
+  .vp-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .vp-what, .vp-meta { display: none; }
+}
+@media (max-width: 600px) {
+  .vp-list { grid-template-columns: 1fr; }
+  .vp-bar { display: none; }
+}
+.presenting .version-panel { display: none; }
+
+/* «Componentes»: versions on the side, like the screens */
+.ref-layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 24px; align-items: start; }
+.ref-layout > .version-panel { top: 84px; }
+@media (max-width: 1060px) { .ref-layout { grid-template-columns: 1fr; } }
+
+/* ---------- «Componentes»: a fixed rail (version + what it brings) and one thing at a time ---------- */
+.ref-layout { grid-template-columns: 272px minmax(0, 1fr); }
+.ref-rail { position: sticky; top: 76px; max-height: calc(100vh - 92px); overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding-right: 4px; scrollbar-width: thin; }
+.ref-rail .version-panel { position: static; }
+.version-panel.compact .vp-list { gap: 6px; }
+.version-panel.compact .vp-card { padding: 10px 12px; gap: 6px; }
+.version-panel.compact .vp-card:not(.on) { flex-direction: row; align-items: center; justify-content: space-between; }
+.version-panel.compact .vp-card:not(.on) .vp-meta { display: none; }
+.version-panel.compact .vp-name { font-size: 14px; }
+.ref-toc { display: flex; flex-direction: column; gap: 10px; padding-top: 12px; border-top: 1px solid var(--line); }
+.toc-group { display: flex; flex-direction: column; gap: 2px; }
+.toc-head { font: 500 11px Roboto, sans-serif; color: var(--fg4); text-transform: uppercase; letter-spacing: .06em; padding: 0 10px 4px; }
+.toc-item { display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 10px; border-radius: 10px; font: 500 14px Roboto, sans-serif; color: var(--fg2); text-align: left; }
+.toc-item:hover { background: var(--hover); color: var(--fg); }
+.toc-item.on { background: var(--accent-soft); color: var(--fg); box-shadow: inset 3px 0 0 var(--accent); }
+.ref-head { display: flex; flex-direction: column; gap: 2px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+.ref-head h2 { margin: 0; font: 700 24px Poppins, sans-serif; color: var(--fg); }
+@media (max-width: 1060px) {
+  .ref-rail { position: static; max-height: none; }
+  .ref-toc { flex-direction: row; flex-wrap: wrap; }
+  .toc-group { flex-direction: row; flex-wrap: wrap; gap: 4px; }
+  .toc-head { display: none; }
+}
+@media (max-width: 1060px) { .ref-layout { grid-template-columns: 1fr; } }

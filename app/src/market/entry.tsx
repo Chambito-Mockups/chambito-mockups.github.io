@@ -86,7 +86,7 @@ export function Inicio() {
 }
 
 /** Services keep today's Chambito flow; the sheet shows where it starts. */
-function ServiceSheet({ service, onClose }: { service: (typeof SERVICES)[number]; onClose: () => void }) {
+export function ServiceSheet({ service, onClose }: { service: [icon: string, label: string, hint: string]; onClose: () => void }) {
   const { t, showToast } = useApp();
   const [when, setWhen] = useState<'hoy' | 'manana' | 'semana'>('hoy');
   return (

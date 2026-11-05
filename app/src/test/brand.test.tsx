@@ -13,7 +13,7 @@ import { dark, light, P, R } from '../theme';
 const openLight = (hash: string) => {
   window.location.hash = hash;
   const r = render(<App />);
-  const toLight = screen.queryByRole('button', { name: 'Teléfono: cambiar a tema claro' });
+  const toLight = screen.queryByRole('radio', { name: 'Teléfono claro' });
   if (toLight) fireEvent.click(toLight);
   return r;
 };

@@ -12,6 +12,13 @@ npm test         # Vitest: registry, navigation, every screen in both themes/cou
 
 ## Navigating the prototype
 
+- **Versions** (cards next to the phone, left of it): each way to navigate, seen on its own with its own colour, its bottom bar and how many screens it has. Choosing one applies its settings, opens its first screen and keeps previous / next inside it.
+  - **Auto** · v1 *Pestaña Auto* (Chambito Auto v3) · v2 *Selector de sección* (Prototipo Auto: «Servicios ▾ / Auto ▾ / Market ▾», bar Inicio · Actividad · Perfil, X1 · X2 · MK · A11 unificada) · v3 *Navegación estable* (the proposals page).
+  - **Market** · v1 *Tarjeta en Inicio* · v2 *Pestaña Tienda* · v3 *Market como sección* (with the selector).
+  - Shared flows (the trip, the driver, buying and selling) are in every version.
+- **Toolbar**: previous / next show the name of the screen they open, with a progress bar; big arrows on both sides of the phone do the same. **Phone theme** (Oscuro | Claro) sits next to the phone (`T`); the page theme stays in the top bar.
+- **Index**: search and versions stay on top; only the group of the current screen is open («Abrir todos» opens the rest).
+
 - **Two menus, Auto and Market**, switched from the top bar. Each one has its own sidebar: only its screens, its account selector and its simulation switches. Coming back to a menu reopens the last screen you saw there.
 - **Search** (`/`) filters the current menu by code or title; Enter opens the first result. If the match is in the other menu, a link takes you there.
 - **Toolbar** above the phone: where you are, position in the menu, previous / next (`←` `→`) and **Reiniciar** (`R`), which reloads the screen with its initial state.
@@ -40,9 +47,9 @@ npm test         # Vitest: registry, navigation, every screen in both themes/cou
 - Driver: availability switch, demand-zone layer, an offer with a 15 s countdown, pickup navigation, PIN entry (`4827` in PY, `3156` in AR; keyboard works too), slide to finish, payment and wallet.
 - New provider: "Sumate como conductor", then requirements with upload slots (tap to simulate uploading) and the review screen.
 
-## Navegación integrada (Servicios · Auto · Market)
+## Componentes (design references)
 
-**Navegación** in the top bar (or `#navegacion`) opens a reference page with tabs, so nothing needs scrolling to find:
+**Componentes** in the top bar (or `#componentes`; the old `#navegacion` still works) gathers every design reference, with the **version cards on the side** as on the screens. Each version shows its own references: v1 the bar of Auto v3, its new components and «Probalo»; v2 the explorer pieces and its fixed bar; v3 the Inicio proposals, the architecture and the 4 vs 5 tabs bar. Three sections: **Navegación**, **Componentes** and **Barra inferior**:
 
 - **Diseños de Inicio**: provider and client phones side by side. *Recomendada · navegación estable* is navigable (Inicio · Explorar/Trabajo · Actividad · Perfil, plus Chambito Auto, Market and Disponibilidad with a back arrow), with a fixed or floating bar and light/dark theme. Also the Opciones 1, 2 y 3 proposals and the module switcher in Inicio, to compare.
 - **Opciones de barra** (A–F with pros, cons and when to use each), **Arquitectura** (what lives in each of the four tabs, 4 vs 5 tabs), **Componentes** (catalogue and the mockup palette with contrast), **Probalo** and **Reglas** (usability, performance, gradual activation).

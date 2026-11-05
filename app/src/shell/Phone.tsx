@@ -8,6 +8,7 @@ import { OfferSheet } from '../screens/driver';
 import { R } from '../theme';
 import { GuestSheet, ReportSheet } from '../market/buyer';
 import { ActionsSheet, DraftSheet, LimitSheet } from '../market/seller';
+import { ExplorerSheet } from '../ui/explorer';
 
 /* ---------------- Phone ---------------- */
 /** `nonce` changes on «Reiniciar» so the screen remounts with a clean local state. */
@@ -31,6 +32,7 @@ export function Phone({ nonce = 0 }: { nonce?: number }) {
       {overlay === 'draft' && <DraftSheet />}
       {overlay === 'actions' && <ActionsSheet />}
       {overlay === 'limit' && <LimitSheet />}
+      {overlay === 'explorer' && <ExplorerSheet />}
       {toast && (
         <div key={toast} role="status" className="toast" style={{ position: 'absolute', top: 116, left: '50%', transform: 'translateX(-50%)', background: t.name === 'dark' ? '#FFFFFF' : '#000000', color: t.name === 'dark' ? '#000000' : '#FFFFFF', borderRadius: 20, padding: '10px 16px', font: R(14, 500), zIndex: 70, whiteSpace: 'nowrap', boxShadow: '0 4px 16px rgba(0,0,0,.25)' }}>
           {toast}
@@ -43,7 +45,7 @@ export function Phone({ nonce = 0 }: { nonce?: number }) {
 }
 
 /** Scales the 390 × 844 phone (plus its 11 px frame) down to fit the available box. */
-export function FitPhone({ nonce = 0 }: { nonce?: number }) {
+export function FitPhone({ nonce = 0, gutter = 0 }: { nonce?: number; gutter?: number }) {
   const box = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   useLayoutEffect(() => {
@@ -52,7 +54,7 @@ export function FitPhone({ nonce = 0 }: { nonce?: number }) {
     const fit = () => {
       const top = el.getBoundingClientRect().top + window.scrollY;
       const reserve = el.closest('.presenting') ? 120 : 40; // presentation bar below the phone
-      const s = Math.min(1.15, (el.clientWidth - 30) / 412, (window.innerHeight - Math.min(top, 160) - reserve) / 866);
+      const s = Math.min(1.15, (el.clientWidth - 30 - gutter) / 412, (window.innerHeight - Math.min(top, 240) - reserve) / 866);
       setScale(Math.max(0.5, s));
     };
     const ro = new ResizeObserver(fit);

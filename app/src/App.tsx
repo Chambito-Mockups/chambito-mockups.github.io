@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AppProvider, Settings, useApp } from './store';
-import { ALL_ENTRIES, Entry, MODULE_OF, MODULES, Module, Tour, entriesOf } from './registry';
+import { ALL_ENTRIES, Entry, MODULE_OF, MODULES, Module, Tour, VERSIONS, Version, entriesIn, versionOf } from './registry';
 import { Icon } from './ui/kit';
-import { BarPage, ComponentsPage } from './showcase';
 import { IntegrationPage } from './integration';
 import { MarketProvider, useMarket, emptyDraft } from './market/state';
 import { FitPhone } from './shell/Phone';
@@ -10,7 +9,8 @@ import { GREEN, isTyping } from './shell/controls';
 import { TopNav, UiTheme } from './shell/TopNav';
 import { usePersistent } from './persist';
 import { Page, SideMenu } from './shell/SideMenu';
-import { NotesPanel, ScreenToolbar } from './shell/ScreenPanel';
+import { NotesPanel, ScreenToolbar, SideArrows } from './shell/ScreenPanel';
+import { VersionPanel } from './shell/Versions';
 import { PresentBar } from './shell/Presenter';
 
 /* ---------------- Root ---------------- */
@@ -19,8 +19,10 @@ const initialKey = () => {
   return ALL_ENTRIES.some((e) => e.key === h) ? h : 'A0';
 };
 
-/** #navegacion opens the integrated navigation page */
-const NAV_HASH = 'navegacion';
+/** #componentes opens «Componentes» (every design reference) */
+const NAV_HASH = 'componentes';
+/** the old link of the page keeps working */
+const isRefHash = (h: string) => h === NAV_HASH || h === 'navegacion';
 
 export function Shell() {
   const { screen, overlay, go, set, setTrip, resetTrip, setOverlay, settings, showToast } = useApp();
@@ -31,6 +33,8 @@ export function Shell() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
+  const settingsRef = useRef(settings);
+  settingsRef.current = settings;
   // page theme (the viewer around the phone), separate from the phone's own theme
   const [ui, setUi] = usePersistent<UiTheme>('ui', () => (window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark'));
   useEffect(() => { document.documentElement.dataset.ui = ui; }, [ui]);
@@ -92,7 +96,7 @@ export function Shell() {
 
   // deep link: #A6 opens that screen
   useEffect(() => {
-    if (bootHash === NAV_HASH) setPage({ kind: 'integration' });
+    if (isRefHash(bootHash)) { setRefVersion(VERSIONS.auto[2]); setPage({ kind: 'integration' }); } // a direct link opens the proposals (v3)
     else if (bootKey !== 'A0') jumpKey(bootKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -102,7 +106,7 @@ export function Shell() {
   useEffect(() => {
     const onHash = () => {
       const h = decodeURIComponent(window.location.hash.slice(1));
-      if (h === NAV_HASH) setPage({ kind: 'integration' });
+      if (isRefHash(h)) { setRefVersion(VERSIONS.auto[2]); setPage({ kind: 'integration' }); }
       else jumpRef.current(h);
     };
     window.addEventListener('hashchange', onHash);
@@ -115,7 +119,19 @@ export function Shell() {
     jumpKey(lastKey.current[m]);
   };
 
-  const list = useMemo(() => entriesOf(module), [module]);
+  // the version (v1, v2…) of the module follows the settings; previous / next walk only its screens
+  // in «Componentes» the version is the one you came with (or picked there); on screens it follows the settings
+  const [refVersion, setRefVersion] = useState<Version | null>(null);
+  const onRefs = page.kind === 'integration';
+  const version = (onRefs && refVersion && VERSIONS[module].some((v) => v.id === refVersion.id) ? VERSIONS[module].find((v) => v.id === refVersion.id)! : null) ?? versionOf(module, settings);
+  const list = useMemo(() => entriesIn(module, version.id), [module, version.id]);
+  const chooseVersion = (v: Version) => {
+    // inside «Componentes»: apply the version and stay, its references change
+    if (onRefs) { set(v.flags ?? {}); setRefVersion(v); return; }
+    if (v.page) { setRefVersion(v); setPage({ kind: v.page }); setMenuOpen(false); return; }
+    set(v.flags ?? {});
+    if (v.first) jumpKey(v.first);
+  };
   const entry = page.kind === 'screen' ? ALL_ENTRIES.find((e) => e.key === page.key && e.screen === screen) ?? ALL_ENTRIES.find((e) => e.screen === screen) : undefined;
   const index = entry ? list.findIndex((e) => e.key === entry.key) : -1;
   const prev = () => { if (index > 0) jump(list[index - 1]); };
@@ -168,6 +184,7 @@ export function Shell() {
       else if (ev.key === '/') { ev.preventDefault(); setMenuOpen(true); searchRef.current?.focus(); }
       else if (ev.key === 'r' || ev.key === 'R') keys.current.reset();
       else if (ev.key === 'p' || ev.key === 'P') (keys.current.present ? keys.current.exit : keys.current.enter)();
+      else if (ev.key === 't' || ev.key === 'T') set({ theme: settingsRef.current.theme === 'dark' ? 'light' : 'dark' });
       else if (ev.key === ' ' && keys.current.present) { ev.preventDefault(); keys.current.play(); }
       else if (ev.key === 'Escape' && keys.current.present && !document.querySelector('[role="dialog"]')) keys.current.exit();
     };
@@ -177,15 +194,19 @@ export function Shell() {
 
   return (
     <div className={`shell${menuOpen ? ' menu-open' : ''}${present ? ' presenting' : ''}`}>
-      <TopNav module={module} onModule={switchModule} onMenu={() => setMenuOpen((o) => !o)} ui={ui} onUi={setUi} navOn={page.kind === 'integration'} onNav={() => { setPage({ kind: 'integration' }); setMenuOpen(false); }} />
+      <TopNav module={module} onModule={switchModule} onMenu={() => setMenuOpen((o) => !o)} ui={ui} onUi={setUi} navOn={page.kind === 'integration'} onNav={() => { setRefVersion(versionOf(module, settings)); setPage({ kind: 'integration' }); setMenuOpen(false); }} />
       <div className="scrim" onClick={() => setMenuOpen(false)} />
-      <SideMenu module={module} page={page} onJump={jump} onPage={(p) => { setPage(p); setMenuOpen(false); }} onModule={switchModule} query={query} setQuery={setQuery} searchRef={searchRef} onStartTour={startTour} />
+      <SideMenu module={module} page={page} onJump={jump} onModule={switchModule} query={query} setQuery={setQuery} searchRef={searchRef} onStartTour={startTour} version={version} />
       <main className="main">
         {page.kind === 'screen' ? (
           <>
-            <ScreenToolbar module={module} entry={entry} index={index} total={list.length} onPrev={prev} onNext={next} onReset={reset} onPresent={() => setPresent(true)} />
+            <ScreenToolbar module={module} version={version} entry={entry} index={index} total={list.length} prevEntry={index > 0 ? list[index - 1] : undefined} nextEntry={index >= 0 && index < list.length - 1 ? list[index + 1] : undefined} onPrev={prev} onNext={next} onReset={reset} onPresent={() => setPresent(true)} />
             <div className="stage">
-              <FitPhone nonce={nonce} />
+              <VersionPanel module={module} version={version} onVersion={chooseVersion} />
+              <div className="phone-wrap">
+                <SideArrows prevEntry={index > 0 ? list[index - 1] : undefined} nextEntry={index >= 0 && index < list.length - 1 ? list[index + 1] : undefined} onPrev={prev} onNext={next} />
+                <FitPhone nonce={nonce} gutter={112} />
+              </div>
               <NotesPanel entry={entry} module={module} />
             </div>
           </>
@@ -194,7 +215,7 @@ export function Shell() {
             <button className="back-link" onClick={() => jumpKey(lastKey.current[module])}>
               <Icon name="arrowLeft" size={16} color={GREEN} /> Volver al prototipo
             </button>
-            {page.kind === 'bar' ? <BarPage /> : page.kind === 'integration' ? <IntegrationPage /> : <ComponentsPage />}
+            <IntegrationPage module={module} version={version} onVersion={chooseVersion} />
           </div>
         )}
       </main>

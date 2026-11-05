@@ -104,3 +104,53 @@ describe('Auto interactions', () => {
     expect(heading()).toHaveTextContent('Punto de encuentro');
   });
 });
+
+describe('Explorador (Prototipo Auto): section selector and a fixed bar', () => {
+  const tabs = () => within(phoneNav()).getAllByRole('button').map((b) => b.getAttribute('aria-label'));
+  const explorer = () => screen.getByRole('dialog', { name: 'Explorá Chambito' });
+
+  it('moves Servicios → Market → Auto from the selector, with Inicio · Actividad · Perfil everywhere', () => {
+    start('#X1');
+    expect(heading()).toHaveTextContent('Portada de Servicios');
+    expect(tabs()).toEqual(['Inicio', 'Actividad', 'Perfil']);
+    expect(screen.getByText('Nuevo: Chambito Auto')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /^Sección: Servicios/ }));
+    expect(within(explorer()).getByRole('listitem', { name: /^Servicios:.*estás acá/ })).toHaveAttribute('aria-current', 'page');
+    fireEvent.click(within(explorer()).getByRole('listitem', { name: /^Chambito Market/ }));
+    expect(screen.queryByRole('dialog', { name: 'Explorá Chambito' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Sección: Market/ })).toBeInTheDocument();
+    expect(tabs()).toEqual(['Inicio', 'Actividad', 'Perfil']);
+    expect(within(phoneNav()).getByRole('button', { name: 'Inicio' })).toHaveAttribute('aria-current', 'page');
+
+    fireEvent.click(screen.getByRole('button', { name: /^Sección: Market/ }));
+    fireEvent.click(within(explorer()).getByRole('listitem', { name: /^Chambito Auto/ }));
+    expect(screen.getByRole('button', { name: /^Sección: Auto/ })).toBeInTheDocument();
+    expect(screen.getByText('¿A dónde vas?')).toBeInTheDocument();
+
+    // Inicio opens the last section used; Actividad keeps every section with a filter
+    fireEvent.click(within(phoneNav()).getByRole('button', { name: 'Actividad' }));
+    expect(screen.getByRole('tablist', { name: 'Filtrar la actividad por sección' })).toBeInTheDocument();
+    expect(screen.getByText('Limpieza general · 4 h')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: /Auto/ }));
+    expect(screen.queryByText('Limpieza general · 4 h')).not.toBeInTheDocument();
+    fireEvent.click(within(phoneNav()).getByRole('button', { name: 'Inicio' }));
+    expect(screen.getByRole('button', { name: /^Sección: Auto/ })).toBeInTheDocument();
+  });
+
+  it('closes the explorer without changing section', () => {
+    start('#X2s');
+    fireEvent.click(within(explorer()).getByRole('button', { name: 'Cerrar' }));
+    expect(screen.queryByRole('dialog', { name: 'Explorá Chambito' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Sección: Servicios/ })).toBeInTheDocument();
+  });
+
+  it('switches the navigation with the version (v1 · v2) in the side menu', () => {
+    start('#A0');
+    expect(tabs()).toContain('Auto');
+    fireEvent.click(screen.getByRole('radio', { name: 'v2 · Selector de sección' }));
+    expect(tabs()).toEqual(['Inicio', 'Actividad', 'Perfil']);
+    fireEvent.click(screen.getByRole('radio', { name: 'v1 · Pestaña Auto' }));
+    expect(tabs()).toContain('Auto');
+  });
+});

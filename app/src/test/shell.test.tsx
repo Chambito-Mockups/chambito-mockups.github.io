@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import App from '../App';
-import { entriesOf } from '../registry';
+import { entriesIn, entriesOf } from '../registry';
 
 const heading = () => screen.getByRole('heading', { level: 1 });
 const menu = (name: string) => screen.getByRole('navigation', { name: `Pantallas de ${name}` });
@@ -73,7 +73,7 @@ describe('search', () => {
 describe('toolbar and keyboard', () => {
   it('moves with the arrows through the current menu', () => {
     start();
-    const auto = entriesOf('auto');
+    const auto = entriesIn('auto', 'v1');
     expect(screen.getByText(`1 de ${auto.length}`)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Pantalla anterior' })).toBeDisabled();
     fireEvent.keyDown(window, { key: 'ArrowRight' });
@@ -101,17 +101,24 @@ describe('toolbar and keyboard', () => {
     expect(moduleBtn('Market')).toHaveAttribute('aria-current', 'page');
   });
 
-  it('opens the design reference pages and comes back', () => {
+  it('opens the design references from «Componentes» and comes back', () => {
     start();
-    fireEvent.click(screen.getByRole('button', { name: /Barra inferior/ }));
+    // the side menu no longer lists them: they all live in «Componentes» (top bar)
+    expect(within(document.querySelector('.sidebar') as HTMLElement).queryByRole('button', { name: /Barra inferior/ })).toBeNull();
+    fireEvent.click(within(screen.getByRole('navigation', { name: 'Referencia' })).getByRole('button', { name: /Componentes/ }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Barra inferior' }));
+    expect(screen.getAllByRole('navigation', { name: 'Navegación principal' }).length).toBeGreaterThan(1);
     fireEvent.click(screen.getByRole('button', { name: /Volver al prototipo/ }));
     expect(heading()).toHaveTextContent('Portada de Auto');
   });
 
   it('opens the integrated navigation from the top bar, on the Inicio designs', () => {
     start();
-    fireEvent.click(within(screen.getByRole('navigation', { name: 'Referencia' })).getByRole('button', { name: /Navegación/ }));
-    expect(window.location.hash).toBe('#navegacion');
+    fireEvent.click(within(screen.getByRole('navigation', { name: 'Referencia' })).getByRole('button', { name: /Componentes/ }));
+    expect(window.location.hash).toBe('#componentes');
+    // it opens on the version you were viewing (v1 from A0); the Inicio designs belong to v3
+    expect(screen.queryByRole('tab', { name: 'Diseños de Inicio' })).toBeNull();
+    fireEvent.click(within(screen.getByRole('radiogroup', { name: 'Versión de Auto' })).getByRole('radio', { name: 'v3 · Navegación estable' }));
     expect(screen.getByRole('tab', { name: 'Diseños de Inicio' })).toHaveAttribute('aria-selected', 'true');
     // recommended first: the stable navigation
     expect(screen.getByRole('group', { name: 'Cliente, estable' })).toBeInTheDocument();
@@ -221,6 +228,8 @@ describe('toolbar and keyboard', () => {
     start('#navegacion');
     fireEvent.click(screen.getByRole('tab', { name: 'Arquitectura' }));
     for (const name of ['Inicio', 'Explorar / Trabajo', 'Actividad', 'Perfil']) expect(screen.getByRole('region', { name })).toBeInTheDocument();
+    // the 4 vs 5 tabs variants are the bottom bar of v3
+    fireEvent.click(screen.getByRole('tab', { name: 'Barra inferior' }));
     expect(screen.getByRole('region', { name: 'Opción alterna (5 pestañas)' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Componentes' }));
     expect(screen.getByText('Paleta del mockup vs. el prototipo')).toBeInTheDocument();
@@ -228,19 +237,22 @@ describe('toolbar and keyboard', () => {
   });
 
   it('opens the integrated navigation from its link', () => {
-    start('#navegacion');
+    start('#navegacion'); // the old link still works and opens the proposals (v3)
     expect(screen.getByRole('tab', { name: 'Diseños de Inicio' })).toBeInTheDocument();
-    expect(window.location.hash).toBe('#navegacion');
+    expect(window.location.hash).toBe('#componentes');
   });
 
   it('shows the bar options and the account simulator in their tabs', () => {
     start();
-    fireEvent.click(screen.getByRole('button', { name: /Navegación integrada/ }));
+    fireEvent.click(within(screen.getByRole('navigation', { name: 'Referencia' })).getByRole('button', { name: /Componentes/ }));
     fireEvent.click(screen.getByRole('tab', { name: 'Opciones de barra' }));
-    expect(screen.getAllByRole('region', { name: /^[A-F] · / }).length).toBe(6);
+    expect(screen.getAllByRole('region', { name: /^[A-G] · / }).length).toBe(7);
+    expect(within(screen.getByRole('region', { name: /^B · Selector de sección/ })).getByText('Cumple la guía de marca')).toBeInTheDocument();
     expect(within(screen.getByRole('region', { name: /^A · / })).getByText('Recomendada')).toBeInTheDocument();
+    // v1 components: the bar and navigation pieces of Auto v3
     fireEvent.click(screen.getByRole('tab', { name: 'Componentes' }));
-    expect(screen.getByText('ModuleSwitcher')).toBeInTheDocument();
+    expect(screen.getByText('navItems()')).toBeInTheDocument();
+    expect(screen.queryByText('ModuleSwitcher')).toBeNull();
     fireEvent.click(screen.getByRole('tab', { name: 'Probalo' }));
     const bar = () => within(screen.getByRole('group', { name: 'Inicio de ejemplo, tema oscuro' })).getByRole('navigation');
     // launch: Tienda is a top icon, not a tab
@@ -251,5 +263,121 @@ describe('toolbar and keyboard', () => {
     fireEvent.click(screen.getByRole('radio', { name: 'Prestador' }));
     expect(within(screen.getByRole('group', { name: 'Inicio de ejemplo, tema claro' })).getByText('Trabajos')).toBeInTheDocument();
     expect(screen.getByText('Mi trabajo')).toBeInTheDocument();
+  });
+});
+
+describe('viewer UX: less scrolling, clearer steps and phone theme', () => {
+  it('names the previous and next screens and moves with the side arrows', () => {
+    start('#A2');
+    const auto = entriesOf('auto');
+    const i = auto.findIndex((e) => e.key === 'A2');
+    expect(screen.getByRole('button', { name: 'Pantalla siguiente' })).toHaveTextContent(auto[i + 1].title);
+    expect(screen.getByRole('button', { name: 'Pantalla anterior' })).toHaveTextContent(auto[i - 1].title);
+    fireEvent.click(screen.getByRole('button', { name: new RegExp(`^Ir a la siguiente: ${auto[i + 1].code}`) }));
+    expect(heading()).toHaveTextContent(auto[i + 1].title);
+    fireEvent.click(screen.getByRole('button', { name: new RegExp(`^Ir a la anterior: ${auto[i].code}`) }));
+    expect(heading()).toHaveTextContent(auto[i].title);
+  });
+
+  it('opens only the group of the current screen in the index', () => {
+    start('#A2');
+    const nav = screen.getByRole('navigation', { name: 'Pantallas de Auto' });
+    expect(within(nav).getByRole('button', { name: /Cliente · pedir un viaje/ })).toHaveAttribute('aria-expanded', 'true');
+    expect(within(nav).getByRole('button', { name: /Conductor · manejar y cobrar/ })).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir todos' }));
+    expect(within(nav).getByRole('button', { name: /Conductor · manejar y cobrar/ })).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('switches the phone theme next to the phone and with T', () => {
+    start('#A0');
+    const phone = () => document.querySelector('[data-theme]')!;
+    fireEvent.click(screen.getByRole('radio', { name: 'Teléfono claro' }));
+    expect(phone()).toHaveAttribute('data-theme', 'light');
+    fireEvent.keyDown(window, { key: 't' });
+    expect(phone()).toHaveAttribute('data-theme', 'dark');
+    expect(screen.getByRole('radio', { name: 'Teléfono oscuro' })).toHaveAttribute('aria-checked', 'true');
+  });
+});
+
+describe('versions (v1, v2, v3) to see each way to navigate on its own', () => {
+  const nav = () => screen.getByRole('navigation', { name: /^Pantallas de/ });
+  const groupNames = () => within(nav()).getAllByRole('button', { expanded: true }).concat(within(nav()).queryAllByRole('button', { expanded: false })).map((b) => b.textContent ?? '');
+
+  it('picks the version next to the phone, not in the side menu', () => {
+    start('#A0');
+    const sidebar = document.querySelector('.sidebar') as HTMLElement;
+    const main = document.querySelector('.main') as HTMLElement;
+    expect(within(sidebar).queryByRole('radiogroup', { name: 'Versión de Auto' })).toBeNull();
+    const panel = within(main).getByRole('region', { name: 'Versiones de Auto' });
+    const v1 = within(panel).getByRole('radio', { name: 'v1 · Pestaña Auto' });
+    expect(v1).toHaveTextContent('Estás viendo');
+    expect(within(panel).getByLabelText('Barra: Inicio, Actividad, Perfil')).toBeInTheDocument();
+  });
+
+  it('shows only the screens of the chosen Auto version and walks them', () => {
+    start('#A0');
+    const versions = screen.getByRole('radiogroup', { name: 'Versión de Auto' });
+    expect(within(versions).getByRole('radio', { name: 'v1 · Pestaña Auto' })).toHaveAttribute('aria-checked', 'true');
+    expect(groupNames().some((g) => g.includes('Explorador'))).toBe(false);
+    expect(screen.getByText(/^v1 · Pestaña Auto$/)).toBeInTheDocument();
+
+    fireEvent.click(within(versions).getByRole('radio', { name: 'v2 · Selector de sección' }));
+    expect(heading()).toHaveTextContent('Portada de Servicios');
+    expect(groupNames().some((g) => g.includes('Explorador'))).toBe(true);
+    expect(screen.getByText(`${entriesIn('auto', 'v2').findIndex((e) => e.key === 'X1') + 1} de ${entriesIn('auto', 'v2').length}`)).toBeInTheDocument();
+
+    // v3 is the page with the stable-navigation proposals
+    fireEvent.click(within(versions).getByRole('radio', { name: 'v3 · Navegación estable' }));
+    expect(screen.getByRole('tab', { name: 'Diseños de Inicio' })).toBeInTheDocument();
+  });
+
+  it('has its own versions in Market: card, tab and section', () => {
+    start('#M01');
+    const versions = screen.getByRole('radiogroup', { name: 'Versión de Market' });
+    fireEvent.click(within(versions).getByRole('radio', { name: 'v2 · Pestaña Tienda' }));
+    expect(heading()).toHaveTextContent('Tienda con pestaña');
+    expect(within(screen.getByRole('navigation', { name: 'Navegación principal' })).getByRole('button', { name: 'Tienda' })).toBeInTheDocument();
+    fireEvent.click(within(versions).getByRole('radio', { name: 'v3 · Market como sección' }));
+    expect(screen.getByRole('button', { name: /^Sección: Market/ })).toBeInTheDocument();
+    fireEvent.click(within(versions).getByRole('radio', { name: 'v1 · Tarjeta en Inicio' }));
+    expect(heading()).toHaveTextContent('Inicio con tarjeta Market');
+  });
+});
+
+describe('«Componentes» with the versions on the side', () => {
+  const versions = () => screen.getByRole('radiogroup', { name: 'Versión de Auto' });
+  const pick = (name: string) => fireEvent.click(within(versions()).getByRole('radio', { name }));
+
+  it('shows the references of each version and stays on the page', () => {
+    start('#componentes');
+    expect(screen.getByRole('region', { name: 'Versiones de Auto' })).toBeInTheDocument();
+    // v3: proposals, architecture and the recommended bar
+    expect(screen.getByRole('tab', { name: 'Arquitectura' })).toBeInTheDocument();
+    // v2: the explorer pieces and its fixed bar
+    pick('v2 · Selector de sección');
+    expect(window.location.hash).toBe('#componentes');
+    expect(screen.queryByRole('tab', { name: 'Arquitectura' })).toBeNull();
+    fireEvent.click(screen.getByRole('tab', { name: 'Componentes' }));
+    expect(screen.getByText('SectionSelector')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Barra inferior' }));
+    expect(screen.getByText('Barra inferior del selector de sección')).toBeInTheDocument();
+    // v1: the bar of Auto v3 (4 and 5 destinations)
+    pick('v1 · Pestaña Auto');
+    expect(screen.getByText(/Auto es un destino propio/)).toBeInTheDocument();
+    expect(within(versions()).getByRole('radio', { name: 'v1 · Pestaña Auto' })).toHaveAttribute('aria-checked', 'true');
+  });
+});
+
+describe('«Componentes»: the rail keeps everything in view', () => {
+  it('shows the versions compact and an index of what the version brings', () => {
+    start('#componentes');
+    const panel = screen.getByRole('region', { name: 'Versiones de Auto' });
+    // only the chosen version opens (its bar and what changes); the others are one line
+    expect(within(panel).getByRole('radio', { name: 'v3 · Navegación estable' })).toHaveTextContent('Inicio');
+    expect(within(panel).getByRole('radio', { name: 'v1 · Pestaña Auto' })).not.toHaveTextContent('Auto tiene su propia pestaña');
+    const toc = screen.getByRole('tablist', { name: 'En esta versión' });
+    expect(within(toc).getAllByRole('tab').map((t) => t.textContent)).toEqual(['Diseños de Inicio', 'Opciones de barra', 'Arquitectura', 'Reglas', 'Componentes', 'Barra inferior']);
+    fireEvent.click(within(toc).getByRole('tab', { name: 'Arquitectura' }));
+    expect(screen.getByRole('heading', { level: 2, name: 'Arquitectura' })).toBeInTheDocument();
   });
 });

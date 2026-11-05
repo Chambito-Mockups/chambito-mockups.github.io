@@ -582,13 +582,19 @@ export function A9() {
 
 /* ================= A11 Actividad · Servicios (wrapped by Actividad with the Servicios | Tienda selector) ================= */
 export function ServiciosActivity() {
+  return <ServicesActivityRows />;
+}
+
+/** Trips and services; `only` keeps one section (explorer Actividad filter). */
+export function ServicesActivityRows({ only }: { only?: 'servicios' | 'auto' }) {
   const { d, trip, go } = useApp();
+  const showAuto = only !== 'servicios';
   const st = useTripStatus();
   const { t } = useApp();
   const from = d.myLocation.split(' ').slice(0, 2).join(' ');
   return (
     <>
-      {trip.phase !== 'none' && (
+      {showAuto && trip.phase !== 'none' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <span style={{ font: P(18) }}>En curso</span>
           <button className="press" onClick={() => go(st.screen)} style={{ background: t.cardOnBg, borderRadius: 20, padding: 14, display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left' }}>
@@ -603,8 +609,8 @@ export function ServiciosActivity() {
       )}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <span style={{ font: P(18) }}>Anteriores</span>
-        {trip.completed && <HistoryCard icon="car" title={`${from} → ${trip.destination}`} detail={`Hoy, ${d.arrival} · Auto ${d.levels[trip.level].label}`} amount={d.currency(tripPrice(d, trip) + d.tips[1])} status="ok" />}
-        {d.history.map((h) => (
+        {showAuto && trip.completed && <HistoryCard icon="car" title={`${from} → ${trip.destination}`} detail={`Hoy, ${d.arrival} · Auto ${d.levels[trip.level].label}`} amount={d.currency(tripPrice(d, trip) + d.tips[1])} status="ok" />}
+        {d.history.filter((h) => !only || (only === 'auto') === (h.icon === 'car')).map((h) => (
           <HistoryCard key={h.title} {...h} />
         ))}
       </div>

@@ -23,7 +23,7 @@ describe('every screen renders', () => {
   it.each(ALL_ENTRIES.map((e) => [e.key, e.title]))('%s · %s (claro, Argentina)', (key, title) => {
     openAt(key);
     fireEvent.click(screen.getByRole('radio', { name: 'Argentina' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Teléfono: cambiar a tema claro' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'Teléfono claro' }));
     expect(heading()).toHaveTextContent(title);
     expect(document.querySelector('[data-theme]')).toHaveAttribute('data-theme', 'light');
   });

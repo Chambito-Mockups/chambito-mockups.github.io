@@ -1,7 +1,7 @@
 /** Viewer side menu: one per module (Auto or Market) with its settings, search and screen index. */
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Settings, useApp } from '../store';
-import { Entry, GROUPS, MODULES, Module, entriesOf } from '../registry';
+import { Entry, MODULES, Module, Version, entriesOf, groupsIn } from '../registry';
 import { Icon } from '../ui/kit';
 import { R } from '../theme';
 import { Collapsible, GREEN, Segmented, Toggle, norm } from './controls';
@@ -10,16 +10,18 @@ import { Tour } from '../registry';
 import { clearDemo } from '../persist';
 
 /* ---------------- Sidebar ---------------- */
-export type Page = { kind: 'screen'; key: string } | { kind: 'bar' } | { kind: 'components' } | { kind: 'integration' };
+/** a screen of the prototype, or «Componentes» (every design reference) */
+export type Page = { kind: 'screen'; key: string } | { kind: 'integration' };
 
-export function SideMenu({ module, page, onJump, onPage, onModule, query, setQuery, searchRef, onStartTour }: {
-  module: Module; page: Page; onJump: (e: Entry) => void; onPage: (p: Page) => void; onModule: (m: Module) => void;
+export function SideMenu({ module, page, onJump, onModule, query, setQuery, searchRef, onStartTour, version }: {
+  module: Module; page: Page; onJump: (e: Entry) => void; onModule: (m: Module) => void; version: Version;
   query: string; setQuery: (q: string) => void; searchRef: React.RefObject<HTMLInputElement>; onStartTour: (t: Tour) => void;
 }) {
   const { settings, set, go, autoRoot, resetTrip } = useApp();
   const [roleChanged, setRoleChanged] = useState(0);
   const [simOpen, setSimOpen] = useState(false);
-  const [closed, setClosed] = useState<Record<string, boolean>>({});
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
+  const [allOpen, setAllOpen] = useState(false);
   useEffect(() => {
     if (roleChanged) go(autoRoot(), { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -48,8 +50,10 @@ export function SideMenu({ module, page, onJump, onPage, onModule, query, setQue
   const changed = flags.filter(([k]) => settings[k] !== (defaults[k] ?? false)).length;
 
   const q = norm(query.trim());
-  const match = (e: Entry) => !q || norm(`${e.code} ${e.title}`).includes(q);
-  const groups = GROUPS.filter((g) => g.module === module);
+  const inV = (e: Entry) => !e.versions || e.versions.includes(version.id);
+  const match = (e: Entry) => inV(e) && (!q || norm(`${e.code} ${e.title}`).includes(q));
+  // only the groups of the chosen version (shared flows are in every version)
+  const groups = groupsIn(module, version.id);
   const other: Module = module === 'auto' ? 'market' : 'auto';
   const hits = groups.reduce((n, g) => n + g.entries.filter(match).length, 0);
   const otherHits = q ? entriesOf(other).filter(match).length : 0;
@@ -58,6 +62,7 @@ export function SideMenu({ module, page, onJump, onPage, onModule, query, setQue
 
   return (
     <aside className="sidebar">
+      <div className="side-top">
       <div className="module-intro">
         <span className="module-icon"><Icon name={MODULES[module].icon} size={20} color="#000000" /></span>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -66,6 +71,9 @@ export function SideMenu({ module, page, onJump, onPage, onModule, query, setQue
         </div>
       </div>
 
+      <span className="v-now" style={{ '--v': version.color } as React.CSSProperties} title="Las versiones se eligen al lado del teléfono">
+        <span className="v-chip">{version.id}</span>{version.label}
+      </span>
       <div className="search-wrap">
         <div className={`search${q ? ' has-query' : ''}`}>
           <Icon name="search" size={18} color={q ? 'var(--accent-fg)' : 'var(--fg3)'} />
@@ -100,50 +108,25 @@ export function SideMenu({ module, page, onJump, onPage, onModule, query, setQue
         )}
       </div>
 
-      {/* who is using the app */}
-      <div className="side-block">
-        <div className="block-body" style={{ paddingTop: 14 }}>
-          {module === 'auto' ? (
-            <Segmented
-              label="Ver la app como"
-              value={settings.role}
-              options={[['pasajero', 'Pasajero'], ['prestador', 'Nuevo'], ['conductor', 'Conductor']]}
-              onChange={(v) => { set({ role: v }); resetTrip(); setRoleChanged((n) => n + 1); }}
-            />
-          ) : (
-            <>
-              <Segmented label="Cómo se entra a la Tienda" value={settings.tiendaEntry} options={[['card', 'Tarjeta en Inicio'], ['tab', 'Pestaña propia']]} onChange={(v) => set({ tiendaEntry: v })} />
-              <div className="field">
-                <span className="side-label">Cuenta de vendedor</span>
-                <select className="side-select" value={settings.sellerStatus} onChange={(e) => set({ sellerStatus: e.target.value as Settings['sellerStatus'] })} aria-label="Cuenta de vendedor">
-                  <option value="verificado">Identidad verificada</option>
-                  <option value="sin-verificar">Sin verificar</option>
-                  <option value="en-revision">En revisión</option>
-                  <option value="suspendido">Suspendida</option>
-                </select>
-              </div>
-            </>
-          )}
-        </div>
       </div>
 
-      <Collapsible title="Simular situaciones" icon="settings" open={simOpen} onToggle={() => setSimOpen((o) => !o)} badge={changed > 0 && <span className="pill">{changed} activa{changed > 1 ? 's' : ''}</span>}>
-        <div style={{ display: 'flex', flexDirection: 'column' }}>{flags.map(([k, l, h]) => flag(k, l, h))}</div>
-      </Collapsible>
-
-      {!q && <TourList module={module} onStart={onStartTour} />}
-
-
+      {!q && (
+        <div className="index-head">
+          <span className="side-label">Pantallas</span>
+          <button className="link-btn" onClick={() => { setAllOpen((v) => !v); setOpenGroups({}); }}>{allOpen ? 'Cerrar grupos' : 'Abrir todos'}</button>
+        </div>
+      )}
       <nav id="screen-nav" aria-label={`Pantallas de ${MODULES[module].label}`} className="screen-nav">
         {groups.map((g) => {
           if (g.page) return null; // reference pages are listed at the bottom
           const list = g.entries.filter(match);
           if (!list.length) return null;
-          const isOpen = !!q || !closed[g.title];
           const hasCurrent = page.kind === 'screen' && g.entries.some((e) => e.key === page.key);
+          // only the group of the current screen opens by default: the index fits without scrolling
+          const isOpen = !!q || (openGroups[g.title] ?? (allOpen || hasCurrent));
           return (
             <div key={g.title} className="group">
-              <button className="group-head" aria-expanded={isOpen} onClick={() => setClosed((c) => ({ ...c, [g.title]: !c[g.title] }))}>
+              <button className="group-head" aria-expanded={isOpen} onClick={() => setOpenGroups((c) => ({ ...c, [g.title]: !isOpen }))}>
                 {g.icon && <Icon name={g.icon} size={15} color={hasCurrent ? GREEN : 'var(--fg3)'} />}
                 <span style={{ flex: 1 }}>{g.title}</span>
                 <span className="count">{list.length}</span>
@@ -174,21 +157,41 @@ export function SideMenu({ module, page, onJump, onPage, onModule, query, setQue
         )}
       </nav>
 
-      {!q && groups.some((g) => g.page) && (
-        <div className="refs">
-          <span className="side-label" style={{ padding: '0 10px' }}>Referencias del diseño</span>
-          {groups.filter((g) => g.page).map((g) => (
-            <button key={g.title} className={`ref-item${page.kind === g.page ? ' on' : ''}`} onClick={() => onPage({ kind: g.page! })}>
-              {g.icon && <Icon name={g.icon} size={16} color={page.kind === g.page ? GREEN : 'var(--fg3)'} />}
-              <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                <span style={{ font: R(13, 500) }}>{g.title}</span>
-                {g.subtitle && <span style={{ font: R(12), color: 'var(--fg3)' }}>{g.subtitle}</span>}
-              </span>
-            </button>
-          ))}
+      {/* who is using the app */}
+      <div className="side-block">
+        <div className="block-body" style={{ paddingTop: 14 }}>
+          {module === 'auto' ? (
+            <Segmented
+              label="Ver la app como"
+              value={settings.role}
+              options={[['pasajero', 'Pasajero'], ['prestador', 'Nuevo'], ['conductor', 'Conductor']]}
+              onChange={(v) => { set({ role: v }); resetTrip(); setRoleChanged((n) => n + 1); }}
+            />
+          ) : (
+            <>
+              <div className="field">
+                <span className="side-label">Cuenta de vendedor</span>
+                <select className="side-select" value={settings.sellerStatus} onChange={(e) => set({ sellerStatus: e.target.value as Settings['sellerStatus'] })} aria-label="Cuenta de vendedor">
+                  <option value="verificado">Identidad verificada</option>
+                  <option value="sin-verificar">Sin verificar</option>
+                  <option value="en-revision">En revisión</option>
+                  <option value="suspendido">Suspendida</option>
+                </select>
+              </div>
+            </>
+          )}
         </div>
-      )}
+      </div>
 
+      <Collapsible title="Simular situaciones" icon="settings" open={simOpen} onToggle={() => setSimOpen((o) => !o)} badge={changed > 0 && <span className="pill">{changed} activa{changed > 1 ? 's' : ''}</span>}>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>{flags.map(([k, l, h]) => flag(k, l, h))}</div>
+      </Collapsible>
+
+      {!q && <TourList module={module} onStart={onStartTour} />}
+
+
+
+      {/* design references live in «Componentes» (top bar) */}
       <button
         className="reset-demo"
         onClick={() => { if (window.confirm('¿Borrar lo que guardaste en la demo (guardados, publicaciones, ajustes)?')) { clearDemo(); window.location.reload(); } }}
@@ -198,7 +201,7 @@ export function SideMenu({ module, page, onJump, onPage, onModule, query, setQue
 
       <div className="shortcuts">
         <span><kbd>←</kbd><kbd>→</kbd> anterior / siguiente</span>
-        <span><kbd>/</kbd> buscar · <kbd>R</kbd> reiniciar · <kbd>P</kbd> presentar</span>
+        <span><kbd>/</kbd> buscar · <kbd>R</kbd> reiniciar · <kbd>P</kbd> presentar · <kbd>T</kbd> tema del teléfono</span>
       </div>
     </aside>
   );

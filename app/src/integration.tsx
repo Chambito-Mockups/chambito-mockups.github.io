@@ -1,5 +1,5 @@
 /**
- * "Navegación integrada": one app with three modules (Servicios, Auto, Tienda) and two sides
+ * «Componentes»: the design references (navigation, components, bottom bar) per version, for one app with three modules (Servicios, Auto, Tienda) and two sides
  * (cliente and prestador). Built only with the shared nav components, so what is shown here
  * is what the screens use.
  */
@@ -7,6 +7,9 @@ import { CSSProperties, ReactNode, useState } from 'react';
 import { ThemeScope, useApp } from './store';
 import { dark, light, P, R, Theme } from './theme';
 import { ProposalsSection } from './proposals';
+import { Module, Version } from './registry';
+import { VersionPanel } from './shell/Versions';
+import { BarPage, ComponentsPage } from './showcase';
 import { BottomNavBar, Icon, MenuGroup, MenuItem, NavBadges, NavIconButton, NavKey, navItems, QuickAccess, QuickTile } from './ui/kit';
 
 const pretty = { textWrap: 'pretty' } as CSSProperties;
@@ -163,6 +166,8 @@ interface BarOption {
   id: string;
   title: string;
   recommended?: boolean;
+  /** follows the brand guide checklist (Navegación: Inicio · Actividad · Perfil) */
+  guide?: boolean;
   idea: string;
   cliente: NavKey[];
   prestador: NavKey[];
@@ -184,8 +189,19 @@ const OPTIONS: BarOption[] = [
     when: 'Desde el lanzamiento. Es la que recomiendo (ver «Diseños de Inicio» → Recomendada).',
   },
   {
+    id: 'explorador',
+    title: 'B · Selector de sección (Prototipo Auto)',
+    guide: true,
+    idea: 'Del «Prototipo Auto». La barra es siempre Inicio · Actividad · Perfil. Cada portada tiene arriba a la izquierda «Servicios ▾», «Auto ▾» o «Market ▾», que abre «Elegí qué querés hacer». La app vuelve a abrir en la última sección usada.',
+    cliente: ['inicio', 'actividad', 'perfil'],
+    prestador: ['inicio', 'actividad', 'perfil'],
+    pros: ['Cumple la guía de marca: la barra de la app actual no cambia.', 'Sumar una sección no toca la barra: es una fila más en el explorador.', 'Cada sección tiene su portada completa (mapa para Servicios y Auto, catálogo para Market).'],
+    cons: ['Cambiar de sección son 2 toques (selector y sección).', 'Las otras secciones no se ven desde la portada: el selector tiene que ser muy claro.'],
+    when: 'Si se mantiene la navegación de la app actual. Se prueba en el menú Auto → «Explorador · Prototipo Auto» o con «Navegación» en el menú lateral.',
+  },
+  {
     id: 'modulos-tab',
-    title: 'B · Pestaña «Módulos»',
+    title: 'C · Pestaña «Módulos»',
     idea: 'De la Opción 1 de los diseños. Inicio · Módulos · Actividad · Perfil; Módulos abre una grilla con todo lo que ofrece Chambito.',
     cliente: ['inicio', 'modulos', 'actividad', 'perfil'],
     prestador: ['inicio', 'modulos', 'actividad', 'perfil'],
@@ -195,7 +211,7 @@ const OPTIONS: BarOption[] = [
   },
   {
     id: 'unica',
-    title: 'C · Una barra, contenido según la cuenta',
+    title: 'D · Una barra, contenido según la cuenta',
     idea: 'Las mismas pestañas para todos. Inicio muestra «qué pedir» al cliente y «qué hacer hoy» al prestador.',
     cliente: ['inicio', 'auto', 'actividad', 'perfil'],
     prestador: ['inicio', 'auto', 'actividad', 'perfil'],
@@ -205,7 +221,7 @@ const OPTIONS: BarOption[] = [
   },
   {
     id: 'modo',
-    title: 'D · Barra por modo (cliente | prestador)',
+    title: 'E · Barra por modo (cliente | prestador)',
     idea: 'El prestador activa «Modo prestador» y la barra cambia a sus herramientas, como una app de conductor dentro de la misma app.',
     cliente: ['inicio', 'auto', 'tienda', 'actividad', 'perfil'],
     prestador: ['trabajos', 'agenda', 'cobros', 'mensajes', 'perfil'],
@@ -215,7 +231,7 @@ const OPTIONS: BarOption[] = [
   },
   {
     id: 'central',
-    title: 'E · Botón central «Pedir»',
+    title: 'F · Botón central «Pedir»',
     idea: 'Un botón en el medio abre una hoja: Servicio · Viaje · Vender (cliente) o Disponibilidad · Publicar (prestador).',
     cliente: ['inicio', 'actividad', 'pedir', 'mensajes', 'perfil'],
     prestador: ['inicio', 'actividad', 'pedir', 'mensajes', 'perfil'],
@@ -225,7 +241,7 @@ const OPTIONS: BarOption[] = [
   },
   {
     id: 'modulos',
-    title: 'F · Una pestaña por módulo',
+    title: 'G · Una pestaña por módulo',
     idea: 'Cada negocio tiene su pestaña y no hay Inicio general.',
     cliente: ['servicios', 'auto', 'tienda', 'actividad', 'perfil'],
     prestador: ['servicios', 'auto', 'tienda', 'actividad', 'perfil'],
@@ -263,6 +279,7 @@ function OptionCard({ o }: { o: BarOption }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <span style={{ font: P(16), color: 'var(--fg)', flex: 1 }}>{o.title}</span>
         {o.recommended && <span style={{ font: R(12, 500), color: '#000000', background: '#4BAC4F', borderRadius: 10, padding: '2px 10px' }}>Recomendada</span>}
+        {o.guide && <span style={{ font: R(12, 500), color: 'var(--fg)', background: 'var(--panel)', outline: '1px solid #4BAC4F', borderRadius: 10, padding: '2px 10px' }}>Cumple la guía de marca</span>}
       </div>
       <span style={{ font: R(14), color: 'var(--fg2)', ...pretty }}>{o.idea}</span>
       <MiniBar theme={dark} items={o.cliente} label="Cliente" />
@@ -279,7 +296,7 @@ function NavOptions() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <span style={{ font: P(22) }}>Opciones para la barra</span>
       <span style={{ font: R(15), color: 'var(--fg2)', maxWidth: 900, ...pretty }}>
-        Seis maneras de ordenar la barra (A y B salen de los diseños propuestos), cada una con cómo la ve el cliente y cómo la ve el prestador. Tocá las pestañas para probarlas.
+        Siete maneras de ordenar la barra (A, B y C salen de los diseños que compartiste), cada una con cómo la ve el cliente y cómo la ve el prestador. Tocá las pestañas para probarlas.
       </span>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20, alignItems: 'flex-start' }}>
         {OPTIONS.map((o) => <OptionCard key={o.id} o={o} />)}
@@ -471,49 +488,103 @@ const HUB_COMPONENTS: [string, string, string][] = [
   ['PageTitle', 'ui/hub.tsx', 'Título grande de Explorar, Trabajo, Actividad y Perfil.'],
 ];
 
-type Tab = 'disenos' | 'opciones' | 'arquitectura' | 'componentes' | 'probalo' | 'reglas';
-const TABS: [Tab, string][] = [['disenos', 'Diseños de Inicio'], ['opciones', 'Opciones de barra'], ['arquitectura', 'Arquitectura'], ['componentes', 'Componentes'], ['probalo', 'Probalo'], ['reglas', 'Reglas']];
+type Tab = 'disenos' | 'opciones' | 'arquitectura' | 'probalo' | 'reglas';
+export type RefSection = 'nav' | 'comp' | 'barra';
+const TAB_ICON: Record<Tab, string> = { disenos: 'home', opciones: 'menu', arquitectura: 'layers', probalo: 'phone', reglas: 'success' };
+const TABS: [Tab, string][] = [['disenos', 'Diseños de Inicio'], ['opciones', 'Opciones de barra'], ['arquitectura', 'Arquitectura'], ['probalo', 'Probalo'], ['reglas', 'Reglas']];
 
-export function IntegrationPage() {
-  const [tab, setTab] = useState<Tab>('disenos');
+const REF_TABS: Record<Version['refs'], Tab[]> = {
+  tabs: ['opciones', 'probalo', 'reglas'],
+  explorer: ['opciones', 'reglas'],
+  estable: ['disenos', 'opciones', 'arquitectura', 'reglas'],
+};
+const EXPLORER_COMPONENTS: [string, string, string][] = [
+  ['SectionSelector', 'ui/section.tsx', '«Servicios ▾» / «Auto ▾» / «Market ▾»: píldora de 48 con el ícono de la sección en verde (blanco encima) y el chevron.'],
+  ['ExplorerSheet', 'ui/explorer.tsx', '«Elegí qué querés hacer»: logo oficial y una fila por sección; la actual con «Estás acá», borde verde y check; Market con «Nuevo».'],
+  ['InicioExplorer (X1)', 'ui/explorer.tsx', 'Portada de Servicios: mapa, selector arriba, «¿Qué necesitás?», servicios populares y la tarjeta «Nuevo: Chambito Auto».'],
+  ['HubTopChrome (modo selector)', 'ui/kit.tsx', 'En la portada de Auto, sin ubicación o con un servicio en curso, el selector reemplaza al buscador de arriba.'],
+  ['ExplorerActivity (A11)', 'ui/explorer.tsx', 'Actividad con todas las secciones y el filtro Todo · Servicios · Auto · Market.'],
+  ['useGoSection', 'ui/explorer.tsx', 'Va a la portada de una sección y la recuerda: Inicio y la próxima apertura vuelven ahí.'],
+];
+
+/** The fixed bar of the explorer, in both themes. */
+function ExplorerBar() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 900 }}>
+      <span style={{ font: P(22) }}>Barra inferior del selector de sección</span>
+      <span style={{ font: R(15), color: 'var(--fg2)', ...pretty }}>
+        La misma en todas las secciones: Inicio · Actividad · Perfil. Inicio abre la portada de la última sección usada; cambiar de sección es tarea del selector de arriba, no de la barra.
+      </span>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: 12 }}>
+        <MiniBar theme={dark} items={['inicio', 'actividad', 'perfil']} label="Tema oscuro" />
+        <MiniBar theme={light} items={['inicio', 'actividad', 'perfil']} label="Tema claro" />
+      </div>
+    </div>
+  );
+}
+
+export function IntegrationPage({ module = 'auto', version, onVersion, initial = 'nav' }: { module?: Module; version?: Version; onVersion?: (v: Version) => void; initial?: RefSection }) {
+  const [section, setSection] = useState<RefSection>(initial);
+  const [tabPick, setTab] = useState<Tab>('disenos');
+  const kind: Version['refs'] = version?.refs ?? 'estable';
+  const tabs = REF_TABS[kind];
+  const tab: Tab = tabs.includes(tabPick) ? tabPick : tabs[0];
   const [account, setAccount] = useState<Account>('cliente');
   const [stage, setStage] = useState<Stage>('lanzamiento');
+  // one list for the whole page: what this version brings, one click each (no tabs above tabs)
+  const items: { key: string; section: RefSection; tab?: Tab; label: string; icon: string; group: string }[] = [
+    ...TABS.filter(([k]) => tabs.includes(k)).map(([k, label]) => ({ key: k, section: 'nav' as const, tab: k, label, icon: TAB_ICON[k], group: 'Navegación' })),
+    { key: 'comp', section: 'comp', label: 'Componentes', icon: 'layers', group: 'Piezas' },
+    { key: 'barra', section: 'barra', label: 'Barra inferior', icon: 'menu', group: 'Piezas' },
+  ];
+  const current = section === 'nav' ? tab : section;
+  const here = items.find((i) => i.key === current) ?? items[0];
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, color: 'var(--fg)' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <span style={{ font: P(26) }}>Navegación integrada</span>
-        <span style={{ font: R(15), color: 'var(--fg2)', maxWidth: 900, ...pretty }}>
-          Una sola app con Servicios (prestadores), Auto (viajes) y Market (Tienda), para el cliente y el prestador.
-        </span>
+    <div className="ref-layout">
+    <aside className="ref-rail">
+      {version && onVersion && <VersionPanel module={module} version={version} onVersion={onVersion} compact />}
+      <div role="tablist" aria-orientation="vertical" aria-label="En esta versión" className="ref-toc">
+        <span className="vp-title">En esta versión</span>
+        {['Navegación', 'Piezas'].map((g) => (
+          <div key={g} className="toc-group">
+            <span className="toc-head">{g}</span>
+            {items.filter((i) => i.group === g).map((i) => {
+              const on = i.key === here.key;
+              return (
+                <button key={i.key} role="tab" aria-selected={on} className={`toc-item${on ? ' on' : ''}`} onClick={() => { setSection(i.section); if (i.tab) setTab(i.tab); }}>
+                  <Icon name={i.icon} size={16} color={on ? 'var(--accent-fg)' : 'var(--fg3)'} />
+                  {i.label}
+                </button>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    </aside>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, color: 'var(--fg)', minWidth: 0 }}>
+      <div className="ref-head">
+        <span className="crumbs">Componentes{version ? ` · ${version.id} ${version.label}` : ''}</span>
+        <h2>{here.label}</h2>
       </div>
 
-      {/* sticky: every part of the page one click away, no scrolling to find it */}
-      <div role="tablist" aria-label="Secciones" style={{ position: 'sticky', top: 64, zIndex: 5, display: 'flex', flexWrap: 'wrap', gap: 6, padding: '10px 0', background: 'var(--bg)', borderBottom: '1px solid var(--line)' }}>
-        {TABS.map(([k, label]) => {
-          const on = k === tab;
-          return (
-            <button key={k} role="tab" aria-selected={on} className="press" onClick={() => setTab(k)}
-              style={{ height: 38, borderRadius: 19, padding: '0 16px', font: R(14, 500), background: on ? '#4BAC4F' : 'var(--panel)', color: on ? '#000000' : 'var(--fg)', outline: on ? 'none' : '1px solid var(--line2)' }}>
-              {label}
-            </button>
-          );
-        })}
-      </div>
+      {section === 'nav' && tab === 'disenos' && <ProposalsSection />}
 
-      {tab === 'disenos' && <ProposalsSection />}
+      {section === 'nav' && tab === 'opciones' && <NavOptions />}
 
-      {tab === 'opciones' && <NavOptions />}
-
-      {tab === 'arquitectura' && (
+      {section === 'nav' && tab === 'arquitectura' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
           <Architecture />
-          <NavVariants />
         </div>
       )}
 
-      {tab === 'componentes' && (
+      {section === 'comp' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {([['Del mockup «Cliente y Prestador»', MOCKUP_COMPONENTS], ['Navegación estable (recomendada)', HUB_COMPONENTS], ['Barra y navegación', COMPONENTS], ['Inicio (de los diseños propuestos)', HOME_COMPONENTS]] as const).map(([title, list]) => (
+          {((kind === 'tabs'
+            ? [['Barra y navegación', COMPONENTS]]
+            : kind === 'explorer'
+              ? [['Selector de sección (Prototipo Auto)', EXPLORER_COMPONENTS]]
+              : [['Del mockup «Cliente y Prestador»', MOCKUP_COMPONENTS], ['Navegación estable', HUB_COMPONENTS], ['Inicio (de los diseños propuestos)', HOME_COMPONENTS]]
+          ) as [string, [string, string, string][]][]).map(([title, list]) => (
             <div key={title} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <span style={{ font: P(18) }}>{title}</span>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: 10, maxWidth: 1240 }}>
@@ -528,10 +599,14 @@ export function IntegrationPage() {
             </div>
           ))}
           <Palette />
+          {/* the pieces the Auto v3 design adds (VehicleCard, SOS, tips, demand layer…) */}
+          {kind === 'tabs' && <ComponentsPage />}
         </div>
       )}
 
-      {tab === 'probalo' && (
+      {section === 'barra' && (kind === 'tabs' ? <BarPage /> : kind === 'explorer' ? <ExplorerBar /> : <NavVariants />)}
+
+      {section === 'nav' && tab === 'probalo' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14 }}>
             <Choice label="Cuenta" options={ACCOUNTS} value={account} onChange={setAccount} />
@@ -552,7 +627,7 @@ export function IntegrationPage() {
         </div>
       )}
 
-      {tab === 'reglas' && (
+      {section === 'nav' && tab === 'reglas' && (
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20, alignItems: 'flex-start' }}>
         <Rule title="Usabilidad" items={[
           'Máximo 5 pestañas, siempre en el mismo orden: Inicio · Auto · (Tienda) · Actividad · Perfil.',
@@ -593,6 +668,7 @@ export function IntegrationPage() {
         ]} />
       </div>
       )}
+    </div>
     </div>
   );
 }

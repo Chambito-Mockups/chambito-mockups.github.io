@@ -2,7 +2,7 @@
  * The three Inicio proposals (Opción 1, 2 y 3) plus the recommended mix, for the client and the
  * provider, built only with ui/home.tsx and the shared BottomNavBar.
  */
-import { CSSProperties, ReactNode, useState } from 'react';
+import { CSSProperties, ReactNode, useEffect, useState } from 'react';
 import { BarStyle, StablePhone } from './stableNav';
 import { ThemeScope } from './store';
 import { dark, light, P, R, Theme } from './theme';
@@ -263,7 +263,21 @@ export function ProposalPhones({ id, theme, bar = 'docked' }: { id: ProposalId; 
   );
 }
 
+/** Scale that makes a phone column (frame 740 + label and note) fit under the page header. */
+function useFitPhones(reserve = 250, column = 812) {
+  const calc = () => Math.max(0.55, Math.min(1, (window.innerHeight - reserve) / column));
+  const [fit, setFit] = useState(calc);
+  useEffect(() => {
+    const on = () => setFit(calc());
+    window.addEventListener('resize', on);
+    return () => window.removeEventListener('resize', on);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return fit;
+}
+
 export function ProposalsSection() {
+  const fit = useFitPhones();
   const [id, setId] = useState<ProposalId>('estable');
   const [th, setTh] = useState<'dark' | 'light'>('light'); // the «Cliente y Prestador» mockup is light
   const [bar, setBar] = useState<BarStyle>('docked');
@@ -286,7 +300,10 @@ export function ProposalsSection() {
         </div>
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, alignItems: 'flex-start' }}>
-        <ProposalPhones key={`${id}-${th}-${bar}`} id={id} bar={bar} theme={th === 'dark' ? dark : light} />
+        {/* both phones fit the height of the window: no scrolling to see a whole design */}
+        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', zoom: fit } as CSSProperties}>
+          <ProposalPhones key={`${id}-${th}-${bar}`} id={id} bar={bar} theme={th === 'dark' ? dark : light} />
+        </div>
         <aside style={{ flex: '1 1 260px', maxWidth: 380, background: 'var(--panel)', borderRadius: 24, padding: 20, display: 'flex', flexDirection: 'column', gap: 12, outline: id === 'estable' ? '2px solid #4BAC4F' : '1px solid var(--line2)' }}>
           <span style={{ font: P(17), color: 'var(--fg)' }}>{p.title}</span>
           <span style={{ font: R(14), color: 'var(--fg2)', ...pretty }}>{p.idea}</span>

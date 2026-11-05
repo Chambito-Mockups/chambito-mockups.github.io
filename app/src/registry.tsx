@@ -8,12 +8,18 @@ import { M01, M03, M04, M05, M06, M09, M10, M11 } from './market/buyer';
 import { V14, V15, V16, V17, V18, V19, V21, V22 } from './market/seller';
 import { Actividad, EA4, Inicio, Perfil } from './market/entry';
 import { MyStatus } from './market/data';
+import { useApp } from './store';
+import { ExplorerActivity, InicioExplorer } from './ui/explorer';
+
+/** Inicio and Actividad follow the navigation chosen in the side menu (tabs or the «Prototipo Auto» explorer). */
+const InicioScreen = () => (useApp().settings.navModel === 'explorer' ? <InicioExplorer /> : <Inicio />);
+const ActividadScreen = () => (useApp().settings.navModel === 'explorer' ? <ExplorerActivity /> : <Actividad />);
 
 export const SCREENS: Record<ScreenId, ComponentType> = {
-  A0, A0b, A2, A3, A4, A5, A5b, A6, A7, A8, A9, A11: Actividad,
+  A0, A0b, A2, A3, A4, A5, A5b, A6, A7, A8, A9, A11: ActividadScreen,
   M01, M03, M04, M05, M06, M09, M10, M11, EA4,
   V14, V15, V16, V17, V18, V19, V21, V22,
-  inicio: Inicio,
+  inicio: InicioScreen,
   perfil: Perfil,
   E1, E2, E3, E4,
   D0, D1, D2, D3, D5, D6, D7, D8, D9,
@@ -34,6 +40,8 @@ export interface Entry {
   changes: string;
   /** Market state to prepare when jumping from the index */
   mk?: { listing?: string; activity?: 'Servicios' | 'Tienda'; myTab?: MyStatus; draft?: boolean; welcomed?: boolean; review?: boolean };
+  /** versions that show this entry (default: the group's, or every version) */
+  versions?: string[];
 }
 
 export type Module = 'auto' | 'market';
@@ -45,14 +53,14 @@ export interface Group {
   icon?: string;
   subtitle?: string;
   entries: Entry[];
-  page?: 'bar' | 'components' | 'integration';
+  page?: 'integration';
   note?: string;
+  /** versions that show this group (default: every version, the flow is the same) */
+  versions?: string[];
 }
 
 const P: Role = 'pasajero';
 export const GROUPS: Group[] = [
-  { title: 'Barra inferior', module: 'auto', icon: 'menu', subtitle: 'Cómo queda la barra con Auto', page: 'bar', entries: [] },
-  { title: 'Navegación integrada', module: 'auto', icon: 'compass', subtitle: 'Servicios, Auto y Tienda en una app', page: 'integration', entries: [] },
   {
     title: 'Cliente · pedir un viaje',
     module: 'auto',
@@ -107,9 +115,9 @@ export const GROUPS: Group[] = [
     module: 'market',
     icon: 'home',
     entries: [
-      { key: 'EB1', code: 'EB1', title: 'Inicio con tarjeta Market', screen: 'inicio', role: P, flags: { tiendaEntry: 'card' }, uses: 'El Inicio actual (mapa + «¿Qué necesitás?») con la MarketEntryCard.', changes: 'Combinación 2, recomendada al lanzar: la Tienda entra por la tarjeta y se abre apilada; Auto conserva su pestaña.' },
-      { key: 'EB2', code: 'EB2', title: 'Inicio · tarjeta sin productos', screen: 'inicio', role: P, flags: { tiendaEntry: 'card', almostEmpty: true }, uses: 'MarketEntryCard sin miniaturas.', changes: 'Si no hay publicaciones cerca: «Sé de los primeros en vender en tu zona».' },
-      { key: 'IA3', code: 'IA3', title: 'Tienda con pestaña (combinación 1)', screen: 'M01', role: P, flags: { tiendaEntry: 'tab' }, uses: 'TabBar de 5: Inicio · Auto · Tienda · Actividad · Perfil.', changes: 'Combinación 1: Auto y Tienda con pestaña propia; Equipos pasa a una fila de Perfil.' },
+      { key: 'EB1', versions: ['v1'], code: 'EB1', title: 'Inicio con tarjeta Market', screen: 'inicio', role: P, flags: { tiendaEntry: 'card' }, uses: 'El Inicio actual (mapa + «¿Qué necesitás?») con la MarketEntryCard.', changes: 'Combinación 2, recomendada al lanzar: la Tienda entra por la tarjeta y se abre apilada; Auto conserva su pestaña.' },
+      { key: 'EB2', versions: ['v1'], code: 'EB2', title: 'Inicio · tarjeta sin productos', screen: 'inicio', role: P, flags: { tiendaEntry: 'card', almostEmpty: true }, uses: 'MarketEntryCard sin miniaturas.', changes: 'Si no hay publicaciones cerca: «Sé de los primeros en vender en tu zona».' },
+      { key: 'IA3', versions: ['v2'], code: 'IA3', title: 'Tienda con pestaña (combinación 1)', screen: 'M01', role: P, flags: { tiendaEntry: 'tab' }, uses: 'TabBar de 5: Inicio · Auto · Tienda · Actividad · Perfil.', changes: 'Combinación 1: Auto y Tienda con pestaña propia; Equipos pasa a una fila de Perfil.' },
       { key: 'EB3', code: 'EB3', title: 'Perfil con filas nuevas', screen: 'perfil', role: P, uses: 'ProfileMenuCard y ListItem.', changes: '«Mis publicaciones» y «Vender en la Tienda». Con la combinación 1 y Equipos, Equipos aparece acá con la etiqueta «Antes en la barra».' },
       { key: 'EA3', code: 'EA3', title: 'Actividad · Servicios | Tienda', screen: 'A11', role: P, mk: { activity: 'Tienda' }, uses: '(tabs)/activity con SegmentedControl.', changes: '«Mis consultas» con la etiqueta Tienda y el lugar de «Mis pedidos» (Fase 2).' },
       { key: 'EA4', code: 'EA4', title: 'Notificaciones', screen: 'EA4', role: P, uses: 'ListItem de notificaciones.', changes: 'Las 4 del brief, también como push. Tocar abre la pantalla correspondiente.' },
@@ -158,8 +166,33 @@ export const GROUPS: Group[] = [
       { key: 'V23', code: 'V23', title: 'Límite alcanzado', screen: 'V21', overlay: 'limit', role: P, flags: { atLimit: true }, uses: 'BottomSheet.', changes: 'Al intentar publicar con 50 activas.' },
     ],
   },
-  { title: 'Componentes nuevos', module: 'auto', icon: 'bookmark', subtitle: 'Piezas que suma el diseño', page: 'components', entries: [] },
-  { title: 'Navegación integrada', module: 'market', icon: 'compass', subtitle: 'Servicios, Auto y Tienda en una app', page: 'integration', entries: [] },
+  {
+    title: 'Explorador · Prototipo Auto',
+    module: 'auto',
+    versions: ['v2'],
+    icon: 'layers',
+    subtitle: 'Otra opción: selector de sección y barra fija',
+    note: 'Del «Prototipo Auto»: cada portada tiene el selector Servicios · Auto · Market arriba a la izquierda y la barra es siempre Inicio · Actividad · Perfil. La app vuelve a abrir en la última sección usada. Se puede dejar fija desde «Navegación» en el menú.',
+    entries: [
+      { key: 'X1', code: 'X1', title: 'Portada de Servicios', screen: 'inicio', role: P, flags: { navModel: 'explorer', lastSection: 'servicios' }, uses: 'Mapa del Inicio, SectionSelector «Servicios», Sheet con «¿Qué necesitás?», servicios populares (íconos oficiales) y la tarjeta «Nuevo: Chambito Auto».', changes: 'El buscador «Buscá tu lugar» pasa a la hoja; arriba queda el selector de sección. La barra pierde la pestaña Auto: Inicio · Actividad · Perfil.' },
+      { key: 'X2s', code: 'X2', title: 'Explorador desde Servicios', screen: 'inicio', overlay: 'explorer', role: P, flags: { navModel: 'explorer', lastSection: 'servicios' }, uses: 'BottomSheet con el logo oficial, «Elegí qué querés hacer» y una fila por sección (la actual con «Estás acá» y el check).', changes: 'Pantalla nueva. La X o tocar afuera cierran sin cambiar de sección; elegir otra la recuerda para la próxima vez.' },
+      { key: 'XA0', code: 'A0', title: 'Portada de Auto con selector', screen: 'A0', role: P, flags: { navModel: 'explorer', lastSection: 'auto' }, uses: 'La misma portada de Auto con SectionSelector «Auto» en lugar del buscador de arriba.', changes: 'El destino se busca en la hoja («¿A dónde vas?»). La barra marca Inicio: Auto ya no es una pestaña.' },
+      { key: 'X2a', code: 'X2', title: 'Explorador desde Auto', screen: 'A0', overlay: 'explorer', role: P, flags: { navModel: 'explorer', lastSection: 'auto' }, uses: 'El mismo explorador con Auto marcada.', changes: '«Servicios» vuelve a la pantalla principal de la app.' },
+      { key: 'MK', code: 'MK', title: 'Portada de Market con selector', screen: 'M01', role: P, flags: { navModel: 'explorer', lastSection: 'market' }, uses: 'La portada de la Tienda con SectionSelector «Market», búsqueda, categorías, Cerca tuyo, Recién publicados y Vender.', changes: 'No se apila sobre el Inicio: es una sección con la barra Inicio · Actividad · Perfil.' },
+      { key: 'X2m', code: 'X2', title: 'Explorador desde Market', screen: 'M01', overlay: 'explorer', role: P, flags: { navModel: 'explorer', lastSection: 'market' }, uses: 'El explorador con Market marcada.', changes: 'Desde acá se pasa a Auto o a Servicios sin volver al Inicio.' },
+      { key: 'XA11', code: 'A11', title: 'Actividad con todas las secciones', screen: 'A11', role: P, flags: { navModel: 'explorer' }, uses: 'TopBar, ModuleFilter Todo · Servicios · Auto · Market, viajes y servicios (en curso y anteriores) y Mis consultas del Market.', changes: 'El selector Servicios | Tienda pasa a ser un filtro por sección; todo el historial queda en un solo lugar.' },
+    ],
+  },
+  {
+    title: 'Explorador · Market',
+    module: 'market',
+    versions: ['v3'],
+    icon: 'layers',
+    subtitle: 'Market como sección, con selector',
+    entries: [
+      { key: 'MKm', code: 'MK', title: 'Portada de Market con selector', screen: 'M01', role: P, flags: { navModel: 'explorer', lastSection: 'market' }, uses: 'La portada de la Tienda con SectionSelector «Market», búsqueda, categorías, Cerca tuyo, Recién publicados y Vender.', changes: 'No se apila sobre el Inicio: es una sección con la barra Inicio · Actividad · Perfil. El recorrido completo está en el menú Auto («Explorar Chambito»).' },
+    ],
+  },
 ];
 
 export const ALL_ENTRIES = GROUPS.flatMap((g) => g.entries);
@@ -167,6 +200,53 @@ export const ALL_ENTRIES = GROUPS.flatMap((g) => g.entries);
 /** Module each entry belongs to (an entry key is unique across groups). */
 export const MODULE_OF: Record<string, Module> = Object.fromEntries(GROUPS.flatMap((g) => g.entries.map((e) => [e.key, g.module])));
 export const entriesOf = (m: Module) => GROUPS.filter((g) => g.module === m).flatMap((g) => g.entries);
+
+/* ================= Versions: each way to move through the app, seen on its own ================= */
+export interface Version {
+  id: string;
+  label: string;
+  hint: string;
+  /** source of the design */
+  source: string;
+  /** settings this version uses */
+  flags?: Partial<Settings>;
+  /** reference page instead of screens */
+  page?: 'integration';
+  /** first screen when the version is chosen */
+  first?: string;
+  /** viewer colour of the version (outside the phone) */
+  color: string;
+  /** tabs of its bottom bar, shown in the version card */
+  bar: string[];
+  /** what is different, in one line */
+  what: string;
+  /** design references that go with it in «Componentes» */
+  refs: 'tabs' | 'explorer' | 'estable';
+}
+export const VERSIONS: Record<Module, Version[]> = {
+  auto: [
+    { id: 'v1', label: 'Pestaña Auto', hint: 'Auto es un destino de la barra', source: 'Chambito Auto v3', flags: { navModel: 'tabs' }, first: 'A0', color: '#4BAC4F', bar: ['Inicio', 'Auto', 'Actividad', 'Perfil'], what: 'Auto tiene su propia pestaña en la barra.', refs: 'tabs' },
+    { id: 'v2', label: 'Selector de sección', hint: 'Servicios · Auto · Market arriba; barra Inicio · Actividad · Perfil', source: 'Prototipo Auto', flags: { navModel: 'explorer' }, first: 'X1', color: '#E0A100', bar: ['Inicio', 'Actividad', 'Perfil'], what: 'Se cambia de sección con «Servicios ▾» arriba; la barra no cambia.', refs: 'explorer' },
+    { id: 'v3', label: 'Navegación estable', hint: 'Inicio · Explorar/Trabajo · Actividad · Perfil', source: 'Propuestas de Inicio', page: 'integration', color: '#9B8AFB', bar: ['Inicio', 'Explorar', 'Actividad', 'Perfil'], what: 'Cliente y prestador, con Explorar o Trabajo. Abre la página de propuestas.', refs: 'estable' },
+  ],
+  market: [
+    { id: 'v1', label: 'Tarjeta en Inicio', hint: 'La Tienda se abre desde una tarjeta (combinación 2)', source: 'Chambito Market', flags: { navModel: 'tabs', tiendaEntry: 'card' }, first: 'EB1', color: '#4BAC4F', bar: ['Inicio', 'Auto', 'Actividad', 'Perfil'], what: 'La Tienda entra por una tarjeta en Inicio y se apila con flecha atrás.', refs: 'tabs' },
+    { id: 'v2', label: 'Pestaña Tienda', hint: 'Tienda como destino de la barra (combinación 1)', source: 'Chambito Market', flags: { navModel: 'tabs', tiendaEntry: 'tab' }, first: 'IA3', color: '#E0A100', bar: ['Inicio', 'Auto', 'Tienda', 'Actividad', 'Perfil'], what: 'La Tienda es una pestaña; Equipos pasa a Perfil si no entra.', refs: 'tabs' },
+    { id: 'v3', label: 'Market como sección', hint: 'Selector «Market ▾» y barra Inicio · Actividad · Perfil', source: 'Prototipo Auto', flags: { navModel: 'explorer', lastSection: 'market' }, first: 'MKm', color: '#9B8AFB', bar: ['Inicio', 'Actividad', 'Perfil'], what: 'Market es una sección del selector, con su portada y la barra fija.', refs: 'explorer' },
+  ],
+};
+/** Version of a module that matches the current settings (a reference page wins when it is open). */
+export function versionOf(m: Module, settings: Settings, onIntegration = false): Version {
+  const list = VERSIONS[m];
+  if (onIntegration && m === 'auto') return list[2];
+  if (m === 'auto') return settings.navModel === 'explorer' ? list[1] : list[0];
+  return settings.navModel === 'explorer' ? list[2] : settings.tiendaEntry === 'tab' ? list[1] : list[0];
+}
+const inVersion = (v: string, own?: string[]) => !own || own.includes(v);
+/** Groups of a module in a version (screens shared by every version are always there). */
+export const groupsIn = (m: Module, v: string) => GROUPS.filter((g) => g.module === m && inVersion(v, g.versions));
+/** Screens of a module in a version, in index order (previous / next walk this list). */
+export const entriesIn = (m: Module, v: string) => groupsIn(m, v).flatMap((g) => g.entries.filter((e) => inVersion(v, e.versions)));
 
 export const MODULES: Record<Module, { label: string; icon: string; tagline: string; first: string }> = {
   auto: { label: 'Auto', icon: 'car', tagline: 'Viajes: pasajero y conductor', first: 'A0' },
@@ -183,6 +263,7 @@ export interface Tour {
 }
 
 export const TOURS: Tour[] = [
+  { id: 'explorar', module: 'auto', title: 'Explorar Chambito', hint: 'Servicios → Market → Auto con el selector', steps: ['X1', 'X2s', 'MK', 'X2m', 'XA0', 'X2a', 'X1'] },
   { id: 'viaje', module: 'auto', title: 'Pedir un viaje', hint: 'De «¿A dónde vas?» a la calificación', steps: ['A0', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A8b', 'A9', 'A11'] },
   { id: 'conductor', module: 'auto', title: 'Manejar con Chambito', hint: 'Alta, oferta, PIN y cobro', steps: ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9'] },
   { id: 'comprar', module: 'market', title: 'Comprar en la Tienda', hint: 'Buscar, ver, consultar y guardar', steps: ['EB1', 'M01', 'M03', 'M04', 'M05', 'M06', 'M10', 'M11'] },

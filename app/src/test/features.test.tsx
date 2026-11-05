@@ -134,7 +134,7 @@ describe('search box', () => {
     const marks = nav.querySelectorAll('mark');
     expect(marks.length).toBeGreaterThan(1);
     expect(marks[0].textContent?.toLowerCase()).toBe('viaje');
-    expect(screen.getByText(/\d+ pantallas/)).toBeInTheDocument();
+    expect(screen.getByText(/^\d+ pantallas$/)).toBeInTheDocument(); // the search count (version cards say «… · N pantallas»)
     const items = within(nav).getAllByRole('button').filter((b) => b.id.startsWith('opt-'));
     fireEvent.keyDown(box, { key: 'ArrowDown' });
     expect(box).toHaveAttribute('aria-activedescendant', items[1].id);

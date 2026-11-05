@@ -29,12 +29,12 @@ export function TopNav({ module, onModule, onMenu, ui, onUi, navOn, onNav }: { m
           </button>
         ))}
       </nav>
-      {/* the integrated navigation (Servicios · Auto · Market) one click away from anywhere */}
+      {/* every design reference (navigation, components, bottom bar) one click away from anywhere */}
       {onNav && (
         <nav className="modules" aria-label="Referencia">
-          <button className={navOn ? 'on' : ''} aria-current={navOn ? 'page' : undefined} onClick={onNav} title="Diseños de Inicio, opciones de barra y componentes">
+          <button className={navOn ? 'on' : ''} aria-current={navOn ? 'page' : undefined} onClick={onNav} title="Referencias del diseño: navegación, componentes y barra inferior">
             <Icon name="layers" size={18} color={navOn ? '#000000' : 'var(--fg2)'} />
-            <span>Navegación</span>
+            <span>Componentes</span>
           </button>
         </nav>
       )}
@@ -45,12 +45,10 @@ export function TopNav({ module, onModule, onMenu, ui, onUi, navOn, onNav }: { m
             <button key={v} role="radio" aria-checked={settings.country === v} aria-label={name} title={name} className={settings.country === v ? 'on' : ''} onClick={() => set({ country: v })}>{l}</button>
           ))}
         </div>
-        <button className="icon-btn" onClick={() => set({ theme: settings.theme === 'dark' ? 'light' : 'dark' })} aria-label={`Teléfono: cambiar a tema ${settings.theme === 'dark' ? 'claro' : 'oscuro'}`} title="Tema del teléfono">
-          <Icon name="phone" size={15} color="var(--fg2)" />
-          <span>{settings.theme === 'dark' ? 'Oscuro' : 'Claro'}</span>
-        </button>
-        <button className="icon-btn square" onClick={() => onUi(ui === 'dark' ? 'light' : 'dark')} aria-label={`Página: cambiar a tema ${ui === 'dark' ? 'claro' : 'oscuro'}`} title={`Tema de la página: ${ui === 'dark' ? 'oscuro' : 'claro'}`}>
-          <span aria-hidden style={{ fontSize: 17, lineHeight: 1 }}>{ui === 'dark' ? '☾' : '☀'}</span>
+        {/* the phone theme lives next to the phone (toolbar); this one is the page around it */}
+        <button className="icon-btn" onClick={() => onUi(ui === 'dark' ? 'light' : 'dark')} aria-label={`Página: cambiar a tema ${ui === 'dark' ? 'claro' : 'oscuro'}`} title="Tema de la página (no del teléfono)">
+          <span aria-hidden style={{ fontSize: 15, lineHeight: 1 }}>{ui === 'dark' ? '☾' : '☀'}</span>
+          <span>Página</span>
         </button>
       </div>
     </header>

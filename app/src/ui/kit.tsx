@@ -1,12 +1,14 @@
 import { CSSProperties, ReactNode, useRef, useState } from 'react';
 import { P, R } from '../theme';
-import { useApp } from '../store';
+import { Section, useApp } from '../store';
 
 import { Icon } from './icon';
 import { TopBar } from './nav';
 
 export { Icon } from './icon';
 export { BrandPattern } from './pattern';
+export { SECTION_META, SECTIONS, SectionSelector } from './section';
+import { SectionSelector } from './section';
 export { BottomNavBar, Dot, MenuGroup, MenuItem, NAV_META, NavIconButton, navItems, QuickAccess, TopBar } from './nav';
 export type { NavBadges, NavKey, QuickTile } from './nav';
 
@@ -317,8 +319,16 @@ export function SlideToConfirm({ label, onConfirm }: { label: string; onConfirm:
 }
 
 /* ---------- Top chrome ---------- */
-export function HubTopChrome({ onSearch, onProfile }: { onSearch?: () => void; onProfile?: () => void }) {
-  const { t } = useApp();
+export function HubTopChrome({ onSearch, onProfile, section }: { onSearch?: () => void; onProfile?: () => void; section?: Section }) {
+  const { t, settings, screen } = useApp();
+  // explorer navigation: the section selector replaces the search pill (the search lives in the sheet)
+  if (settings.navModel === 'explorer')
+    return (
+      <div style={{ position: 'absolute', top: 55, left: 20, right: 20, display: 'flex', justifyContent: 'space-between', gap: 8, zIndex: 11 }}>
+        <SectionSelector section={section ?? (screen === 'inicio' ? 'servicios' : 'auto')} />
+        <CircleButton icon="user" onClick={onProfile} label="Perfil" />
+      </div>
+    );
   return (
     <div style={{ position: 'absolute', top: 55, left: 20, right: 20, display: 'flex', gap: 8, zIndex: 11 }}>
       <button className="press" onClick={onSearch} aria-label="Buscá tu lugar" style={{ flex: 1, height: 48, borderRadius: 24, background: t.sheet, display: 'flex', alignItems: 'center', gap: 10, padding: '0 18px', font: R(15), color: t.text2, boxShadow: t.name === 'dark' ? '0 4px 14px rgba(0,0,0,.5)' : '0 3px 12px rgba(0,0,0,.14)' }}>
