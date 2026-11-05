@@ -27,7 +27,10 @@ export function useSeconds() {
 export function useTabNav() {
   const { go, autoRoot } = useApp();
   return (k: NavKey) => {
-    const map: Record<NavKey, ScreenId> = { inicio: 'inicio', auto: autoRoot(), tienda: 'M01', actividad: 'A11', perfil: 'perfil', equipos: 'equipos', comercios: 'comercios' };
+    const map: Record<NavKey, ScreenId> = { inicio: 'inicio', auto: autoRoot(), tienda: 'M01', actividad: 'A11', perfil: 'perfil', equipos: 'equipos', comercios: 'comercios',
+      // alternatives only drawn in the reference page; they open the closest existing screen
+      servicios: 'inicio', trabajos: 'D3', agenda: 'D3', cobros: 'D9', mensajes: 'A11', pedir: 'inicio',
+      modulos: 'inicio', trabajo: 'D3', explorar: 'M03' };
     go(map[k], { replace: true });
   };
 }

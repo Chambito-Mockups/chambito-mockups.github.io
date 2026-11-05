@@ -8,7 +8,11 @@ import { P, R } from '../theme';
 import { Icon } from './icon';
 
 /* ================= Bottom navigation (floating pill) ================= */
-export type NavKey = 'inicio' | 'auto' | 'tienda' | 'comercios' | 'equipos' | 'actividad' | 'perfil';
+export type NavKey = 'inicio' | 'auto' | 'tienda' | 'comercios' | 'equipos' | 'actividad' | 'perfil'
+  // alternatives shown in «Navegación integrada» (provider mode, central action, one tab per module)
+  | 'servicios' | 'trabajos' | 'agenda' | 'cobros' | 'mensajes' | 'pedir'
+  // from the three UI proposals: Módulos (Opción 1), Trabajo | Explorar (Opción 3)
+  | 'modulos' | 'trabajo' | 'explorar';
 export const NAV_META: Record<NavKey, { label: string; icon: string }> = {
   inicio: { label: 'Inicio', icon: 'home' },
   auto: { label: 'Auto', icon: 'car' },
@@ -17,6 +21,15 @@ export const NAV_META: Record<NavKey, { label: string; icon: string }> = {
   equipos: { label: 'Equipos', icon: 'users' },
   actividad: { label: 'Actividad', icon: 'bell' },
   perfil: { label: 'Perfil', icon: 'user' },
+  servicios: { label: 'Servicios', icon: 'limpieza' },
+  trabajos: { label: 'Trabajos', icon: 'inbox' },
+  agenda: { label: 'Agenda', icon: 'calendar' },
+  cobros: { label: 'Cobros', icon: 'wallet' },
+  mensajes: { label: 'Mensajes', icon: 'messageCircle' },
+  pedir: { label: 'Pedir', icon: 'plus' },
+  modulos: { label: 'Módulos', icon: 'grid' },
+  trabajo: { label: 'Trabajo', icon: 'briefcase' },
+  explorar: { label: 'Explorar', icon: 'search' },
 };
 
 /**
@@ -37,9 +50,39 @@ export function navItems(autoEnabled: boolean, teams: boolean, tiendaTab = false
 /** `true` shows a dot, a number shows a count. */
 export type NavBadges = Partial<Record<NavKey, number | boolean>>;
 
-/** Floating pill. Active destination: solid green with black icon and label (unified rule for Auto and Tienda). */
-export function BottomNavBar({ items, active, onSelect, badges, style }: { items: NavKey[]; active: NavKey; onSelect?: (k: NavKey) => void; badges?: NavBadges; style?: CSSProperties }) {
+/**
+ * Docked bar from the «Cliente y Prestador» mockup: full width at the bottom, flat, active tab
+ * as a green icon and label with no pill. Same items and badges as the floating one.
+ */
+function DockedNavBar({ items, active, onSelect, badges, style }: { items: NavKey[]; active: NavKey; onSelect?: (k: NavKey) => void; badges?: NavBadges; style?: CSSProperties }) {
   const { t } = useApp();
+  return (
+    <nav aria-label="Navegación principal" style={{ height: 64, background: t.sheet, borderTop: `1px solid ${t.name === 'dark' ? '#262626' : '#E6E6E6'}`, display: 'grid', gridTemplateColumns: `repeat(${items.length},minmax(0,1fr))`, ...style }}>
+      {items.map((k) => {
+        const on = k === active;
+        const c = on ? t.success : t.navInactive;
+        const b = badges?.[k];
+        const label = NAV_META[k].label;
+        return (
+          <button key={k} className="nav-tab" aria-current={on ? 'page' : undefined} aria-label={b ? `${label}, ${typeof b === 'number' ? `${b} nuevas` : 'con novedades'}` : label} onClick={() => onSelect?.(k)}
+            style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, minWidth: 0 }}>
+            {on && <span aria-hidden style={{ position: 'absolute', top: 0, width: 28, height: 3, borderRadius: 2, background: t.green }} />}
+            <span style={{ position: 'relative', display: 'flex' }}>
+              <Icon name={NAV_META[k].icon} size={22} color={c} />
+              {!!b && <Dot count={typeof b === 'number' ? b : undefined} ring={t.sheet} />}
+            </span>
+            <span style={{ font: R(12, on ? 500 : 400), color: c, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{label}</span>
+          </button>
+        );
+      })}
+    </nav>
+  );
+}
+
+/** Floating pill. Active destination: solid green with black icon and label (unified rule for Auto and Tienda). */
+export function BottomNavBar({ items, active, onSelect, badges, style, variant = 'pill' }: { items: NavKey[]; active: NavKey; onSelect?: (k: NavKey) => void; badges?: NavBadges; style?: CSSProperties; variant?: 'pill' | 'docked' }) {
+  const { t } = useApp();
+  if (variant === 'docked') return <DockedNavBar items={items} active={active} onSelect={onSelect} badges={badges} style={style} />;
   const idx = items.indexOf(active);
   const n = items.length;
   const shadow = t.name === 'dark' ? '0 10px 30px rgba(0,0,0,.55)' : '0 8px 24px rgba(0,0,0,.12)';
