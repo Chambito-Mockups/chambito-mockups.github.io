@@ -73,7 +73,7 @@ function useIntegrada(props: IntegradaProps, onPlace?: (p: IgPlace) => void) {
 }
 
 export const IntegradaPhone = forwardRef<IntegradaHandle, IntegradaProps & { onPlace?: (p: IgPlace) => void }>(function IntegradaPhone({ onPlace, ...props }, ref) {
-  const stable = useMemo(() => props, [props.navegacion, props.faseMarket, props.pantallaInicial, props.dark]); // eslint-disable-line react-hooks/exhaustive-deps
+  const stable = useMemo(() => props, [props.navegacion, props.faseMarket, props.pantallaInicial, props.dark, props.categorias]); // eslint-disable-line react-hooks/exhaustive-deps
   const { vm, S, reset } = useIntegrada(stable, onPlace);
   useImperativeHandle(ref, () => ({
     jump: (id, sheet) => S({ screen: id, hist: [], sheet: sheet ?? null, role: SOCIO_SCREENS.includes(id) ? 'socio' : 'cliente', ...(SECTION_OF[id] ? { section: SECTION_OF[id] } : {}) }),

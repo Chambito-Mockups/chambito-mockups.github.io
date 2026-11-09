@@ -149,3 +149,21 @@ export function Pattern() {
   const mask = 'url(./brand/patronaje.svg) 0 0/228px auto repeat';
   return <span aria-hidden="true" data-pattern style={{ position: 'absolute', inset: 0, background: t.text, opacity: 0.04, WebkitMask: mask, mask, pointerEvents: 'none' }} />;
 }
+
+/** CategoryTile del sistema de diseño (§15): horizontal, círculo de 40 con el ícono + nombre en dos líneas, dos por fila.
+ *  Elegida: la tarjeta entera en negro (blanca en oscuro), nunca en verde. `c` viene de `m.cats` del modelo. */
+export function CategoryTile({ c }: { c: { on: boolean; label: string; icon: string; pressed: string; pick: () => void } }) {
+  const { t } = useVM();
+  return (
+    <button
+      aria-pressed={c.on}
+      onClick={c.pick}
+      style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 64, padding: 12, boxSizing: 'border-box', borderRadius: 16, background: c.on ? t.inverse : t.cardBg, color: c.on ? t.onInverse : t.text, boxShadow: c.on ? 'none' : t.shadow1, width: '100%' }}
+    >
+      <span aria-hidden="true" style={{ flex: 'none', width: 40, height: 40, borderRadius: 9999, background: c.on ? 'transparent' : t.mos, boxShadow: c.on ? `inset 0 0 0 1px ${t.onInverse}` : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <I name={c.icon} size={24} />
+      </span>
+      <span style={{ flex: 1, minWidth: 0, font: '500 15px/22px Roboto, Arial, sans-serif', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{c.label}</span>
+    </button>
+  );
+}

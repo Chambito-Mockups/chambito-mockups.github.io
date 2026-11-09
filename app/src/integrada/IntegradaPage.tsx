@@ -27,6 +27,8 @@ export interface IgEntry {
   sheet?: IgSheet;
   /** navegación que aplica al abrirla (las del selector de sección) */
   nav?: string;
+  /** forma de las categorías de la Tienda que aplica al abrirla */
+  cats?: IntegradaProps['categorias'];
 }
 export interface IgGroup { title: string; note?: string; entries: IgEntry[] }
 
@@ -59,7 +61,7 @@ export const IG_GROUPS: IgGroup[] = [
   {
     title: 'Market · comprar',
     entries: [
-      e('tienda', 'Tienda'), e('mBuscar', 'Buscar'), e('ficha', 'Ficha del producto'), e('chat', 'Consulta'), e('guardados', 'Guardados'),
+      e('tienda', 'Tienda'), { key: 'tienda-mosaicos', title: 'Tienda con categorías en mosaicos', screen: 'tienda', cats: 'Mosaicos' }, e('mBuscar', 'Buscar'), e('ficha', 'Ficha del producto'), e('chat', 'Consulta'), e('guardados', 'Guardados'),
       e('carrito', 'Carrito (fase 2)'), e('confirmar', 'Confirmar la compra'), e('compraOk', 'Compra hecha'), e('orden', 'Seguimiento de la compra'), e('devolucion', 'Reclamo'),
     ],
   },
@@ -120,7 +122,7 @@ function Select({ label, value, options, onChange }: { label: string; value: str
 
 export function IntegradaPage() {
   const [cfg, setCfg] = usePersistent<Required<IntegradaProps>>('integrada', () => ({
-    navegacion: SELECTOR, faseMarket: FASES[0], pantallaInicial: INICIOS[0], dark: false,
+    navegacion: SELECTOR, faseMarket: FASES[0], pantallaInicial: INICIOS[0], dark: false, categorias: 'Círculos',
   }));
   const set = (o: Partial<IntegradaProps>) => setCfg((c) => ({ ...c, ...o }));
   const phone = useRef<IntegradaHandle>(null);
@@ -132,6 +134,7 @@ export function IntegradaPage() {
 
   const open = useCallback((en: IgEntry) => {
     if (en.nav) setCfg((c) => ({ ...c, navegacion: en.nav! }));
+    if (en.cats) setCfg((c) => ({ ...c, categorias: en.cats! }));
     phone.current?.jump(en.screen, en.sheet);
     setKey(en.key);
   }, [setCfg]);
@@ -208,6 +211,14 @@ export function IntegradaPage() {
               <div className="seg seg-sm" role="radiogroup" aria-label="Tema del teléfono">
                 {([[false, 'Claro'], [true, 'Oscuro']] as const).map(([v, l]) => (
                   <button key={l} role="radio" aria-checked={cfg.dark === v} className={cfg.dark === v ? 'on' : ''} onClick={() => set({ dark: v })}>{l}</button>
+                ))}
+              </div>
+            </div>
+            <div className="field">
+              <span className="side-label">Categorías de la Tienda</span>
+              <div className="seg seg-sm" role="radiogroup" aria-label="Categorías de la Tienda">
+                {(['Círculos', 'Mosaicos'] as const).map((v) => (
+                  <button key={v} role="radio" aria-checked={(cfg.categorias ?? 'Círculos') === v} className={(cfg.categorias ?? 'Círculos') === v ? 'on' : ''} onClick={() => set({ categorias: v })}>{v}</button>
                 ))}
               </div>
             </div>

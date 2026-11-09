@@ -1,10 +1,10 @@
 /** Chambito Market: Tienda, búsqueda, ficha, consulta, Guardados, vender (publicar 1–3), carrito, compra protegida, orden y devolución. Convertido de chambito-app.html. */
 import { useVM } from '../model';
-import { Body, Btn, Chip, Divider, Footer, H2, Header, I, IconBtn, Pattern, Screen, SectionHead, SectionPill, StatusSpace, Title } from '../kit';
+import { Body, Btn, CategoryTile, Chip, Divider, Footer, H2, Header, I, IconBtn, Pattern, Screen, SectionHead, SectionPill, StatusSpace, Title } from '../kit';
 
 /** tienda */
 export function Tienda() {
-  const { a, canBack, cart, fabBottom, fase2, go, m, selector, t, tabPad } = useVM();
+  const { a, canBack, cart, fabBottom, fase2, go, m, mosaicos, selector, t, tabPad } = useVM();
   return (
     <Screen id="tienda">
       <StatusSpace />
@@ -41,16 +41,22 @@ export function Tienda() {
           <I name="search" size={20} />
           <span>Buscá en Chambito Market</span>
         </button>
-        <div role="group" aria-label="Categorías" style={{ display: "flex", justifyContent: "space-between", marginTop: 16 }}>
-          {(m.cats as any[]).map((c: any, i: number) => (
-            <button key={i} aria-pressed={c.pressed} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, width: 64, color: c.t.text }} onClick={c.pick}>
-              <span aria-hidden="true" style={{ width: 56, height: 56, borderRadius: 28, background: c.bg, color: c.fg, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <I name={c.icon} size={22} />
-              </span>
-              <span style={{ font: "500 12px/16px Roboto, Arial, sans-serif", letterSpacing: 0.2 }}>{c.label}</span>
-            </button>
-          ))}
-        </div>
+        {mosaicos ? (
+          <div role="group" aria-label="Categorías" style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12, marginTop: 16 }}>
+            {(m.cats as any[]).map((c: any) => <CategoryTile key={c.label} c={c} />)}
+          </div>
+        ) : (
+          <div role="group" aria-label="Categorías" style={{ display: "flex", justifyContent: "space-between", marginTop: 16 }}>
+            {(m.cats as any[]).map((c: any, i: number) => (
+              <button key={i} aria-pressed={c.pressed} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, width: 64, color: c.t.text }} onClick={c.pick}>
+                <span aria-hidden="true" style={{ width: 56, height: 56, borderRadius: 28, background: c.bg, color: c.fg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <I name={c.icon} size={22} />
+                </span>
+                <span style={{ font: "500 12px/16px Roboto, Arial, sans-serif", letterSpacing: 0.2 }}>{c.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
         {m.hasNear ? (
           <section style={{ marginTop: 20 }}>
             <SectionHead>

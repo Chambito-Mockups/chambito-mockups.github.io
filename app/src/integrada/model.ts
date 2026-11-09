@@ -17,6 +17,8 @@ export interface IntegradaProps {
   faseMarket?: string;
   pantallaInicial?: string;
   dark?: boolean;
+  /** categorías de la Tienda: círculos en una fila, o mosaicos (CategoryTile del sistema de diseño) */
+  categorias?: 'Círculos' | 'Mosaicos';
 }
 
 export interface ModelIO {
@@ -284,7 +286,7 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
   const sort = st.sort || 'cerca';
   results = results.slice().sort(function (x?: Any, y?: Any) { return sort === 'precio' ? x.price - y.price : x.km - y.km; });
   const m: Any = {
-    cats: CATS.map(function (c?: Any) { const on = c[0] === cat; return { t: t, label: c[1], icon: c[2], pressed: on ? 'true' : 'false', bg: on ? t.inverse : t.fill, fg: on ? t.onInverse : t.text2,
+    cats: CATS.map(function (c?: Any) { const on = c[0] === cat; return { t: t, on: on, label: c[1], icon: c[2], pressed: on ? 'true' : 'false', bg: on ? t.inverse : t.fill, fg: on ? t.onInverse : t.text2,
       pick: function () { S({ cat: on ? null : c[0] }); } }; }),
     near: near, recent: recent, hasNear: near.length > 0, hasRecent: recent.length > 0, emptyCat: !near.length && !recent.length,
     catLabel: cat ? catName[cat] : '',
@@ -603,7 +605,7 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
   const onMap = MAPS.indexOf(screen) >= 0;
   const toastV: Any = { show: !!st.toast, msg: st.toast || '', top: onMap ? '108px' : 'auto', bottom: onMap ? 'auto' : (showTabs ? tabPad + 8 : (TALL.indexOf(screen) >= 0 ? 190 : 120)) + 'px' };
   return {
-    screen: screen, role: role, dark: dark, sel: sel, selector: selector, explorer: explorer, t: t, s: s, a: a, go: gonav, tabs: tabs, tabCols: tabs.length, showTabs: showTabs, tabPad: tabPad, live: live, canBack: hist.length > 0 || !isRoot,
+    screen: screen, role: role, dark: dark, sel: sel, mosaicos: P_.categorias === 'Mosaicos', selector: selector, explorer: explorer, t: t, s: s, a: a, go: gonav, tabs: tabs, tabCols: tabs.length, showTabs: showTabs, tabPad: tabPad, live: live, canBack: hist.length > 0 || !isRoot,
     toast: toastV, notifDot: notifDot, fase2: fase2, fabBottom: showTabs ? tabPad - 8 : 34, sheetSos: st.sheet === 'sos', offer: offer,
     home: home, explore: explore, act: act, perfil: perfil, notifs: notifs, svc: svc, m: m, pv: pv, chat: chat,
     saved: { items: savedItems, empty: savedItems.length === 0 }, mine: { items: mineItems }, pub: pub, cart: cartV, order: orderV, claim: claimV,

@@ -144,6 +144,19 @@ describe('app integrada: selector de sección', () => {
   });
 });
 
+describe('app integrada: categorías de la Tienda en mosaicos', () => {
+  it('dos por fila, y la elegida entera en negro (nunca verde) filtra la Tienda', () => {
+    phone({ pantallaInicial: 'Tienda', categorias: 'Mosaicos' });
+    const group = screen.getByRole('group', { name: 'Categorías' });
+    expect(group.style.gridTemplateColumns).toBe('repeat(2, minmax(0, 1fr))');
+    const hogar = within(group).getByRole('button', { name: 'Hogar' });
+    fireEvent.click(hogar);
+    expect(hogar).toHaveAttribute('aria-pressed', 'true');
+    expect(hogar.style.background).toBe('rgb(0, 0, 0)');
+    expect(hogar.style.color).toBe('rgb(255, 255, 255)');
+  });
+});
+
 describe('app integrada en el visor', () => {
   const menu = () => screen.getByRole('navigation', { name: 'Pantallas de la app integrada' });
 
