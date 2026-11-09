@@ -49,11 +49,16 @@ npm test         # Vitest: registry, navigation, every screen in both themes/cou
 
 ## App integrada (Servicios, Auto and Market in one app)
 
-**App integrada** in the top bar (or `#integrada`) runs the whole app of `chambito-app.html` in one phone: 38 screens across Servicios (base), Market (buying and selling, Phase 1 and 2), Auto (client) and Socio/Conductor. On the left are the demo settings (bottom bar: Explorar / Combinación 1 / Combinación 2 / Tienda en la barra, Market phase, start screen, phone theme, text on green, Reiniciar). On the right is an index that jumps to any screen. The trip, the driver's offer and the protected purchase advance on their own (driver PIN `4827`).
+**App integrada** in the top bar (or `#integrada`) runs the whole app of `chambito-app.html` in one phone: 38 screens across Servicios (base), Market (buying and selling, Phase 1 and 2), Auto (client) and Socio/Conductor. The trip, the driver's offer and the protected purchase advance on their own (driver PIN `4827`).
+
+- **Navigation by default: «Selector de sección»** (from Prototipo Auto). Each home (Servicios, Auto, Market) has the «Servicios ▾ / Auto ▾ / Market ▾» pill, which opens «Elegí qué querés hacer» (X2). The bar is Inicio · Actividad · Perfil in every section and Inicio reopens the last section used. The other bars (Explorar, Combinación 1 and 2, Tienda en la barra) stay as options.
+- **Menu of screens** (right): the selector tour first (X1, X2 from each section, A0, MK, A11, Perfil), then every screen by module, with search. Previous / next above the phone and `←` `→` walk it; each screen has its link, `#integrada/<key>` (e.g. `#integrada/X2m`).
+- **Design system:** colours, type scale, spacing and components follow the brief and the design system of 09/11/2026 (TOKENS.json v1.1.0): canvas `#F5F5F5 / #000000` with white / `#333333` cards, white text on green, selected chips, segments and radios in black, floating bottom bar of 72 (active `#2F7A33 / #7CCB7F`), side margin 20, sheets with radius 24 and padding 24 on a 50 % veil, chat with the outgoing bubble black (green in dark) and the brand pattern at 4 %, 4 s toasts and the press / sheet motion. `src/test/integrada.test.tsx` checks the rules on every screen in both themes.
+- On the left are the demo settings (bottom bar, Market phase, start screen, phone theme, Reiniciar).
 
 - `src/integrada/screens/{base,market,auto,socio}.tsx`: one component per screen.
-- `src/integrada/kit.tsx`: shared pieces (Screen, Header, Title, Body, Footer, Btn, IconBtn, Chip, I…).
-- `src/integrada/chrome.tsx`: bottom bar with the live card, SOS and offer sheets, toast and status bar.
+- `src/integrada/kit.tsx`: shared pieces (Screen, Header, Title, Body, Footer, Btn, IconBtn, Chip, SectionPill, Pattern, I…).
+- `src/integrada/chrome.tsx`: bottom bar with the live card, the explorer (X2), SOS and offer sheets, toast and status bar.
 - `src/integrada/model.ts`: state and logic ported from the design (`buildModel` → the view model read with `useVM()`).
 - `src/integrada/IntegradaPhone.tsx` (state, timers, screen map) and `IntegradaPage.tsx` (the viewer page). Icons live in `integrada.css`, scoped under `.ig`.
 - `src/test/integrada.test.tsx`: every screen in both themes, the trip, chat, protected purchase and driver flows, and the viewer page.

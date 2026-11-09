@@ -17,7 +17,6 @@ export interface IntegradaProps {
   faseMarket?: string;
   pantallaInicial?: string;
   dark?: boolean;
-  textoSobreVerde?: 'blanco' | 'negro';
 }
 
 export interface ModelIO {
@@ -42,10 +41,12 @@ export function useVM(): VM {
 
 export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: ModelIO): VM {
   const SCREENS: Any = ["inicio", "explorar", "actividad", "perfil", "notifs", "svc", "svcPros", "svcConfirm", "svcOk", "tienda", "mBuscar", "ficha", "chat", "guardados", "misPubs", "vender", "pub1", "pub2", "pub3", "pubOk", "carrito", "confirmar", "compraOk", "orden", "devolucion", "auto", "aDestino", "aPunto", "aConfirmar", "viaje", "aCalificar", "sInicio", "trabajo", "dHome", "dBuscar", "dPin", "dViaje", "dCobro"];
-  const L: Any = {"canvas": "#F5F5F5", "surface": "#FFFFFF", "raised": "#FFFFFF", "muted": "#EBEBEB", "mos": "#F5F5F5", "field": "#FFFFFF", "inverse": "#000000", "onInverse": "#FFFFFF", "brand": "#4BAC4F", "brandSubtle": "rgba(75,172,79,0.2)", "text": "#000000", "text2": "#5C5C5C", "text3": "#707070", "link": "#2F7A33", "success": "#24602A", "warning": "#7A4D00", "danger": "#B71C1C", "iconBrand": "#2F7A33", "bSubtle": "#EBEBEB", "bDefault": "#CCCCCC", "bField": "#808080", "bStrong": "#000000", "focus": "#2F7A33", "warnSubtle": "rgba(122,77,0,0.12)", "dangerSubtle": "rgba(183,28,28,0.12)", "brandOnInverse": "#4BAC4F", "shadow1": "0 1px 2px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04)", "shadow3": "0 16px 48px rgba(0,0,0,0.18)", "map": "#E3E7E3", "road": "#FFFFFF", "handle": "#CCCCCC", "badgeNeutral": "#EBEBEB", "onDanger": "#FFFFFF", "skel": "#EBEBEB", "text2Inv": "#B3B3B3"};
-  const D: Any = {"canvas": "#000000", "surface": "#333333", "raised": "#1A1A1A", "muted": "#333333", "mos": "#4D4D4D", "field": "#333333", "inverse": "#FFFFFF", "onInverse": "#000000", "brand": "#4BAC4F", "brandSubtle": "rgba(75,172,79,0.2)", "text": "#FFFFFF", "text2": "#B3B3B3", "text3": "#9E9E9E", "link": "#7CCB7F", "success": "#7CCB7F", "warning": "#FFB547", "danger": "#FF6B6B", "iconBrand": "#4BAC4F", "bSubtle": "#333333", "bDefault": "#4D4D4D", "bField": "#808080", "bStrong": "#FFFFFF", "focus": "#4BAC4F", "warnSubtle": "rgba(255,181,71,0.16)", "dangerSubtle": "rgba(255,107,107,0.16)", "brandOnInverse": "#2F7A33", "shadow1": "none", "shadow3": "0 16px 48px rgba(0,0,0,0.6)", "map": "#1A1A1A", "road": "#333333", "handle": "#4D4D4D", "badgeNeutral": "#4D4D4D", "onDanger": "#000000", "skel": "#333333", "text2Inv": "#5C5C5C"};
-  const LX: Any = {"bg": "#FFFFFF", "fill": "#F5F5F5", "cardBg": "#FFFFFF", "ph": "#E3E3E3", "ph2": "#D6D6D6", "ph3": "#CCCCCC", "line": "#EBEBEB", "scrim": "rgba(0,0,0,0.4)", "outline": "#E0E0E0"};
-  const DX: Any = {"bg": "#000000", "fill": "#333333", "cardBg": "#1A1A1A", "ph": "#333333", "ph2": "#4D4D4D", "ph3": "#262626", "line": "#333333", "scrim": "rgba(0,0,0,0.6)", "outline": "#4D4D4D"};
+  // colores del brief de diseño (2026-11-09, TOKENS.json v1.1.0): claro
+  const L: Any = {"canvas": "#F5F5F5", "surface": "#FFFFFF", "raised": "#FFFFFF", "muted": "#EBEBEB", "mos": "#F5F5F5", "field": "#FFFFFF", "inverse": "#000000", "onInverse": "#FFFFFF", "brand": "#4BAC4F", "brandPressed": "#3E9642", "brandSubtle": "#4BAC4F33", "text": "#000000", "text2": "#5C5C5C", "text3": "#707070", "link": "#2F7A33", "success": "#24602A", "warning": "#7A4D00", "danger": "#B71C1C", "iconBrand": "#2F7A33", "bSubtle": "#EBEBEB", "bDefault": "#CCCCCC", "bField": "#808080", "bStrong": "#000000", "focus": "#2F7A33", "warnSubtle": "#7A4D001F", "dangerSubtle": "#B71C1C1F", "brandOnInverse": "#4BAC4F", "shadow1": "0 1px 2px #0000000F, 0 2px 8px #0000000A", "shadow3": "0 16px 48px #0000002E", "map": "#E3E7E3", "road": "#FFFFFF", "handle": "#CCCCCC", "badgeNeutral": "#EBEBEB", "onDanger": "#FFFFFF", "skel": "#EBEBEB", "text2Inv": "#B3B3B3"};
+  const D: Any = {"canvas": "#000000", "surface": "#333333", "raised": "#1A1A1A", "muted": "#333333", "mos": "#4D4D4D", "field": "#333333", "inverse": "#FFFFFF", "onInverse": "#000000", "brand": "#4BAC4F", "brandPressed": "#3E9642", "brandSubtle": "#4BAC4F33", "text": "#FFFFFF", "text2": "#B3B3B3", "text3": "#9E9E9E", "link": "#7CCB7F", "success": "#7CCB7F", "warning": "#FFB547", "danger": "#FF6B6B", "iconBrand": "#4BAC4F", "bSubtle": "#333333", "bDefault": "#4D4D4D", "bField": "#808080", "bStrong": "#FFFFFF", "focus": "#4BAC4F", "warnSubtle": "#FFB54729", "dangerSubtle": "#FF6B6B29", "brandOnInverse": "#2F7A33", "shadow1": "none", "shadow3": "0 16px 48px #00000099", "map": "#1A1A1A", "road": "#333333", "handle": "#4D4D4D", "badgeNeutral": "#4D4D4D", "onDanger": "#000000", "skel": "#333333", "text2Inv": "#5C5C5C"};
+  // bg = bg.canvas · fill = bg.muted (chips, cajas de ícono, buscadores) · cardBg = bg.surface
+  const LX: Any = {"bg": "#F5F5F5", "fill": "#EBEBEB", "cardBg": "#FFFFFF", "ph": "#E3E3E3", "ph2": "#D6D6D6", "ph3": "#CCCCCC", "line": "#EBEBEB", "scrim": "#00000080", "outline": "#EBEBEB"};
+  const DX: Any = {"bg": "#000000", "fill": "#333333", "cardBg": "#333333", "ph": "#4D4D4D", "ph2": "#5C5C5C", "ph3": "#262626", "line": "#333333", "scrim": "#00000080", "outline": "#4D4D4D"};
   const startKey = P_.pantallaInicial || 'Inicio (cliente)';
   const START: Any = {
     'Inicio (cliente)': ['inicio', 'cliente'], 'Tienda': ['tienda', 'cliente'], 'Auto': ['auto', 'cliente'],
@@ -61,19 +62,26 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
   const src = dark ? D : L; const t: Any = {};
   for (const k in src) { t[k] = src[k]; }
   const X = dark ? DX : LX; for (const k2 in X) { t[k2] = X[k2]; }
-  t.onBrand = P_.textoSobreVerde === 'negro' ? '#000000' : '#FFFFFF';
+  t.onBrand = '#FFFFFF'; // texto sobre verde: siempre blanco (brief, regla de color)
   t.logo = dark ? './brand/chambito-horizontal-blanco.png' : './brand/chambito-horizontal.png';
   const fase2 = P_.faseMarket === 'Fase 2 · compra protegida';
   const navMode = P_.navegacion || 'Explorar (prototipo)';
+  // «Selector de sección» (Prototipo Auto): each home has «Servicios ▾ / Auto ▾ / Market ▾» and the bar is Inicio · Actividad · Perfil
+  const sel = navMode === 'Selector de sección';
+  const SECTION_HOME: Any = { servicios: 'inicio', auto: 'auto', market: 'tienda' };
+  const SECTION_OF: Any = { inicio: 'servicios', auto: 'auto', tienda: 'market' };
+  const section = SECTION_OF[screen] || st.section || 'servicios';
+  /** going to a section home in the selector mode remembers it, so Inicio reopens there */
+  function withSection(id?: Any, o?: Any) { if (sel && SECTION_OF[id]) o.section = SECTION_OF[id]; return o; }
 
   // ---------- helpers ----------
   function fmt(n?: Any) { return 'Gs. ' + String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
   function copy(o?: Any) { const r: Any = {}; for (const kk in (o || {})) r[kk] = o[kk]; return r; }
-  function homeOf(r?: Any) { return (r || role) === 'socio' ? 'sInicio' : 'inicio'; }
+  function homeOf(r?: Any) { return (r || role) === 'socio' ? 'sInicio' : sel ? SECTION_HOME[cs().section || 'servicios'] : 'inicio'; }
   function curScreen() { const x = cs(); return x.screen || start[0]; }
   function curHist() { return cs().hist || []; }
   function go(id?: Any, extra?: Any) {
-    const o: Any = { screen: id, hist: curHist().concat([curScreen()]), sheet: null };
+    const o: Any = withSection(id, { screen: id, hist: curHist().concat([curScreen()]), sheet: null });
     if (extra) for (const kk in extra) o[kk] = extra[kk];
     S(o);
   }
@@ -85,7 +93,7 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
     S(o);
   }
   function root(id?: Any, extra?: Any) {
-    const o: Any = { screen: id, hist: [], sheet: null };
+    const o: Any = withSection(id, { screen: id, hist: [], sheet: null });
     if (extra) for (const kk in extra) o[kk] = extra[kk];
     S(o);
   }
@@ -97,13 +105,13 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
   function toast(msg?: Any) {
     const id = Date.now() + Math.random();
     S({ toast: msg, toastId: id });
-    later(function () { if (cs().toastId === id) S({ toast: null }); }, 2800);
+    later(function () { if (cs().toastId === id) S({ toast: null }); }, 4000);
   }
-  function nav(id?: Any) { return function () { if (tabDefs.some(function (d?: Any) { return d[0] === id; })) root(id); else go(id); }; }
+  function nav(id?: Any) { return function () { if (tabDefs.some(function (d?: Any) { return d[0] === id; }) || (selHomes && SECTION_OF[id])) root(id); else go(id); }; }
   function chip(label?: Any, on?: Any, pick?: Any) {
     return { t: t, label: label, on: !!on, pressed: on ? 'true' : 'false', pick: pick, bg: on ? t.inverse : t.fill, fg: on ? t.onInverse : t.text };
   }
-  function radioV(on?: Any) { return { checked: on ? 'true' : 'false', ring: on ? t.focus : t.bDefault, ringW: on ? 2 : 1, dot: on ? t.focus : 'transparent' }; }
+  function radioV(on?: Any) { return { checked: on ? 'true' : 'false', ring: on ? t.focus : t.bDefault, ringW: on ? 2 : 1, rRing: on ? t.inverse : t.bField, rBg: on ? t.inverse : 'transparent', dot: on ? t.onInverse : 'transparent' }; }
   function assign(a?: Any, b?: Any) { for (const kk in b) a[kk] = b[kk]; return a; }
 
   // ---------- data ----------
@@ -155,11 +163,14 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
     'Explorar (prototipo)': [['inicio', 'home', 'Inicio'], ['explorar', 'search', 'Explorar'], ['actividad', 'bell', 'Actividad'], ['perfil', 'user', 'Perfil']],
     'Combinación 1 · Auto y Tienda': [['inicio', 'home', 'Inicio'], ['auto', 'car', 'Auto'], ['tienda', 'bag', 'Tienda'], ['actividad', 'bell', 'Actividad'], ['perfil', 'user', 'Perfil']],
     'Combinación 2 · Auto': [['inicio', 'home', 'Inicio'], ['auto', 'car', 'Auto'], ['actividad', 'bell', 'Actividad'], ['perfil', 'user', 'Perfil']],
-    'Tienda en la barra': [['inicio', 'home', 'Inicio'], ['tienda', 'bag', 'Tienda'], ['actividad', 'bell', 'Actividad'], ['perfil', 'user', 'Perfil']]
+    'Tienda en la barra': [['inicio', 'home', 'Inicio'], ['tienda', 'bag', 'Tienda'], ['actividad', 'bell', 'Actividad'], ['perfil', 'user', 'Perfil']],
+    'Selector de sección': [['inicio', 'home', 'Inicio'], ['actividad', 'bell', 'Actividad'], ['perfil', 'user', 'Perfil']]
   };
   const SOCIO_TABS: Any = [['sInicio', 'home', 'Inicio'], ['trabajo', 'inbox', 'Trabajo'], ['actividad', 'bell', 'Actividad'], ['perfil', 'user', 'Perfil']];
   const tabDefs = role === 'socio' ? SOCIO_TABS : (TABSETS[navMode] || TABSETS['Explorar (prototipo)']);
-  const isRoot = tabDefs.some(function (d?: Any) { return d[0] === screen; });
+  // in the selector mode the three section homes are roots: the bar shows and Inicio stays marked
+  const selHomes = sel && role !== 'socio';
+  const isRoot = tabDefs.some(function (d?: Any) { return d[0] === screen; }) || (selHomes && !!SECTION_OF[screen]);
   const showTabs = isRoot && hist.length === 0;
 
   const SVC: Any = {
@@ -188,10 +199,12 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
 
   const notifDot = !st.notifsRead;
   const tabs = tabDefs.map(function (d?: Any) {
-    const on = d[0] === screen;
-    return { t: t, label: d[2], icon: d[1], current: on ? 'page' : 'false', bg: on ? t.brand : 'transparent', fg: on ? '#000000' : t.text2,
+    // selector mode: Inicio is marked on any section home and reopens the last section used
+    const inicioSel = selHomes && d[0] === 'inicio';
+    const on = d[0] === screen || (inicioSel && !!SECTION_OF[screen]);
+    return { t: t, label: d[2], icon: d[1], current: on ? 'page' : 'false', bg: 'transparent', fg: on ? t.link : t.text2, // activa: #2F7A33 / #7CCB7F
       dot: d[0] === 'actividad' && (tripActive || (order && orderPhase !== 'entregado')) && !on,
-      go: function () { root(d[0]); } };
+      go: function () { root(inicioSel ? SECTION_HOME[cs().section || 'servicios'] : d[0]); } };
   });
 
   // ---------- actions ----------
@@ -202,6 +215,25 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
   a.share = function () { toast('Abrimos la hoja de compartir del sistema'); };
   a.reset = reset;
   a.closeSheet = function () { S({ sheet: null }); };
+
+  // X2 · «Elegí qué querés hacer»: one row per section, the current one marked
+  const SECTIONS: Any = [
+    ['servicios', 'Servicios', 'Servicios', 'servicios', 'Limpieza, enfermería, niñeras y más', ''],
+    ['auto', 'Auto', 'Chambito Auto', 'car', 'Pedí un viaje o manejá con tu auto', ''],
+    ['market', 'Market', 'Chambito Market', 'bag', 'Comprá y vendé con gente verificada', 'Nuevo']
+  ];
+  const curSec = SECTIONS.filter(function (x?: Any) { return x[0] === section; })[0];
+  const selector = { show: selHomes && !!SECTION_OF[screen], label: curSec[1], icon: curSec[3], aria: 'Sección: ' + curSec[1] + '. Cambiar de sección' };
+  a.openExplorer = function () { S({ sheet: 'explorer' }); };
+  const explorer = {
+    show: st.sheet === 'explorer',
+    items: SECTIONS.map(function (x?: Any) {
+      const on = x[0] === section;
+      return { t: t, title: x[2], icon: x[3], hint: x[4], on: on, tag: on ? 'Estás acá' : x[5], hasTag: on || !!x[5],
+        aria: x[2] + ': ' + x[4] + (on ? ', estás acá' : x[5] ? ', ' + x[5].toLowerCase() : ''),
+        pick: function () { if (on) { S({ sheet: null }); return; } root(SECTION_HOME[x[0]]); } };
+    })
+  };
   a.toActividad = function () { root('actividad'); };
   a.toConsultas = function () { root('actividad', { actFilter: 'market' }); };
   function popTo(id?: Any, fallback?: Any) {
@@ -252,7 +284,7 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
   const sort = st.sort || 'cerca';
   results = results.slice().sort(function (x?: Any, y?: Any) { return sort === 'precio' ? x.price - y.price : x.km - y.km; });
   const m: Any = {
-    cats: CATS.map(function (c?: Any) { const on = c[0] === cat; return { t: t, label: c[1], icon: c[2], pressed: on ? 'true' : 'false', bg: on ? t.brand : t.fill, fg: on ? '#000000' : t.text2,
+    cats: CATS.map(function (c?: Any) { const on = c[0] === cat; return { t: t, label: c[1], icon: c[2], pressed: on ? 'true' : 'false', bg: on ? t.inverse : t.fill, fg: on ? t.onInverse : t.text2,
       pick: function () { S({ cat: on ? null : c[0] }); } }; }),
     near: near, recent: recent, hasNear: near.length > 0, hasRecent: recent.length > 0, emptyCat: !near.length && !recent.length,
     catLabel: cat ? catName[cat] : '',
@@ -308,7 +340,7 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
   const chat: Any = {
     name: party.name, ini: party.ini, ptitle: cp.title, pprice: fmt(cp.price), ph: TONES[cp.tone || 0], openProduct: openProduct(cp.id),
     empty: thread.length === 0, typing: st.typing === cpid, typingTxt: party.name.split(' ')[0] + ' está escribiendo…',
-    msgs: thread.map(function (x?: Any) { return { t: t, text: x.text, align: x.me ? 'flex-end' : 'flex-start', bg: x.me ? t.inverse : t.fill, fg: x.me ? t.onInverse : t.text }; }),
+    msgs: thread.map(function (x?: Any) { return { t: t, text: x.text, align: x.me ? 'flex-end' : 'flex-start', bg: x.me ? (dark ? t.brand : '#000000') : t.fill, fg: x.me ? '#FFFFFF' : t.text, me: !!x.me }; }),
     quick: (cp.mine ? ['Sí, sigue disponible', '¿Te queda bien el sábado?', 'Te paso el punto de encuentro'] : ['¿Sigue disponible?', '¿Último precio?', '¿Dónde se retira?'])
       .map(function (x?: Any) { return chip(x, false, send(x)); }),
     sendDefault: send(cp.mine ? 'Podemos vernos el sábado a la tarde.' : 'Hola, ¿podemos vernos el sábado?')
@@ -370,7 +402,7 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
     canReceive: orderPhase === 'enCamino' && !st.claim,
     steps: OSTEPS.map(function (x?: Any, i?: Any) {
       const done = i <= phIx; const curr = i === phIx;
-      return { t: t, label: x[0], sub: x[1], current: curr ? 'step' : 'false', dotBg: done ? t.brand : t.fill, dotFg: done ? '#000000' : 'transparent',
+      return { t: t, label: x[0], sub: x[1], current: curr ? 'step' : 'false', dotBg: done ? t.brand : t.fill, dotFg: done ? t.onBrand : 'transparent',
         lineBg: i === OSTEPS.length - 1 ? 'transparent' : (i < phIx ? t.brand : t.bDefault), weight: curr ? 500 : 400, color: done ? t.text : t.text2 };
     })
   };
@@ -406,7 +438,7 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
   const apay = st.apay || 'efectivo';
   const auto: Any = {
     modes: [['viaje', 'Viaje'], ['moto', 'Moto'], ['envio', 'Envío']].map(function (x?: Any) { const on = x[0] === mode;
-      return { t: t, label: x[1], selected: on ? 'true' : 'false', bg: on ? t.bg : 'transparent', fg: on ? t.text : t.text2, shadow: on ? '0 1px 3px rgba(0,0,0,.18)' : 'none', pick: function () { S({ mode: x[0], level: null }); } }; }),
+      return { t: t, label: x[1], selected: on ? 'true' : 'false', bg: on ? t.inverse : 'transparent', fg: on ? t.onInverse : t.text2, shadow: 'none', pick: function () { S({ mode: x[0], level: null }); } }; }),
     placeholder: mode === 'envio' ? '¿A dónde lo enviamos?' : '¿A dónde vas?', destTitle: mode === 'envio' ? '¿A dónde lo enviamos?' : '¿A dónde vas?',
     recents: ['galeria', 'santa', 'aero'].map(function (id?: Any) { const p = PLACES[id]; return { t: t, name: p.name, sub: p.sub, km: String(p.km).replace('.', ','), pick: pickPlace(id) }; }),
     destName: dest.name, km: String(dest.km).replace('.', ','), min: dest.min, kmReal: dest.kmReal, minReal: dest.minReal,
@@ -442,7 +474,7 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
 
   const stars = st.stars || 0; const rchips = st.rchips || {}; const tip = st.tip == null ? 5000 : st.tip;
   const rate: Any = {
-    stars: [1, 2, 3, 4, 5].map(function (n?: Any) { return { label: n + (n === 1 ? ' estrella' : ' estrellas'), checked: n === stars ? 'true' : 'false', color: n <= stars ? t.text : t.bDefault, pick: function () { S({ stars: n }); } }; }),
+    stars: [1, 2, 3, 4, 5].map(function (n?: Any) { return { label: n + (n === 1 ? ' estrella' : ' estrellas'), checked: n === stars ? 'true' : 'false', color: n <= stars ? t.iconBrand : t.bDefault, pick: function () { S({ stars: n }); } }; }),
     chips: ['Manejo seguro', 'Puntual', 'Auto limpio', 'Buena atención'].map(function (x?: Any) { return chip(x, !!rchips[x], function () { const r = copy(cs().rchips || {}); r[x] = !r[x]; S({ rchips: r }); }); }),
     tips: [[3000, 'Gs. 3.000'], [5000, 'Gs. 5.000'], [10000, 'Gs. 10.000'], [0, 'Sin propina']].map(function (x?: Any) { return chip(x[1], x[0] === tip, function () { S({ tip: x[0] }); }); }),
     tipTxt: tip ? fmt(tip) : 'Gs. 0', totalTxt: fmt(tripPrice + tip)
@@ -502,8 +534,8 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
   const socio: Any = { marketTitle: fase2 ? '1 pedido nuevo' : '1 consulta nueva' };
 
   // activity (cliente) and work (socio)
-  const V: Any = { servicios: ['Servicios', 'servicios', t.brand, '#000000'], auto: ['Auto', 'car', t.inverse, t.brandOnInverse], market: ['Market', 'bag', t.brandSubtle, t.text] };
-  const BT: Any = { live: [t.brandSubtle, t.text], ok: [t.brandSubtle, t.success], warn: [t.warnSubtle, t.warning], neutral: [t.fill, t.text], danger: [t.dangerSubtle, t.danger] };
+  const V: Any = { servicios: ['Servicios', 'servicios', t.brand, t.onBrand], auto: ['Auto', 'car', t.inverse, t.brandOnInverse], market: ['Market', 'bag', t.brandSubtle, t.text] };
+  const BT: Any = { live: [t.brandSubtle, t.text], ok: [t.brandSubtle, t.success], warn: [t.warnSubtle, t.warning], neutral: [t.fill, t.text2], danger: [t.dangerSubtle, t.danger] };
   function item(v?: Any, title?: Any, sub?: Any, badge?: Any, tone?: Any, when?: Any, open?: Any, group?: Any) {
     return { t: t, v: v, vertical: V[v][0], icon: V[v][1], ibg: V[v][2], ifg: V[v][3], title: title, sub: sub, badge: badge, bbg: BT[tone][0], bfg: BT[tone][1], when: when, open: open, g: group };
   }
@@ -551,9 +583,9 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
   const perfil: Any = {
     roleLabel: role === 'socio' ? 'Modo socio' : 'Modo cliente',
     pubsSub: mineItems.length + ' publicaciones', savedSub: savedItems.length + ' guardados',
-    socio: { checked: role === 'socio' ? 'true' : 'false', sub: role === 'socio' ? 'Ves Trabajo y tus pedidos como prestadora' : 'Ofrecé servicios, vendé o conducí', track: role === 'socio' ? t.brand : t.bDefault, knob: role === 'socio' ? 'flex-end' : 'flex-start',
+    socio: { checked: role === 'socio' ? 'true' : 'false', sub: role === 'socio' ? 'Ves Trabajo y tus pedidos como prestadora' : 'Ofrecé servicios, vendé o conducí', track: role === 'socio' ? t.focus : t.bDefault, knob: role === 'socio' ? 'flex-end' : 'flex-start',
       toggle: function () { const r = role === 'socio' ? 'cliente' : 'socio'; const o: Any = { role: r, screen: 'perfil', hist: [], offer: false }; if (r === 'cliente') { o.dOnline = false; o.offerId = null; } S(o); toast(r === 'socio' ? 'Pasaste a modo socio' : 'Pasaste a modo cliente'); } },
-    dark: { checked: dark ? 'true' : 'false', sub: dark ? 'Activado' : 'Desactivado', track: dark ? t.brand : t.bDefault, knob: dark ? 'flex-end' : 'flex-start', toggle: function () { S({ dark: !dark }); } }
+    dark: { checked: dark ? 'true' : 'false', sub: dark ? 'Activado' : 'Desactivado', track: dark ? t.focus : t.bDefault, knob: dark ? 'flex-end' : 'flex-start', toggle: function () { S({ dark: !dark }); } }
   };
 
   const gonav: Any = {};
@@ -571,7 +603,7 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
   const onMap = MAPS.indexOf(screen) >= 0;
   const toastV: Any = { show: !!st.toast, msg: st.toast || '', top: onMap ? '108px' : 'auto', bottom: onMap ? 'auto' : (showTabs ? tabPad + 8 : (TALL.indexOf(screen) >= 0 ? 190 : 120)) + 'px' };
   return {
-    screen: screen, role: role, dark: dark, t: t, s: s, a: a, go: gonav, tabs: tabs, tabCols: tabs.length, showTabs: showTabs, tabPad: tabPad, live: live, canBack: hist.length > 0 || !isRoot,
+    screen: screen, role: role, dark: dark, sel: sel, selector: selector, explorer: explorer, t: t, s: s, a: a, go: gonav, tabs: tabs, tabCols: tabs.length, showTabs: showTabs, tabPad: tabPad, live: live, canBack: hist.length > 0 || !isRoot,
     toast: toastV, notifDot: notifDot, fase2: fase2, fabBottom: showTabs ? tabPad - 8 : 34, sheetSos: st.sheet === 'sos', offer: offer,
     home: home, explore: explore, act: act, perfil: perfil, notifs: notifs, svc: svc, m: m, pv: pv, chat: chat,
     saved: { items: savedItems, empty: savedItems.length === 0 }, mine: { items: mineItems }, pub: pub, cart: cartV, order: orderV, claim: claimV,

@@ -1,7 +1,7 @@
 /** El teléfono de la app integrada: guarda el estado, arma el modelo y muestra la pantalla abierta con lo que va encima. */
 import { ComponentType, forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { buildModel, IntegradaProps, St, VMContext } from './model';
-import { Bars, HomeIndicator, OfferSheet, PhoneStatusBar, SosSheet, Toast } from './chrome';
+import { Bars, ExplorerSheet, HomeIndicator, OfferSheet, PhoneStatusBar, SosSheet, Toast } from './chrome';
 import { Actividad, Explorar, Inicio, Notificaciones, Perfil, Servicio, ServicioConfirmar, ServicioEnviado, ServicioProfesional } from './screens/base';
 import {
   Carrito, CompraHecha, ConfirmarCompra, Consulta, Devolucion, Ficha, Guardados, MisPublicaciones, Orden, Publicado, Publicar1, Publicar2, Publicar3, Tienda, TiendaBuscar, Vender,
@@ -28,15 +28,23 @@ export const IG_SCREENS: Record<IgScreen, ComponentType> = {
 /** Pantallas del socio (prestador y conductor): al abrirlas desde el índice, la cuenta pasa a socio. */
 export const SOCIO_SCREENS: IgScreen[] = ['sInicio', 'trabajo', 'dHome', 'dBuscar', 'dPin', 'dViaje', 'dCobro'];
 
+/** hojas que el menú puede abrir encima de una pantalla */
+export type IgSheet = 'explorer' | 'sos';
+/** lo que el visor necesita saber para marcar la pantalla en el menú */
+export interface IgPlace { screen: IgScreen; sheet: IgSheet | null }
+
+/** sección de cada portada (para que «Inicio» reabra la última usada en el modo selector) */
+const SECTION_OF: Partial<Record<IgScreen, string>> = { inicio: 'servicios', auto: 'auto', tienda: 'market' };
+
 export interface IntegradaHandle {
-  /** abre una pantalla desde el índice del visor (sin historial, con la cuenta que le corresponde) */
-  jump: (id: IgScreen) => void;
+  /** abre una pantalla desde el menú del visor (sin historial, con la cuenta que le corresponde); `sheet` abre además una hoja */
+  jump: (id: IgScreen, sheet?: IgSheet) => void;
   /** vuelve al estado inicial */
   reset: () => void;
 }
 
 /** Estado de la app: un objeto que se mezcla como el setState del diseño, y temporizadores que se limpian al desmontar. */
-function useIntegrada(props: IntegradaProps, onScreen?: (id: IgScreen) => void) {
+function useIntegrada(props: IntegradaProps, onPlace?: (p: IgPlace) => void) {
   const [st, setSt] = useState<St>({});
   const latest = useRef<St>(st);
   const timers = useRef(new Set<ReturnType<typeof setTimeout>>());
@@ -59,15 +67,16 @@ function useIntegrada(props: IntegradaProps, onScreen?: (id: IgScreen) => void) 
   useEffect(() => { reset(); }, [props.pantallaInicial, reset]);
   const vm = useMemo(() => buildModel(props, { st, cs: () => latest.current, S, later, reset }), [props, st, S, later, reset]);
   const screen = vm.screen as IgScreen;
-  useEffect(() => { onScreen?.(screen); }, [screen, onScreen]);
+  const sheet = (st.sheet ?? null) as IgSheet | null;
+  useEffect(() => { onPlace?.({ screen, sheet }); }, [screen, sheet, onPlace]);
   return { vm, S, reset };
 }
 
-export const IntegradaPhone = forwardRef<IntegradaHandle, IntegradaProps & { onScreen?: (id: IgScreen) => void }>(function IntegradaPhone({ onScreen, ...props }, ref) {
-  const stable = useMemo(() => props, [props.navegacion, props.faseMarket, props.pantallaInicial, props.dark, props.textoSobreVerde]); // eslint-disable-line react-hooks/exhaustive-deps
-  const { vm, S, reset } = useIntegrada(stable, onScreen);
+export const IntegradaPhone = forwardRef<IntegradaHandle, IntegradaProps & { onPlace?: (p: IgPlace) => void }>(function IntegradaPhone({ onPlace, ...props }, ref) {
+  const stable = useMemo(() => props, [props.navegacion, props.faseMarket, props.pantallaInicial, props.dark]); // eslint-disable-line react-hooks/exhaustive-deps
+  const { vm, S, reset } = useIntegrada(stable, onPlace);
   useImperativeHandle(ref, () => ({
-    jump: (id) => S({ screen: id, hist: [], sheet: null, role: SOCIO_SCREENS.includes(id) ? 'socio' : 'cliente' }),
+    jump: (id, sheet) => S({ screen: id, hist: [], sheet: sheet ?? null, role: SOCIO_SCREENS.includes(id) ? 'socio' : 'cliente', ...(SECTION_OF[id] ? { section: SECTION_OF[id] } : {}) }),
     reset,
   }), [S, reset]);
   const Current = IG_SCREENS[vm.screen as IgScreen] ?? Inicio;
@@ -81,6 +90,7 @@ export const IntegradaPhone = forwardRef<IntegradaHandle, IntegradaProps & { onS
       >
         <Current />
         <Bars />
+        <ExplorerSheet />
         <SosSheet />
         <OfferSheet />
         <Toast />

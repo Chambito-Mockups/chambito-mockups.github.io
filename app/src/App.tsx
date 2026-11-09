@@ -26,6 +26,8 @@ const NAV_HASH = 'componentes';
 const isRefHash = (h: string) => h === NAV_HASH || h === 'navegacion';
 /** #integrada opens «App integrada» (Servicios, Auto y Market in one app) */
 const APP_HASH = 'integrada';
+/** #integrada and #integrada/<pantalla> */
+const isAppHash = (h: string) => h === APP_HASH || h.startsWith(`${APP_HASH}/`);
 
 export function Shell() {
   const { screen, overlay, go, set, setTrip, resetTrip, setOverlay, settings, showToast } = useApp();
@@ -67,10 +69,14 @@ export function Shell() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen, overlay]);
 
+  // a link #integrada/<pantalla> must survive the first render, which is still on a screen
+  const bootingApp = useRef(isAppHash(decodeURIComponent(window.location.hash.slice(1))));
   // remember the last screen per module, and keep it in the URL for sharing
   useEffect(() => {
+    if (page.kind === 'integrada') bootingApp.current = false;
+    if (bootingApp.current) return;
     if (page.kind === 'integration') window.history.replaceState(null, '', `#${NAV_HASH}`);
-    if (page.kind === 'integrada') window.history.replaceState(null, '', `#${APP_HASH}`);
+    if (page.kind === 'integrada' && !isAppHash(decodeURIComponent(window.location.hash.slice(1)))) window.history.replaceState(null, '', `#${APP_HASH}`); // the page keeps its own #integrada/<pantalla>
     if (page.kind !== 'screen') return;
     const m = MODULE_OF[page.key];
     if (m) lastKey.current[m] = page.key;
@@ -101,7 +107,7 @@ export function Shell() {
   // deep link: #A6 opens that screen
   useEffect(() => {
     if (isRefHash(bootHash)) { setRefVersion(VERSIONS.auto[2]); setPage({ kind: 'integration' }); } // a direct link opens the proposals (v3)
-    else if (bootHash === APP_HASH) setPage({ kind: 'integrada' });
+    else if (isAppHash(bootHash)) setPage({ kind: 'integrada' });
     else if (bootKey !== 'A0') jumpKey(bootKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -112,7 +118,7 @@ export function Shell() {
     const onHash = () => {
       const h = decodeURIComponent(window.location.hash.slice(1));
       if (isRefHash(h)) { setRefVersion(VERSIONS.auto[2]); setPage({ kind: 'integration' }); }
-      else if (h === APP_HASH) setPage({ kind: 'integrada' });
+      else if (isAppHash(h)) setPage({ kind: 'integrada' });
       else jumpRef.current(h);
     };
     window.addEventListener('hashchange', onHash);

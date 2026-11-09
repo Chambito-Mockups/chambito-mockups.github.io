@@ -1,15 +1,15 @@
 /** Servicios (base): Inicio, Explorar, Actividad, Perfil, Notificaciones y el pedido de un servicio. Convertido de chambito-app.html. */
 import { useVM } from '../model';
-import { Body, Btn, Chip, Divider, Footer, H2, Header, I, IconBtn, Screen, SectionHead, StatusSpace, Title } from '../kit';
+import { Body, Btn, Chip, Divider, Footer, H2, Header, I, IconBtn, Screen, SectionHead, SectionPill, StatusSpace, Title } from '../kit';
 
 /** inicio */
 export function Inicio() {
-  const { a, go, home, notifDot, t, tabPad } = useVM();
+  const { a, go, home, notifDot, selector, t, tabPad } = useVM();
   return (
     <Screen id="inicio">
       <StatusSpace />
       <Header>
-        <img src={t.logo} alt="Chambito" style={{ height: 30, width: "auto", display: "block" }} />
+        {selector.show ? <SectionPill /> : <img src={t.logo} alt="Chambito" style={{ height: 30, width: "auto", display: "block" }} />}
         <span style={{ flex: 1 }} />
         <div style={{ position: "relative" }}>
           <IconBtn icon="bell" label="Notificaciones" onClick={go.notifs} />
@@ -19,31 +19,31 @@ export function Inicio() {
         </div>
       </Header>
       <Body>
-        <h1 style={{ margin: 0, font: "700 26px/34px Poppins, Arial, sans-serif" }}>¿Qué necesitás?</h1>
-        <button style={{ marginTop: 12, width: "100%", height: 48, borderRadius: 24, background: t.fill, color: t.text2, display: "flex", alignItems: "center", gap: 10, padding: "0 16px", boxSizing: "border-box" }} onClick={go.explorar}>
+        <h1 style={{ margin: 0, font: "700 28px/36px Poppins, Arial, sans-serif", letterSpacing: -0.3 }}>¿Qué necesitás?</h1>
+        <button style={{ marginTop: 12, width: "100%", height: 48, borderRadius: 24, background: t.fill, color: t.text2, display: "flex", alignItems: "center", gap: 10, padding: "0 20px", boxSizing: "border-box" }} onClick={go.explorar}>
           <I name="search" size={20} />
           <span>Buscá servicios, viajes o productos</span>
         </button>
         <section style={{ marginTop: 20 }}>
           <SectionHead>
             <H2>Servicios</H2>
-            <button style={{ font: "500 14px/20px Roboto, Arial, sans-serif", color: t.link, minHeight: 44 }} onClick={go.explorar}>Ver todos</button>
+            <button style={{ font: "500 14px/20px Roboto, Arial, sans-serif", letterSpacing: 0.1, color: t.link, minHeight: 44 }} onClick={go.explorar}>Ver todos</button>
           </SectionHead>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 8 }}>
             <button style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }} onClick={a.svcLimpieza}>
-              <span aria-hidden="true" style={{ flex: "none", width: 64, height: 64, borderRadius: 20, background: t.brandSubtle, color: t.text, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span aria-hidden="true" style={{ flex: "none", width: 64, height: 64, borderRadius: 20, background: t.fill, color: t.text, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <I name="broom" size={28} />
               </span>
               <span style={{ font: "500 13px/18px Roboto, Arial, sans-serif" }}>Limpieza</span>
             </button>
             <button style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }} onClick={a.svcNinera}>
-              <span aria-hidden="true" style={{ flex: "none", width: 64, height: 64, borderRadius: 20, background: t.brandSubtle, color: t.text, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span aria-hidden="true" style={{ flex: "none", width: 64, height: 64, borderRadius: 20, background: t.fill, color: t.text, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <I name="bottle" size={28} />
               </span>
               <span style={{ font: "500 13px/18px Roboto, Arial, sans-serif" }}>Niñera</span>
             </button>
             <button style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }} onClick={a.svcEnfermeria}>
-              <span aria-hidden="true" style={{ flex: "none", width: 64, height: 64, borderRadius: 20, background: t.brandSubtle, color: t.text, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span aria-hidden="true" style={{ flex: "none", width: 64, height: 64, borderRadius: 20, background: t.fill, color: t.text, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <I name="nurse" size={28} />
               </span>
               <span style={{ font: "500 13px/18px Roboto, Arial, sans-serif" }}>Enfermería</span>
@@ -58,11 +58,11 @@ export function Inicio() {
         </section>
         <section style={{ marginTop: 20 }}>
           <button style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: 16, boxSizing: "border-box", borderRadius: 20, background: t.inverse, color: t.onInverse }} onClick={go.auto}>
-            <span aria-hidden="true" style={{ flex: "none", width: 48, height: 48, borderRadius: 12, background: t.brand, color: "#000000", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <span aria-hidden="true" style={{ flex: "none", width: 48, height: 48, borderRadius: 12, background: t.brand, color: t.onBrand, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <I name="car" size={26} />
             </span>
             <span style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
-              <span style={{ font: "700 18px/24px Poppins, Arial, sans-serif" }}>Chambito Auto</span>
+              <span style={{ font: "700 18px/26px Poppins, Arial, sans-serif" }}>Chambito Auto</span>
               <span style={{ fontSize: 14, lineHeight: "20px", opacity: 0.8 }}>¿A dónde vas? Viajes, motos y envíos</span>
             </span>
             <I name="chevronright" size={22} style={{ color: t.brandOnInverse }} />
@@ -71,11 +71,11 @@ export function Inicio() {
         <section style={{ marginTop: 16 }}>
           <button style={{ width: "100%", display: "flex", flexDirection: "column", gap: 12, padding: 16, boxSizing: "border-box", borderRadius: 20, background: t.cardBg, boxShadow: `inset 0 0 0 1px ${t.line}`, color: t.text }} onClick={go.tienda}>
             <span style={{ display: "flex", alignItems: "center", gap: 12, width: "100%" }}>
-              <span aria-hidden="true" style={{ flex: "none", width: 48, height: 48, borderRadius: 12, background: t.brandSubtle, color: t.text, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span aria-hidden="true" style={{ flex: "none", width: 48, height: 48, borderRadius: 12, background: t.fill, color: t.text, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <I name="bag" size={26} />
               </span>
               <span style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
-                <span style={{ font: "700 18px/24px Poppins, Arial, sans-serif" }}>Chambito Market</span>
+                <span style={{ font: "700 18px/26px Poppins, Arial, sans-serif" }}>Chambito Market</span>
                 <span style={{ fontSize: 14, lineHeight: "20px", color: t.text2 }}>Comprá y vendé con gente verificada</span>
               </span>
               <I name="chevronright" size={22} style={{ color: t.text2 }} />
@@ -86,7 +86,7 @@ export function Inicio() {
                   <span aria-hidden="true" style={{ height: 88, borderRadius: 12, background: h.ph, color: h.t.text3, display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <I name="image" size={22} />
                   </span>
-                  <span style={{ font: "700 13px/18px Poppins, Arial, sans-serif" }}>{h.priceTxt}</span>
+                  <span style={{ font: "700 14px/20px Poppins, Arial, sans-serif" }}>{h.priceTxt}</span>
                 </span>
               ))}
             </span>
@@ -104,16 +104,16 @@ export function Explorar() {
   return (
     <Screen id="explorar">
       <StatusSpace />
-      <div style={{ flex: "none", display: "flex", alignItems: "center", gap: 8, minHeight: 56, padding: "4px 16px 0" }}>
+      <div style={{ flex: "none", display: "flex", alignItems: "center", gap: 8, minHeight: 56, padding: "4px 20px 0" }}>
         {canBack ? (
           <IconBtn icon="chevronleft" label="Volver" onClick={a.back} />
         ) : null}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <h1 style={{ margin: 0, font: "700 28px/36px Poppins, Arial, sans-serif" }}>Explorar</h1>
+          <h1 style={{ margin: 0, font: "700 28px/36px Poppins, Arial, sans-serif", letterSpacing: -0.3 }}>Explorar</h1>
         </div>
       </div>
       <Body>
-        <div style={{ marginTop: 8, width: "100%", height: 48, borderRadius: 24, background: t.fill, color: t.text2, display: "flex", alignItems: "center", gap: 10, padding: "0 16px", boxSizing: "border-box" }}>
+        <div style={{ marginTop: 8, width: "100%", height: 48, borderRadius: 24, background: t.fill, color: t.text2, display: "flex", alignItems: "center", gap: 10, padding: "0 20px", boxSizing: "border-box" }}>
           <I name="search" size={20} />
           <span>Buscá en Chambito</span>
         </div>
@@ -123,11 +123,11 @@ export function Explorar() {
           </SectionHead>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <button style={{ display: "flex", alignItems: "center", gap: 14, padding: 16, borderRadius: 16, background: t.cardBg, boxShadow: `inset 0 0 0 1px ${t.line}`, color: t.text, width: "100%", boxSizing: "border-box" }} onClick={a.svcLimpieza}>
-              <span aria-hidden="true" style={{ flex: "none", width: 48, height: 48, borderRadius: 12, background: t.brand, color: "#000000", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span aria-hidden="true" style={{ flex: "none", width: 48, height: 48, borderRadius: 12, background: t.brand, color: t.onBrand, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <I name="servicios" />
               </span>
               <span style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
-                <span style={{ font: "700 16px/22px Poppins, Arial, sans-serif" }}>Servicios</span>
+                <span style={{ font: "700 16px/24px Poppins, Arial, sans-serif" }}>Servicios</span>
                 <span style={{ fontSize: 14, lineHeight: "20px", color: t.text2 }}>Limpieza, niñera, enfermería y más</span>
               </span>
               <I name="chevronright" size={20} style={{ color: t.text2 }} />
@@ -137,17 +137,17 @@ export function Explorar() {
                 <I name="car" />
               </span>
               <span style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
-                <span style={{ font: "700 16px/22px Poppins, Arial, sans-serif" }}>Chambito Auto</span>
+                <span style={{ font: "700 16px/24px Poppins, Arial, sans-serif" }}>Chambito Auto</span>
                 <span style={{ fontSize: 14, lineHeight: "20px", color: t.text2 }}>Viajes, motos y envíos con precio cerrado</span>
               </span>
               <I name="chevronright" size={20} style={{ color: t.text2 }} />
             </button>
             <button style={{ display: "flex", alignItems: "center", gap: 14, padding: 16, borderRadius: 16, background: t.cardBg, boxShadow: `inset 0 0 0 1px ${t.line}`, color: t.text, width: "100%", boxSizing: "border-box" }} onClick={go.tienda}>
-              <span aria-hidden="true" style={{ flex: "none", width: 48, height: 48, borderRadius: 12, background: t.brandSubtle, color: t.text, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span aria-hidden="true" style={{ flex: "none", width: 48, height: 48, borderRadius: 12, background: t.fill, color: t.text, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <I name="bag" />
               </span>
               <span style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
-                <span style={{ font: "700 16px/22px Poppins, Arial, sans-serif" }}>Chambito Market</span>
+                <span style={{ font: "700 16px/24px Poppins, Arial, sans-serif" }}>Chambito Market</span>
                 <span style={{ fontSize: 14, lineHeight: "20px", color: t.text2 }}>Comprá y vendé cerca tuyo</span>
               </span>
               <I name="chevronright" size={20} style={{ color: t.text2 }} />
@@ -176,16 +176,16 @@ export function Actividad() {
   return (
     <Screen id="actividad">
       <StatusSpace />
-      <div style={{ flex: "none", display: "flex", alignItems: "center", gap: 8, minHeight: 56, padding: "4px 16px 0" }}>
+      <div style={{ flex: "none", display: "flex", alignItems: "center", gap: 8, minHeight: 56, padding: "4px 20px 0" }}>
         {canBack ? (
           <IconBtn icon="chevronleft" label="Volver" onClick={a.back} />
         ) : null}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <h1 style={{ margin: 0, font: "700 28px/36px Poppins, Arial, sans-serif" }}>Actividad</h1>
+          <h1 style={{ margin: 0, font: "700 28px/36px Poppins, Arial, sans-serif", letterSpacing: -0.3 }}>Actividad</h1>
         </div>
       </div>
       <div style={{ flex: "none", padding: "8px 16px 4px" }}>
-        <div role="group" style={{ display: "flex", gap: 8, overflowX: "auto", margin: "0 -16px", padding: "0 16px" }}>
+        <div role="group" style={{ display: "flex", gap: 8, overflowX: "auto", margin: "0 -16px", padding: "0 20px" }}>
           {(act.chips as any[]).map((c: any, i: number) => (
             <Chip key={i} aria-pressed={c.pressed} onClick={c.pick} c={c}>{c.on ? (   <I name="check" size={16} /> ) : null}{c.label}</Chip>
           ))}
@@ -202,12 +202,12 @@ export function Actividad() {
                     <I name={it.icon} size={22} />
                   </span>
                   <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
-                    <span style={{ font: "500 12px/16px Roboto, Arial, sans-serif", color: it.t.text2 }}>{it.vertical}</span>
+                    <span style={{ font: "500 12px/16px Roboto, Arial, sans-serif", letterSpacing: 0.2, color: it.t.text2 }}>{it.vertical}</span>
                     <span style={{ fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{it.title}</span>
                     <span style={{ fontSize: 13, lineHeight: "18px", color: it.t.text2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{it.sub}</span>
                   </span>
                   <span style={{ flex: "none", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
-                    <span style={{ height: 24, padding: "0 10px", borderRadius: 9999, display: "inline-flex", alignItems: "center", font: "500 12px/16px Roboto, Arial, sans-serif", background: it.bbg, color: it.bfg, whiteSpace: "nowrap" }}>{it.badge}</span>
+                    <span style={{ height: 24, padding: "0 10px", borderRadius: 9999, display: "inline-flex", alignItems: "center", font: "500 12px/16px Roboto, Arial, sans-serif", letterSpacing: 0.2, background: it.bbg, color: it.bfg, whiteSpace: "nowrap" }}>{it.badge}</span>
                     <span style={{ fontSize: 12, lineHeight: "16px", color: it.t.text2 }}>{it.when}</span>
                   </span>
                 </button>
@@ -221,7 +221,7 @@ export function Actividad() {
               <I name="inbox" size={30} />
             </span>
             <span style={{ font: "700 16px/24px Poppins, Arial, sans-serif" }}>Todavía no hay nada acá</span>
-            <span style={{ fontSize: 14, lineHeight: "19px", color: t.text2 }}>Cuando pidas un servicio, un viaje o consultes en la Tienda, lo vas a ver en esta lista.</span>
+            <span style={{ fontSize: 14, lineHeight: "20px", color: t.text2 }}>Cuando pidas un servicio, un viaje o consultes en la Tienda, lo vas a ver en esta lista.</span>
           </div>
         ) : null}
         <div aria-hidden="true" style={{ height: `${tabPad}px` }} />
@@ -236,22 +236,22 @@ export function Perfil() {
   return (
     <Screen id="perfil">
       <StatusSpace />
-      <div style={{ flex: "none", display: "flex", alignItems: "center", gap: 8, minHeight: 56, padding: "4px 16px 0" }}>
+      <div style={{ flex: "none", display: "flex", alignItems: "center", gap: 8, minHeight: 56, padding: "4px 20px 0" }}>
         {canBack ? (
           <IconBtn icon="chevronleft" label="Volver" onClick={a.back} />
         ) : null}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <h1 style={{ margin: 0, font: "700 28px/36px Poppins, Arial, sans-serif" }}>Perfil</h1>
+          <h1 style={{ margin: 0, font: "700 28px/36px Poppins, Arial, sans-serif", letterSpacing: -0.3 }}>Perfil</h1>
         </div>
       </div>
       <Body>
         <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 14 }}>
-          <span aria-hidden="true" style={{ flex: "none", width: 64, height: 64, borderRadius: 9999, background: t.brand, color: "#000000", display: "flex", alignItems: "center", justifyContent: "center", font: "700 23px/1 Poppins, Arial, sans-serif" }}>LG</span>
+          <span aria-hidden="true" style={{ flex: "none", width: 64, height: 64, borderRadius: 9999, background: t.brand, color: t.onBrand, display: "flex", alignItems: "center", justifyContent: "center", font: "700 23px/1 Poppins, Arial, sans-serif" }}>LG</span>
           <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
-            <span style={{ font: "700 18px/24px Poppins, Arial, sans-serif" }}>Lucía Giménez</span>
+            <span style={{ font: "700 18px/26px Poppins, Arial, sans-serif" }}>Lucía Giménez</span>
             <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, font: "500 12px/16px Roboto, Arial, sans-serif", color: t.success }}><I name="shield" size={14} />Verificado</span>
-              <span style={{ fontSize: 13, color: t.text2 }}>· {perfil.roleLabel}</span>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, font: "500 12px/16px Roboto, Arial, sans-serif", letterSpacing: 0.2, color: t.success }}><I name="shield" size={14} />Verificado</span>
+              <span style={{ fontSize: 13, lineHeight: "18px", color: t.text2 }}>· {perfil.roleLabel}</span>
             </span>
           </div>
         </div>
@@ -427,11 +427,11 @@ export function Servicio() {
       </Header>
       <Body>
         <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 4 }}>
-          <span aria-hidden="true" style={{ flex: "none", width: 56, height: 56, borderRadius: 16, background: t.brandSubtle, color: t.text, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <span aria-hidden="true" style={{ flex: "none", width: 56, height: 56, borderRadius: 16, background: t.fill, color: t.text, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <I name={svc.icon} size={28} />
           </span>
           <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <span style={{ font: "700 18px/24px Poppins, Arial, sans-serif" }}>{svc.headline}</span>
+            <span style={{ font: "700 18px/26px Poppins, Arial, sans-serif" }}>{svc.headline}</span>
             <span style={{ fontSize: 14, lineHeight: "20px", color: t.text2 }}>{svc.blurb}</span>
           </div>
         </div>
@@ -487,7 +487,7 @@ export function Servicio() {
       <Footer>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
           <span style={{ color: t.text2 }}>Precio estimado</span>
-          <span style={{ font: "700 18px/24px Poppins, Arial, sans-serif" }}>{svc.priceTxt}</span>
+          <span style={{ font: "700 18px/26px Poppins, Arial, sans-serif" }}>{svc.priceTxt}</span>
         </div>
         <Btn onClick={go.svcPros}>Ver profesionales</Btn>
       </Footer>
@@ -506,20 +506,20 @@ export function ServicioProfesional() {
         <Title>Elegí a tu profesional</Title>
       </Header>
       <Body>
-        <span style={{ fontSize: 14, lineHeight: "19px", color: t.text2 }}>{svc.summary}</span>
+        <span style={{ fontSize: 14, lineHeight: "20px", color: t.text2 }}>{svc.summary}</span>
         <div role="radiogroup" aria-label="Profesionales" style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
           {(svc.pros as any[]).map((p: any, i: number) => (
             <button key={i} role="radio" aria-checked={p.checked} style={{ display: "flex", alignItems: "center", gap: 12, padding: 14, borderRadius: 16, background: p.t.cardBg, boxShadow: `inset 0 0 0 ${p.ringW}px ${p.ring}`, color: p.t.text, width: "100%", boxSizing: "border-box" }} onClick={p.pick}>
-              <span aria-hidden="true" style={{ flex: "none", width: 48, height: 48, borderRadius: 9999, background: p.t.fill, display: "flex", alignItems: "center", justifyContent: "center", font: "700 16px/1 Poppins, Arial, sans-serif" }}>{p.ini}</span>
+              <span aria-hidden="true" style={{ flex: "none", width: 48, height: 48, borderRadius: 9999, background: p.t.brandSubtle, display: "flex", alignItems: "center", justifyContent: "center", font: "700 16px/1 Poppins, Arial, sans-serif" }}>{p.ini}</span>
               <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
                 <span style={{ fontWeight: 500 }}>{p.name}</span>
-                <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 13, color: p.t.text2 }}><I name="star" size={13} style={{ color: p.t.warning }} />{p.rating} · {p.jobs}</span>
-                <span style={{ display: "flex", alignItems: "center", gap: 4, font: "500 12px/16px Roboto, Arial, sans-serif", color: p.t.success }}><I name="shield" size={14} />Verificada</span>
+                <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 13, lineHeight: "18px", color: p.t.text2 }}><I name="star" size={13} style={{ color: p.t.warning }} />{p.rating} · {p.jobs}</span>
+                <span style={{ display: "flex", alignItems: "center", gap: 4, font: "500 12px/16px Roboto, Arial, sans-serif", letterSpacing: 0.2, color: p.t.success }}><I name="shield" size={14} />Verificada</span>
               </span>
               <span style={{ flex: "none", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
-                <span style={{ font: "700 15px/20px Poppins, Arial, sans-serif" }}>{p.rate}</span>
-                <span aria-hidden="true" style={{ flex: "none", width: 22, height: 22, borderRadius: 9999, boxShadow: `inset 0 0 0 2px ${p.ring}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ width: 12, height: 12, borderRadius: 9999, background: p.dot }} />
+                <span style={{ font: "700 16px/24px Poppins, Arial, sans-serif" }}>{p.rate}</span>
+                <span aria-hidden="true" style={{ flex: "none", width: 24, height: 24, borderRadius: 9999, background: p.rBg, boxShadow: `inset 0 0 0 2px ${p.rRing}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <span style={{ width: 10, height: 10, borderRadius: 9999, background: p.dot }} />
                 </span>
               </span>
             </button>
@@ -556,7 +556,7 @@ export function ServicioConfirmar() {
             </div>
           </div>
           <Divider />
-          <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 14 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 14, lineHeight: "20px" }}>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span style={{ color: t.text2 }}>Profesional</span>
               <span style={{ fontWeight: 500 }}>{svc.proName}</span>
@@ -582,7 +582,7 @@ export function ServicioConfirmar() {
       <Footer>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
           <span style={{ color: t.text2 }}>Total estimado</span>
-          <span style={{ font: "700 18px/24px Poppins, Arial, sans-serif" }}>{svc.priceTxt}</span>
+          <span style={{ font: "700 18px/26px Poppins, Arial, sans-serif" }}>{svc.priceTxt}</span>
         </div>
         <Btn onClick={a.svcSend}>Confirmar pedido</Btn>
       </Footer>
@@ -602,14 +602,14 @@ export function ServicioEnviado() {
           <span aria-hidden="true" style={{ flex: "none", width: 88, height: 88, borderRadius: 9999, background: t.brandSubtle, color: t.success, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <I name="success" size={44} />
           </span>
-          <h1 style={{ margin: 0, font: "700 24px/32px Poppins, Arial, sans-serif" }}>¡Pedido enviado!</h1>
-          <span style={{ fontSize: 15, lineHeight: "20px", color: t.text2 }}>Le avisamos a {svc.proName}. Te confirmamos por acá y con una notificación.</span>
+          <h1 style={{ margin: 0, font: "700 22px/30px Poppins, Arial, sans-serif", letterSpacing: -0.2 }}>¡Pedido enviado!</h1>
+          <span style={{ fontSize: 15, lineHeight: "22px", color: t.text2 }}>Le avisamos a {svc.proName}. Te confirmamos por acá y con una notificación.</span>
         </div>
         <section style={{ marginTop: 28 }}>
           <div style={{ background: t.cardBg, borderRadius: 16, boxShadow: `inset 0 0 0 1px ${t.line}`, padding: 16, display: "flex", flexDirection: "column", gap: 12, boxSizing: "border-box" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
               <span style={{ fontWeight: 500 }}>{svc.title}</span>
-              <span style={{ height: 24, padding: "0 10px", borderRadius: 9999, display: "inline-flex", alignItems: "center", font: "500 12px/16px Roboto, Arial, sans-serif", background: svc.stBg, color: svc.stFg }}>{svc.statusLabel}</span>
+              <span style={{ height: 24, padding: "0 10px", borderRadius: 9999, display: "inline-flex", alignItems: "center", font: "500 12px/16px Roboto, Arial, sans-serif", letterSpacing: 0.2, background: svc.stBg, color: svc.stFg }}>{svc.statusLabel}</span>
             </div>
             <span style={{ fontSize: 13, lineHeight: "18px", color: t.text2 }}>{svc.summary}</span>
           </div>

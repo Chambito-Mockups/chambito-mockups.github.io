@@ -387,6 +387,11 @@ kbd { font: 500 11px Roboto, sans-serif; color: var(--fg2); background: var(--li
 .ig-index { max-height: calc(100vh - 100px); overflow-y: auto; gap: 4px; scrollbar-width: thin; }
 .ig-intro h1 { margin: 0 0 4px; font: 700 22px Poppins, sans-serif; color: var(--fg); }
 .ig-intro p, .ig-hint { margin: 0; font: 400 13px/1.5 Roboto, sans-serif; color: var(--fg2); text-wrap: pretty; }
+.ig-center { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.ig-bar { display: flex; align-items: center; gap: 10px; max-width: 480px; width: 100%; margin: 0 auto; }
+.ig-bar-title { flex: 1; min-width: 0; display: flex; flex-direction: column; text-align: center; font: 500 15px Roboto, sans-serif; color: var(--fg); }
+.ig-bar-title > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ig-bar-group { font: 500 11px Roboto, sans-serif; color: var(--fg3); text-transform: uppercase; letter-spacing: .06em; }
 .ig-phone { display: flex; justify-content: center; min-width: 0; }
 @media (max-width: 1180px) {
   .ig-stage { grid-template-columns: 1fr; }
