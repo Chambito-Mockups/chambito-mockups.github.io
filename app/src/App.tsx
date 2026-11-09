@@ -3,6 +3,7 @@ import { AppProvider, Settings, useApp } from './store';
 import { ALL_ENTRIES, Entry, MODULE_OF, MODULES, Module, Tour, VERSIONS, Version, entriesIn, versionOf } from './registry';
 import { Icon } from './ui/kit';
 import { IntegrationPage } from './integration';
+import { IntegradaPage } from './integrada/IntegradaPage';
 import { MarketProvider, useMarket, emptyDraft } from './market/state';
 import { FitPhone } from './shell/Phone';
 import { GREEN, isTyping } from './shell/controls';
@@ -23,6 +24,8 @@ const initialKey = () => {
 const NAV_HASH = 'componentes';
 /** the old link of the page keeps working */
 const isRefHash = (h: string) => h === NAV_HASH || h === 'navegacion';
+/** #integrada opens «App integrada» (Servicios, Auto y Market in one app) */
+const APP_HASH = 'integrada';
 
 export function Shell() {
   const { screen, overlay, go, set, setTrip, resetTrip, setOverlay, settings, showToast } = useApp();
@@ -67,6 +70,7 @@ export function Shell() {
   // remember the last screen per module, and keep it in the URL for sharing
   useEffect(() => {
     if (page.kind === 'integration') window.history.replaceState(null, '', `#${NAV_HASH}`);
+    if (page.kind === 'integrada') window.history.replaceState(null, '', `#${APP_HASH}`);
     if (page.kind !== 'screen') return;
     const m = MODULE_OF[page.key];
     if (m) lastKey.current[m] = page.key;
@@ -97,6 +101,7 @@ export function Shell() {
   // deep link: #A6 opens that screen
   useEffect(() => {
     if (isRefHash(bootHash)) { setRefVersion(VERSIONS.auto[2]); setPage({ kind: 'integration' }); } // a direct link opens the proposals (v3)
+    else if (bootHash === APP_HASH) setPage({ kind: 'integrada' });
     else if (bootKey !== 'A0') jumpKey(bootKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -107,6 +112,7 @@ export function Shell() {
     const onHash = () => {
       const h = decodeURIComponent(window.location.hash.slice(1));
       if (isRefHash(h)) { setRefVersion(VERSIONS.auto[2]); setPage({ kind: 'integration' }); }
+      else if (h === APP_HASH) setPage({ kind: 'integrada' });
       else jumpRef.current(h);
     };
     window.addEventListener('hashchange', onHash);
@@ -194,7 +200,8 @@ export function Shell() {
 
   return (
     <div className={`shell${menuOpen ? ' menu-open' : ''}${present ? ' presenting' : ''}`}>
-      <TopNav module={module} onModule={switchModule} onMenu={() => setMenuOpen((o) => !o)} ui={ui} onUi={setUi} navOn={page.kind === 'integration'} onNav={() => { setRefVersion(versionOf(module, settings)); setPage({ kind: 'integration' }); setMenuOpen(false); }} />
+      <TopNav module={module} onModule={switchModule} onMenu={() => setMenuOpen((o) => !o)} ui={ui} onUi={setUi} navOn={page.kind === 'integration'} onNav={() => { setRefVersion(versionOf(module, settings)); setPage({ kind: 'integration' }); setMenuOpen(false); }}
+        appOn={page.kind === 'integrada'} onApp={() => { setPage({ kind: 'integrada' }); setMenuOpen(false); }} />
       <div className="scrim" onClick={() => setMenuOpen(false)} />
       <SideMenu module={module} page={page} onJump={jump} onModule={switchModule} query={query} setQuery={setQuery} searchRef={searchRef} onStartTour={startTour} version={version} />
       <main className="main">
@@ -215,7 +222,7 @@ export function Shell() {
             <button className="back-link" onClick={() => jumpKey(lastKey.current[module])}>
               <Icon name="arrowLeft" size={16} color={GREEN} /> Volver al prototipo
             </button>
-            <IntegrationPage module={module} version={version} onVersion={chooseVersion} />
+            {page.kind === 'integrada' ? <IntegradaPage /> : <IntegrationPage module={module} version={version} onVersion={chooseVersion} />}
           </div>
         )}
       </main>

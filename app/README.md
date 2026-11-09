@@ -47,6 +47,17 @@ npm test         # Vitest: registry, navigation, every screen in both themes/cou
 - Driver: availability switch, demand-zone layer, an offer with a 15 s countdown, pickup navigation, PIN entry (`4827` in PY, `3156` in AR; keyboard works too), slide to finish, payment and wallet.
 - New provider: "Sumate como conductor", then requirements with upload slots (tap to simulate uploading) and the review screen.
 
+## App integrada (Servicios, Auto and Market in one app)
+
+**App integrada** in the top bar (or `#integrada`) runs the whole app of `chambito-app.html` in one phone: 38 screens across Servicios (base), Market (buying and selling, Phase 1 and 2), Auto (client) and Socio/Conductor. On the left are the demo settings (bottom bar: Explorar / Combinación 1 / Combinación 2 / Tienda en la barra, Market phase, start screen, phone theme, text on green, Reiniciar). On the right is an index that jumps to any screen. The trip, the driver's offer and the protected purchase advance on their own (driver PIN `4827`).
+
+- `src/integrada/screens/{base,market,auto,socio}.tsx`: one component per screen.
+- `src/integrada/kit.tsx`: shared pieces (Screen, Header, Title, Body, Footer, Btn, IconBtn, Chip, I…).
+- `src/integrada/chrome.tsx`: bottom bar with the live card, SOS and offer sheets, toast and status bar.
+- `src/integrada/model.ts`: state and logic ported from the design (`buildModel` → the view model read with `useVM()`).
+- `src/integrada/IntegradaPhone.tsx` (state, timers, screen map) and `IntegradaPage.tsx` (the viewer page). Icons live in `integrada.css`, scoped under `.ig`.
+- `src/test/integrada.test.tsx`: every screen in both themes, the trip, chat, protected purchase and driver flows, and the viewer page.
+
 ## Componentes (design references)
 
 **Componentes** in the top bar (or `#componentes`; the old `#navegacion` still works) gathers every design reference, with the **version cards on the side** as on the screens. Each version shows its own references: v1 the bar of Auto v3, its new components and «Probalo»; v2 the explorer pieces and its fixed bar; v3 the Inicio proposals, the architecture and the 4 vs 5 tabs bar. Three sections: **Navegación**, **Componentes** and **Barra inferior**:

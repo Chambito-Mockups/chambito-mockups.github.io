@@ -6,7 +6,8 @@ import { Icon } from '../ui/kit';
 /* ---------------- Header ---------------- */
 export type UiTheme = 'dark' | 'light';
 
-export function TopNav({ module, onModule, onMenu, ui, onUi, navOn, onNav }: { module: Module; onModule: (m: Module) => void; onMenu: () => void; ui: UiTheme; onUi: (v: UiTheme) => void; navOn?: boolean; onNav?: () => void }) {
+export function TopNav({ module, onModule, onMenu, ui, onUi, navOn, onNav, appOn, onApp }: { module: Module; onModule: (m: Module) => void; onMenu: () => void; ui: UiTheme; onUi: (v: UiTheme) => void; navOn?: boolean; onNav?: () => void; appOn?: boolean; onApp?: () => void }) {
+  const away = navOn || appOn; // on a page, not on a module's screens
   const { settings, set } = useApp();
   return (
     <header className="topbar">
@@ -23,8 +24,8 @@ export function TopNav({ module, onModule, onMenu, ui, onUi, navOn, onNav }: { m
 
       <nav className="modules" aria-label="Módulo">
         {(Object.keys(MODULES) as Module[]).map((m) => (
-          <button key={m} className={module === m && !navOn ? 'on' : ''} aria-current={module === m && !navOn ? 'page' : undefined} onClick={() => onModule(m)}>
-            <Icon name={MODULES[m].icon} size={18} color={module === m && !navOn ? '#000000' : 'var(--fg2)'} />
+          <button key={m} className={module === m && !away ? 'on' : ''} aria-current={module === m && !away ? 'page' : undefined} onClick={() => onModule(m)}>
+            <Icon name={MODULES[m].icon} size={18} color={module === m && !away ? '#000000' : 'var(--fg2)'} />
             <span>{MODULES[m].label}</span>
           </button>
         ))}
@@ -36,6 +37,13 @@ export function TopNav({ module, onModule, onMenu, ui, onUi, navOn, onNav }: { m
             <Icon name="layers" size={18} color={navOn ? '#000000' : 'var(--fg2)'} />
             <span>Componentes</span>
           </button>
+          {/* the whole app (Servicios, Auto y Market) navigable in one phone */}
+          {onApp && (
+            <button className={appOn ? 'on' : ''} aria-current={appOn ? 'page' : undefined} onClick={onApp} title="Servicios, Auto y Market en una sola app navegable">
+              <Icon name="home" size={18} color={appOn ? '#000000' : 'var(--fg2)'} />
+              <span>App integrada</span>
+            </button>
+          )}
         </nav>
       )}
 

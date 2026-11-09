@@ -11,7 +11,7 @@ import { clearDemo } from '../persist';
 
 /* ---------------- Sidebar ---------------- */
 /** a screen of the prototype, or «Componentes» (every design reference) */
-export type Page = { kind: 'screen'; key: string } | { kind: 'integration' };
+export type Page = { kind: 'screen'; key: string } | { kind: 'integration' } | { kind: 'integrada' };
 
 export function SideMenu({ module, page, onJump, onModule, query, setQuery, searchRef, onStartTour, version }: {
   module: Module; page: Page; onJump: (e: Entry) => void; onModule: (m: Module) => void; version: Version;

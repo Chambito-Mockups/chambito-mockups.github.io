@@ -380,3 +380,15 @@ kbd { font: 500 11px Roboto, sans-serif; color: var(--fg2); background: var(--li
   .toc-head { display: none; }
 }
 @media (max-width: 1060px) { .ref-layout { grid-template-columns: 1fr; } }
+
+/* ---------- «App integrada»: ajustes · teléfono · índice de las 38 pantallas ---------- */
+.ig-stage { display: grid; grid-template-columns: 260px minmax(0, 1fr) 240px; gap: 24px; align-items: start; max-width: 1320px; margin: 0 auto; width: 100%; }
+.ig-side, .ig-index { position: sticky; top: 84px; display: flex; flex-direction: column; gap: 12px; }
+.ig-index { max-height: calc(100vh - 100px); overflow-y: auto; gap: 4px; scrollbar-width: thin; }
+.ig-intro h1 { margin: 0 0 4px; font: 700 22px Poppins, sans-serif; color: var(--fg); }
+.ig-intro p, .ig-hint { margin: 0; font: 400 13px/1.5 Roboto, sans-serif; color: var(--fg2); text-wrap: pretty; }
+.ig-phone { display: flex; justify-content: center; min-width: 0; }
+@media (max-width: 1180px) {
+  .ig-stage { grid-template-columns: 1fr; }
+  .ig-side, .ig-index { position: static; max-width: 440px; margin: 0 auto; width: 100%; max-height: none; }
+}
