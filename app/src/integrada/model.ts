@@ -5,6 +5,7 @@
  * El estado vive en `useIntegrada` (IntegradaPhone.tsx); los temporizadores del viaje, la oferta y la compra pasan por `later`.
  */
 import { createContext, useContext } from 'react';
+import { tokens } from './tokens';
 
 /* The design's view model is dynamic (built per render from the state), so it is typed loosely. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -43,12 +44,6 @@ export function useVM(): VM {
 
 export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: ModelIO): VM {
   const SCREENS: Any = ["inicio", "explorar", "actividad", "perfil", "notifs", "svc", "svcPros", "svcConfirm", "svcOk", "tienda", "mBuscar", "ficha", "chat", "guardados", "misPubs", "vender", "pub1", "pub2", "pub3", "pubOk", "carrito", "confirmar", "compraOk", "orden", "devolucion", "auto", "aDestino", "aPunto", "aConfirmar", "viaje", "aCalificar", "sInicio", "trabajo", "dHome", "dBuscar", "dPin", "dViaje", "dCobro"];
-  // colores del brief de diseño (2026-11-09, TOKENS.json v1.1.0): claro
-  const L: Any = {"canvas": "#F5F5F5", "surface": "#FFFFFF", "raised": "#FFFFFF", "muted": "#EBEBEB", "mos": "#F5F5F5", "field": "#FFFFFF", "inverse": "#000000", "onInverse": "#FFFFFF", "brand": "#4BAC4F", "brandPressed": "#3E9642", "brandSubtle": "#4BAC4F33", "text": "#000000", "text2": "#5C5C5C", "text3": "#707070", "link": "#2F7A33", "success": "#24602A", "warning": "#7A4D00", "danger": "#B71C1C", "iconBrand": "#2F7A33", "bSubtle": "#EBEBEB", "bDefault": "#CCCCCC", "bField": "#808080", "bStrong": "#000000", "focus": "#2F7A33", "warnSubtle": "#7A4D001F", "dangerSubtle": "#B71C1C1F", "brandOnInverse": "#4BAC4F", "shadow1": "0 1px 2px #0000000F, 0 2px 8px #0000000A", "shadow3": "0 16px 48px #0000002E", "map": "#E3E7E3", "road": "#FFFFFF", "handle": "#CCCCCC", "badgeNeutral": "#EBEBEB", "onDanger": "#FFFFFF", "skel": "#EBEBEB", "text2Inv": "#B3B3B3"};
-  const D: Any = {"canvas": "#000000", "surface": "#333333", "raised": "#1A1A1A", "muted": "#333333", "mos": "#4D4D4D", "field": "#333333", "inverse": "#FFFFFF", "onInverse": "#000000", "brand": "#4BAC4F", "brandPressed": "#3E9642", "brandSubtle": "#4BAC4F33", "text": "#FFFFFF", "text2": "#B3B3B3", "text3": "#9E9E9E", "link": "#7CCB7F", "success": "#7CCB7F", "warning": "#FFB547", "danger": "#FF6B6B", "iconBrand": "#4BAC4F", "bSubtle": "#333333", "bDefault": "#4D4D4D", "bField": "#808080", "bStrong": "#FFFFFF", "focus": "#4BAC4F", "warnSubtle": "#FFB54729", "dangerSubtle": "#FF6B6B29", "brandOnInverse": "#2F7A33", "shadow1": "none", "shadow3": "0 16px 48px #00000099", "map": "#1A1A1A", "road": "#333333", "handle": "#4D4D4D", "badgeNeutral": "#4D4D4D", "onDanger": "#000000", "skel": "#333333", "text2Inv": "#5C5C5C"};
-  // bg = bg.canvas · fill = bg.muted (chips, cajas de ícono, buscadores) · cardBg = bg.surface
-  const LX: Any = {"bg": "#F5F5F5", "fill": "#EBEBEB", "cardBg": "#FFFFFF", "ph": "#E3E3E3", "ph2": "#D6D6D6", "ph3": "#CCCCCC", "line": "#EBEBEB", "scrim": "#00000080", "outline": "#EBEBEB"};
-  const DX: Any = {"bg": "#000000", "fill": "#333333", "cardBg": "#333333", "ph": "#4D4D4D", "ph2": "#5C5C5C", "ph3": "#262626", "line": "#333333", "scrim": "#00000080", "outline": "#4D4D4D"};
   const startKey = P_.pantallaInicial || 'Inicio (cliente)';
   const START: Any = {
     'Inicio (cliente)': ['inicio', 'cliente'], 'Tienda': ['tienda', 'cliente'], 'Auto': ['auto', 'cliente'],
@@ -61,11 +56,7 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
 
   // ---------- tokens ----------
   const dark = (st.dark === true || st.dark === false) ? st.dark : !!P_.dark;
-  const src = dark ? D : L; const t: Any = {};
-  for (const k in src) { t[k] = src[k]; }
-  const X = dark ? DX : LX; for (const k2 in X) { t[k2] = X[k2]; }
-  t.onBrand = '#FFFFFF'; // texto sobre verde: siempre blanco (brief, regla de color)
-  t.logo = dark ? './brand/chambito-horizontal-blanco.png' : './brand/chambito-horizontal.png';
+  const t: Any = { ...tokens(dark) }; // colores del sistema de diseño (tokens.ts); texto sobre verde siempre blanco
   const fase2 = P_.faseMarket === 'Fase 2 · compra protegida';
   const navMode = P_.navegacion || 'Explorar (prototipo)';
   // «Selector de sección» (Prototipo Auto): each home has «Servicios ▾ / Auto ▾ / Market ▾» and the bar is Inicio · Actividad · Perfil

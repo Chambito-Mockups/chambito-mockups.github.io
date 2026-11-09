@@ -81,6 +81,9 @@ html { background: var(--bg); transition: background .2s; }
 
 /* ---------- shell (prototype viewer) · canvas var(--bg), panels var(--panel) ---------- */
 .shell { display: grid; grid-template-columns: 300px 1fr; grid-template-rows: auto 1fr; min-height: 100%; }
+/* «App integrada» and «Sistema de diseño» have their own menus: the Auto / Market side menu is hidden there */
+.shell.wide { grid-template-columns: 1fr; }
+.shell.wide .sidebar, .shell.wide .menu-btn { display: none; }
 .topbar { grid-column: 1 / -1; position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 20px; height: 64px; padding: 0 20px; background: var(--topbar); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
 .brand { display: flex; align-items: center; gap: 10px; width: 260px; flex: none; }
 .brand img { width: 36px; height: 36px; object-fit: cover; border-radius: 10px; background: #FFFFFF; }
@@ -397,3 +400,39 @@ kbd { font: 500 11px Roboto, sans-serif; color: var(--fg2); background: var(--li
   .ig-stage { grid-template-columns: 1fr; }
   .ig-side, .ig-index { position: static; max-width: 440px; margin: 0 auto; width: 100%; max-height: none; }
 }
+
+/* ---------- «Sistema de diseño»: fundamentos y componentes en claro y oscuro ---------- */
+.ds-content { display: flex; flex-direction: column; gap: 28px; color: var(--fg); min-width: 0; max-width: 1080px; }
+.ds-block { display: flex; flex-direction: column; gap: 12px; }
+.ds-block-head h3 { margin: 0; font: 700 18px/26px Poppins, sans-serif; color: var(--fg); }
+.ds-block-head p { margin: 4px 0 0; font: 400 14px/1.5 Roboto, sans-serif; color: var(--fg2); max-width: 760px; text-wrap: pretty; }
+.ds-both { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.ds-pane { position: relative; border-radius: 20px; padding: 40px 20px 20px; outline: 1px solid var(--line2); font: 400 15px/22px Roboto, sans-serif; min-width: 0; }
+.ds-pane-tag { position: absolute; top: 12px; left: 20px; font: 500 12px/16px Roboto, sans-serif; letter-spacing: .06em; text-transform: uppercase; }
+.ds-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+.ds-2col { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.ds-color-card { display: flex; flex-direction: column; gap: 4px; padding: 12px; border-radius: 16px; background: var(--panel); outline: 1px solid var(--line2); font: 400 13px/1.4 Roboto, sans-serif; color: var(--fg2); }
+.ds-color-card b { font: 700 15px Poppins, sans-serif; color: var(--fg); }
+.ds-color-big { height: 72px; border-radius: 12px; outline: 1px solid var(--line2); margin-bottom: 6px; }
+.ds-swatch { display: inline-block; flex: none; border-radius: 8px; outline: 1px solid var(--line2); }
+.ds-sub { display: block; font: 500 12px Roboto, sans-serif; color: var(--fg3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+.ds-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.ds-chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px 6px 6px; border-radius: 12px; background: var(--panel); outline: 1px solid var(--line2); font: 400 13px Roboto, sans-serif; color: var(--fg2); }
+.ds-chip b { font-weight: 500; color: var(--fg); }
+.ds-table { width: 100%; border-collapse: collapse; font: 400 14px/1.4 Roboto, sans-serif; color: var(--fg); }
+.ds-table th { text-align: left; font: 500 12px Roboto, sans-serif; color: var(--fg3); text-transform: uppercase; letter-spacing: .06em; padding: 8px 10px; border-bottom: 1px solid var(--line2); }
+.ds-table td { padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.ds-table code, .ds-color-card code, .ds-chip code, .ds-space code, .ds-radius code, .ds-elev code { font: 500 12px ui-monospace, Consolas, monospace; color: var(--fg2); }
+.ds-cell { display: inline-flex; align-items: center; gap: 8px; font: 500 12px ui-monospace, Consolas, monospace; }
+.ds-type-row { display: flex; flex-direction: column; gap: 2px; }
+.ds-type-spec { font: 400 12px/16px Roboto, sans-serif; opacity: .6; }
+.ds-space { display: flex; align-items: center; gap: 12px; }
+.ds-space > span { height: 16px; border-radius: 4px; background: #4BAC4F; }
+.ds-radius { display: flex; flex-direction: column; gap: 6px; font: 400 12px Roboto, sans-serif; color: var(--fg2); }
+.ds-radius > span { width: 96px; height: 64px; background: var(--panel); outline: 2px solid #4BAC4F; }
+.ds-elev { display: flex; flex-direction: column; gap: 4px; padding: 16px; border-radius: 16px; background: #FFFFFF; color: #000000; font: 400 13px Roboto, sans-serif; }
+.ds-elev code { color: #5C5C5C; word-break: break-all; }
+.ds-icons { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 12px; }
+.ds-icons > span { display: flex; flex-direction: column; align-items: center; gap: 6px; font: 400 11px Roboto, sans-serif; opacity: .9; }
+.ds-rules { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; font: 400 15px/1.5 Roboto, sans-serif; color: var(--fg); }
+@media (max-width: 900px) { .ds-both { grid-template-columns: 1fr; } }

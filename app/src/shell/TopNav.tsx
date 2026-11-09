@@ -6,8 +6,8 @@ import { Icon } from '../ui/kit';
 /* ---------------- Header ---------------- */
 export type UiTheme = 'dark' | 'light';
 
-export function TopNav({ module, onModule, onMenu, ui, onUi, navOn, onNav, appOn, onApp }: { module: Module; onModule: (m: Module) => void; onMenu: () => void; ui: UiTheme; onUi: (v: UiTheme) => void; navOn?: boolean; onNav?: () => void; appOn?: boolean; onApp?: () => void }) {
-  const away = navOn || appOn; // on a page, not on a module's screens
+export function TopNav({ module, onModule, onMenu, ui, onUi, navOn, onNav, appOn, onApp, v3On, onV3 }: { module: Module; onModule: (m: Module) => void; onMenu: () => void; ui: UiTheme; onUi: (v: UiTheme) => void; navOn?: boolean; onNav?: () => void; appOn?: boolean; onApp?: () => void; v3On?: boolean; onV3?: () => void }) {
+  const away = navOn || appOn || v3On; // on a page, not on a module's screens
   const { settings, set } = useApp();
   return (
     <header className="topbar">
@@ -33,15 +33,22 @@ export function TopNav({ module, onModule, onMenu, ui, onUi, navOn, onNav, appOn
       {/* every design reference (navigation, components, bottom bar) one click away from anywhere */}
       {onNav && (
         <nav className="modules" aria-label="Referencia">
-          <button className={navOn ? 'on' : ''} aria-current={navOn ? 'page' : undefined} onClick={onNav} title="Referencias del diseño: navegación, componentes y barra inferior">
+          <button className={navOn ? 'on' : ''} aria-current={navOn ? 'page' : undefined} onClick={onNav} title="Colores, tipografía, componentes y patrones, y las referencias de navegación por versión">
             <Icon name="layers" size={18} color={navOn ? '#000000' : 'var(--fg2)'} />
-            <span>Componentes</span>
+            <span>Sistema de diseño</span>
           </button>
           {/* the whole app (Servicios, Auto y Market) navigable in one phone */}
           {onApp && (
             <button className={appOn ? 'on' : ''} aria-current={appOn ? 'page' : undefined} onClick={onApp} title="Servicios, Auto y Market en una sola app navegable">
               <Icon name="home" size={18} color={appOn ? '#000000' : 'var(--fg2)'} />
               <span>App integrada</span>
+            </button>
+          )}
+          {/* «Chambito Auto v3» as its own navigable version, apart from the integrated app */}
+          {onV3 && (
+            <button className={v3On ? 'on' : ''} aria-current={v3On ? 'page' : undefined} onClick={onV3} title="Los mockups de Chambito Auto v3, navegables y separados">
+              <Icon name="car" size={18} color={v3On ? '#000000' : 'var(--fg2)'} />
+              <span>Auto v3</span>
             </button>
           )}
         </nav>

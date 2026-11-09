@@ -177,6 +177,13 @@ export function useApp() {
   return scoped ? { ...c, t: scoped } : c;
 }
 
+/** The prototype's theme when there is one (null outside AppProvider): for pieces that pages like Auto v3 reuse. */
+export function useAppTheme(): Theme | null {
+  const c = useContext(AppCtx);
+  const scoped = useContext(ThemeScope);
+  return scoped ?? c?.t ?? null;
+}
+
 /** Price helpers shared by quote, search and receipt. */
 export function tripPrice(d: CountryData, trip: Trip) {
   if (trip.expanded) return d.expanded.price;

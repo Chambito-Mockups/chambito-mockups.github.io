@@ -4,6 +4,8 @@ import { ALL_ENTRIES, Entry, MODULE_OF, MODULES, Module, Tour, VERSIONS, Version
 import { Icon } from './ui/kit';
 import { IntegrationPage } from './integration';
 import { IntegradaPage } from './integrada/IntegradaPage';
+import { DesignSystemPage } from './integrada/DesignSystemPage';
+import { AutoV3Page } from './autov3/AutoV3Page';
 import { MarketProvider, useMarket, emptyDraft } from './market/state';
 import { FitPhone } from './shell/Phone';
 import { GREEN, isTyping } from './shell/controls';
@@ -28,6 +30,10 @@ const isRefHash = (h: string) => h === NAV_HASH || h === 'navegacion';
 const APP_HASH = 'integrada';
 /** #integrada and #integrada/<pantalla> */
 const isAppHash = (h: string) => h === APP_HASH || h.startsWith(`${APP_HASH}/`);
+/** #sistema and #sistema/<sección> open «Sistema de diseño» (colores, tipografía, componentes…) */
+const isSysHash = (h: string) => h === 'sistema' || h.startsWith('sistema/');
+/** #autov3 and #autov3/<código> open the navigable mockups of «Chambito Auto v3», a version of its own */
+const isV3Hash = (h: string) => h === 'autov3' || h.startsWith('autov3/');
 
 export function Shell() {
   const { screen, overlay, go, set, setTrip, resetTrip, setOverlay, settings, showToast } = useApp();
@@ -70,10 +76,10 @@ export function Shell() {
   }, [screen, overlay]);
 
   // a link #integrada/<pantalla> must survive the first render, which is still on a screen
-  const bootingApp = useRef(isAppHash(decodeURIComponent(window.location.hash.slice(1))));
+  const bootingApp = useRef(((h: string) => isAppHash(h) || isSysHash(h) || isV3Hash(h))(decodeURIComponent(window.location.hash.slice(1))));
   // remember the last screen per module, and keep it in the URL for sharing
   useEffect(() => {
-    if (page.kind === 'integrada') bootingApp.current = false;
+    if (page.kind === 'integrada' || page.kind === 'sistema' || page.kind === 'autov3') bootingApp.current = false;
     if (bootingApp.current) return;
     if (page.kind === 'integration') window.history.replaceState(null, '', `#${NAV_HASH}`);
     if (page.kind === 'integrada' && !isAppHash(decodeURIComponent(window.location.hash.slice(1)))) window.history.replaceState(null, '', `#${APP_HASH}`); // the page keeps its own #integrada/<pantalla>
@@ -108,6 +114,8 @@ export function Shell() {
   useEffect(() => {
     if (isRefHash(bootHash)) { setRefVersion(VERSIONS.auto[2]); setPage({ kind: 'integration' }); } // a direct link opens the proposals (v3)
     else if (isAppHash(bootHash)) setPage({ kind: 'integrada' });
+    else if (isSysHash(bootHash)) setPage({ kind: 'sistema' });
+    else if (isV3Hash(bootHash)) setPage({ kind: 'autov3' });
     else if (bootKey !== 'A0') jumpKey(bootKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -119,6 +127,8 @@ export function Shell() {
       const h = decodeURIComponent(window.location.hash.slice(1));
       if (isRefHash(h)) { setRefVersion(VERSIONS.auto[2]); setPage({ kind: 'integration' }); }
       else if (isAppHash(h)) setPage({ kind: 'integrada' });
+      else if (isSysHash(h)) setPage({ kind: 'sistema' });
+      else if (isV3Hash(h)) setPage({ kind: 'autov3' });
       else jumpRef.current(h);
     };
     window.addEventListener('hashchange', onHash);
@@ -205,9 +215,10 @@ export function Shell() {
   }, []);
 
   return (
-    <div className={`shell${menuOpen ? ' menu-open' : ''}${present ? ' presenting' : ''}`}>
-      <TopNav module={module} onModule={switchModule} onMenu={() => setMenuOpen((o) => !o)} ui={ui} onUi={setUi} navOn={page.kind === 'integration'} onNav={() => { setRefVersion(versionOf(module, settings)); setPage({ kind: 'integration' }); setMenuOpen(false); }}
-        appOn={page.kind === 'integrada'} onApp={() => { setPage({ kind: 'integrada' }); setMenuOpen(false); }} />
+    <div className={`shell${menuOpen ? ' menu-open' : ''}${present ? ' presenting' : ''}${page.kind === 'integrada' || page.kind === 'sistema' || page.kind === 'autov3' ? ' wide' : ''}`}>
+      <TopNav module={module} onModule={switchModule} onMenu={() => setMenuOpen((o) => !o)} ui={ui} onUi={setUi} navOn={page.kind === 'integration' || page.kind === 'sistema'} onNav={() => { setPage({ kind: 'sistema' }); setMenuOpen(false); }}
+        appOn={page.kind === 'integrada'} onApp={() => { setPage({ kind: 'integrada' }); setMenuOpen(false); }}
+        v3On={page.kind === 'autov3'} onV3={() => { setPage({ kind: 'autov3' }); setMenuOpen(false); }} />
       <div className="scrim" onClick={() => setMenuOpen(false)} />
       <SideMenu module={module} page={page} onJump={jump} onModule={switchModule} query={query} setQuery={setQuery} searchRef={searchRef} onStartTour={startTour} version={version} />
       <main className="main">
@@ -228,7 +239,10 @@ export function Shell() {
             <button className="back-link" onClick={() => jumpKey(lastKey.current[module])}>
               <Icon name="arrowLeft" size={16} color={GREEN} /> Volver al prototipo
             </button>
-            {page.kind === 'integrada' ? <IntegradaPage /> : <IntegrationPage module={module} version={version} onVersion={chooseVersion} />}
+            {page.kind === 'autov3' ? <AutoV3Page />
+              : page.kind === 'integrada' ? <IntegradaPage />
+              : page.kind === 'sistema' ? <DesignSystemPage onRefs={() => { setRefVersion(versionOf(module, settings)); setPage({ kind: 'integration' }); }} />
+              : <IntegrationPage module={module} version={version} onVersion={chooseVersion} />}
           </div>
         )}
       </main>

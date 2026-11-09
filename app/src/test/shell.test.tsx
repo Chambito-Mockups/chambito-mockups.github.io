@@ -7,6 +7,11 @@ const heading = () => screen.getByRole('heading', { level: 1 });
 const menu = (name: string) => screen.getByRole('navigation', { name: `Pantallas de ${name}` });
 const moduleBtn = (name: string) => within(screen.getByRole('navigation', { name: 'Módulo' })).getByRole('button', { name });
 const start = (hash = '') => { window.location.hash = hash; return render(<App />); };
+/** «Sistema de diseño» (top bar) → «Navegación por versión»: the design references of each version */
+const openRefs = () => {
+  fireEvent.click(within(screen.getByRole('navigation', { name: 'Referencia' })).getByRole('button', { name: /Sistema de diseño/ }));
+  fireEvent.click(screen.getByRole('button', { name: 'Navegación por versión' }));
+};
 
 describe('Auto | Market menus', () => {
   it('starts on Auto with only Auto screens in the side menu', () => {
@@ -105,7 +110,7 @@ describe('toolbar and keyboard', () => {
     start();
     // the side menu no longer lists them: they all live in «Componentes» (top bar)
     expect(within(document.querySelector('.sidebar') as HTMLElement).queryByRole('button', { name: /Barra inferior/ })).toBeNull();
-    fireEvent.click(within(screen.getByRole('navigation', { name: 'Referencia' })).getByRole('button', { name: /Componentes/ }));
+    openRefs();
     fireEvent.click(screen.getByRole('tab', { name: 'Barra inferior' }));
     expect(screen.getAllByRole('navigation', { name: 'Navegación principal' }).length).toBeGreaterThan(1);
     fireEvent.click(screen.getByRole('button', { name: /Volver al prototipo/ }));
@@ -114,7 +119,7 @@ describe('toolbar and keyboard', () => {
 
   it('opens the integrated navigation from the top bar, on the Inicio designs', () => {
     start();
-    fireEvent.click(within(screen.getByRole('navigation', { name: 'Referencia' })).getByRole('button', { name: /Componentes/ }));
+    openRefs();
     expect(window.location.hash).toBe('#componentes');
     // it opens on the version you were viewing (v1 from A0); the Inicio designs belong to v3
     expect(screen.queryByRole('tab', { name: 'Diseños de Inicio' })).toBeNull();
@@ -244,7 +249,7 @@ describe('toolbar and keyboard', () => {
 
   it('shows the bar options and the account simulator in their tabs', () => {
     start();
-    fireEvent.click(within(screen.getByRole('navigation', { name: 'Referencia' })).getByRole('button', { name: /Componentes/ }));
+    openRefs();
     fireEvent.click(screen.getByRole('tab', { name: 'Opciones de barra' }));
     expect(screen.getAllByRole('region', { name: /^[A-G] · / }).length).toBe(7);
     expect(within(screen.getByRole('region', { name: /^B · Selector de sección/ })).getByText('Cumple la guía de marca')).toBeInTheDocument();

@@ -64,6 +64,25 @@ npm test         # Vitest: registry, navigation, every screen in both themes/cou
 - `src/integrada/IntegradaPhone.tsx` (state, timers, screen map) and `IntegradaPage.tsx` (the viewer page). Icons live in `integrada.css`, scoped under `.ig`.
 - `src/test/integrada.test.tsx`: every screen in both themes, the trip, chat, protected purchase and driver flows, and the viewer page.
 
+## Sistema de diseño
+
+**Sistema de diseño** in the top bar (or `#sistema/<section>`, e.g. `#sistema/botones`) puts the whole design system of 09/11/2026 (brief + SISTEMA-DE-DISENO, TOKENS.json v1.1.0) in one menu, with full width (the Auto / Market side menu is hidden there):
+
+- **Fundamentos:** colours (palette, derived, every semantic token in light and dark, read from `src/integrada/tokens.ts`, the same values the screens use), type scale, spacing and radii, elevation, motion and the icon set.
+- **Componentes:** live, in light and dark side by side: buttons, icon button, chips and segmented control, badges and avatar, fields and search, switch / radio / checkbox / stars, cards and lists, progress and empty state, bottom bar, section selector and app bar, sheet, banner and toast, chat, vehicle card / plate / PIN, category tiles.
+- **Patrones:** the rules (what is not allowed) and voice and formats.
+- **Referencias anteriores:** «Navegación por versión» opens the previous design references (`#componentes` still works).
+- Components: `src/integrada/kit.tsx` and `src/integrada/ds.tsx`; page: `src/integrada/DesignSystemPage.tsx`.
+
+## Auto v3 (navigable mockups, a version of its own)
+
+**Auto v3** in the top bar (or `#autov3/<code>`, e.g. `#autov3/A6`) turns the canvas «Chambito Auto v3» into navigable mockups, apart from the App integrada and built only with the design-system components and tokens. 34 entries: Explorador (X1, X2, V3, V4), Viaje · Moto · Envío (V1, V2), Pasajero (A0–A11 with A0b, A5b, A8b SOS and A10 details), Estados especiales (E1 guest, E2 location off, E3 offline, E4 service in progress) and Conductor (D0–D9, D4 offer as a sheet).
+
+- Settings: country (Paraguay / Argentina: plates, prices, Mercado Pago, PIN 4827 / 3156), phone theme, and «Simular el viaje y las ofertas» (the trip advances on its own from «Buscando conductor»; online, an offer arrives and expires in 12 s).
+- Same viewer as the App integrada: menu with search, previous / next and `←` `→`.
+- What changes from the canvas to follow the design system: no call button (A7 offers the chat), the bottom bar is the floating one with the active item in `#2F7A33 / #7CCB7F`, the logo stays out of the explorer, map controls are the white / `#1A1A1A` circles.
+- Code: `src/autov3/` (model, parts, pasajero, conductor, phone, page); tests in `src/test/autov3.test.tsx`.
+
 ## Componentes (design references)
 
 **Componentes** in the top bar (or `#componentes`; the old `#navegacion` still works) gathers every design reference, with the **version cards on the side** as on the screens. Each version shows its own references: v1 the bar of Auto v3, its new components and «Probalo»; v2 the explorer pieces and its fixed bar; v3 the Inicio proposals, the architecture and the 4 vs 5 tabs bar. Three sections: **Navegación**, **Componentes** and **Barra inferior**:

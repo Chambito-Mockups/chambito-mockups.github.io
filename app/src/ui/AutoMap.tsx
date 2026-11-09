@@ -1,15 +1,16 @@
 import { CSSProperties } from 'react';
-import { useApp } from '../store';
-import { GREEN } from '../theme';
+import { useAppTheme } from '../store';
+import { GREEN, Theme } from '../theme';
 
 // Port of AutoMapa.dc.html: a sober map mock (not a real map) with the route in green.
 export type MapVariant = 'none' | 'base' | 'origin' | 'route' | 'driver' | 'arrived' | 'trip' | 'search' | 'heat';
 
 const PIN = 'M0,0 C-3,-7 -12,-13 -12,-24 A12,12 0 1 1 12,-24 C12,-13 3,-7 0,0Z';
 
-export function AutoMap({ variant, drop, offsetY = 0, heat, panX = 0, panY = 0, style }: { variant: MapVariant; drop?: boolean; offsetY?: number; heat?: boolean; panX?: number; panY?: number; style?: CSSProperties }) {
-  const { t } = useApp();
-  const c = t.map;
+/** `palette` lets a page outside the prototype's theme (Auto v3) pass its own map colours. */
+export function AutoMap({ variant, drop, offsetY = 0, heat, panX = 0, panY = 0, style, palette }: { variant: MapVariant; drop?: boolean; offsetY?: number; heat?: boolean; panX?: number; panY?: number; style?: CSSProperties; palette?: Theme['map'] }) {
+  const theme = useAppTheme();
+  const c = palette ?? theme!.map;
   const v = variant;
   const hasOrigin = ['route', 'driver', 'arrived', 'search', 'base', 'origin'].includes(v);
   const o = ['search', 'base'].includes(v) ? { x: 165, y: 280 } : { x: 100, y: 350 };
@@ -87,7 +88,7 @@ export function AutoMap({ variant, drop, offsetY = 0, heat, panX = 0, panY = 0, 
 }
 
 export function MapPinSvg({ kind, stroke }: { kind: 'origin' | 'dest'; stroke: string }) {
-  const { t } = useApp();
+  const t = useAppTheme()!;
   return (
     <svg width="28" height="42" viewBox="-14 -40 28 42" style={{ display: 'block' }}>
       <path d={PIN} fill={kind === 'origin' ? GREEN : t.map.dest} stroke={stroke} strokeWidth="2" />
