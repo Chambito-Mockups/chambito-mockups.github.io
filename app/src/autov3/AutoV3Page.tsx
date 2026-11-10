@@ -3,7 +3,7 @@
  * App integrada), con los colores, la tipografía y los componentes del sistema de diseño. Menú con todas las pantallas
  * y estados del lienzo, anterior / siguiente (← →) y un enlace por pantalla: #autov3/<código>.
  */
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { usePersistent } from '../persist';
 import { isTyping } from '../shell/controls';
 import { Icon } from '../ui/kit';
@@ -51,7 +51,6 @@ export const V3_GROUPS: V3Group[] = [
 ];
 export const V3_ENTRIES = V3_GROUPS.flatMap((g) => g.entries);
 
-const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 const keyFromHash = () => {
   const h = decodeURIComponent(window.location.hash.slice(1));
   return h.startsWith('autov3/') ? h.slice(7) : null;
@@ -64,8 +63,10 @@ function useFit() {
     const el = box.current;
     if (!el) return;
     const fit = () => {
-      const top = el.getBoundingClientRect().top + window.scrollY;
-      setScale(Math.max(0.5, Math.min(1.1, (el.clientWidth - 30) / 412, (window.innerHeight - Math.min(top, 240) - 40) / 866)));
+      const top = el.getBoundingClientRect().top;
+      const availW = el.clientWidth - 20;
+      const availH = window.innerHeight - top - 40;
+      setScale(Math.max(0.6, Math.min(1.25, availW / 412, availH / 866)));
     };
     const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(fit);
     ro?.observe(el);
@@ -81,7 +82,6 @@ export function AutoV3Page() {
   const set = (o: Partial<typeof cfg>) => setCfg((c) => ({ ...c, ...o }));
   const phone = useRef<AutoV3Handle>(null);
   const [key, setKey] = useState<string>(() => keyFromHash() ?? 'A0');
-  const [query, setQuery] = useState('');
   const { box, scale } = useFit();
 
   const open = useCallback((en: V3Entry) => { phone.current?.jump(en.screen, en.setup); setKey(en.key); }, []);
@@ -106,8 +106,6 @@ export function AutoV3Page() {
     });
   }, []);
 
-  const q = norm(query.trim());
-  const groups = useMemo(() => V3_GROUPS.map((g) => ({ ...g, entries: q ? g.entries.filter((x) => norm(`${x.key} ${x.title}`).includes(q)) : g.entries })).filter((g) => g.entries.length), [q]);
   const index = V3_ENTRIES.findIndex((x) => x.key === key);
   const cur = V3_ENTRIES[index];
   const prevE = index > 0 ? V3_ENTRIES[index - 1] : undefined;
@@ -128,78 +126,44 @@ export function AutoV3Page() {
   }, []);
 
   return (
-    <div className="ig-stage">
-      <aside className="ig-side" aria-label="Ajustes de Auto v3">
-        <div className="ig-intro">
-          <h1>Chambito Auto v3</h1>
-          <p>Los mockups del lienzo «Chambito Auto v3», navegables y con los colores, la tipografía y los componentes del sistema de diseño. Es una versión aparte de la App integrada.</p>
+    <div className="v3-stage">
+      <div className="v3-bar">
+        <button className="nav-btn" aria-label={prevE ? `Anterior: ${prevE.title}` : 'Anterior'} disabled={!prevE} onClick={() => prevE && open(prevE)}><Icon name="chevronLeft" size={18} color="var(--fg)" /></button>
+        <div className="v3-bar-title">
+          <span className="ig-bar-group">{groupOf(cur)?.title}</span>
+          <span><b>{cur?.key} · </b>{cur?.title}</span>
         </div>
-        <div className="side-block">
-          <div className="block-body" style={{ paddingTop: 14 }}>
-            <div className="field">
-              <span className="side-label">País</span>
-              <div className="seg seg-sm" role="radiogroup" aria-label="País de Auto v3">
-                {([['PY', 'Paraguay'], ['AR', 'Argentina']] as const).map(([v, l]) => (
-                  <button key={v} role="radio" aria-checked={cfg.country === v} className={cfg.country === v ? 'on' : ''} onClick={() => set({ country: v })}>{l}</button>
-                ))}
-              </div>
-            </div>
-            <div className="field">
-              <span className="side-label">Tema del teléfono</span>
-              <div className="seg seg-sm" role="radiogroup" aria-label="Tema de Auto v3">
-                {([[false, 'Claro'], [true, 'Oscuro']] as const).map(([v, l]) => (
-                  <button key={l} role="radio" aria-checked={cfg.dark === v} className={cfg.dark === v ? 'on' : ''} onClick={() => set({ dark: v })}>{l}</button>
-                ))}
-              </div>
-            </div>
-            <button className="toggle" role="switch" aria-checked={cfg.sim} onClick={() => set({ sim: !cfg.sim })}>
-              <span className={`switch${cfg.sim ? ' on' : ''}`}><span /></span>
-              <span style={{ font: '500 13px Roboto, sans-serif', color: 'var(--fg)' }}>Simular el viaje y las ofertas</span>
-            </button>
-            <button className="ghost-btn" style={{ justifyContent: 'center' }} onClick={() => cur && open(cur)}>Reiniciar la pantalla</button>
+        <span className="pos">{index + 1}/{V3_ENTRIES.length}</span>
+        <div className="v3-controls">
+          <div className="seg seg-sm" role="radiogroup" aria-label="País" title="País">
+            {(['PY', 'AR'] as const).map((v) => (
+              <button key={v} role="radio" aria-checked={cfg.country === v} className={cfg.country === v ? 'on' : ''} onClick={() => set({ country: v })}>{v}</button>
+            ))}
           </div>
-        </div>
-        {groupOf(cur)?.note && <p className="ig-hint">{groupOf(cur)!.note}</p>}
-        <p className="ig-hint">Con la simulación, el viaje avanza solo desde «Buscando conductor» y, con el conductor conectado, llega una oferta. El PIN es <b>{cfg.country === 'PY' ? '4827' : '3156'}</b>. <kbd>←</kbd> <kbd>→</kbd> recorren el menú.</p>
-      </aside>
-
-      <div className="ig-center">
-        <div className="ig-bar">
-          <button className="nav-btn" aria-label={prevE ? `Anterior: ${prevE.title}` : 'Anterior'} disabled={!prevE} onClick={() => prevE && open(prevE)}><Icon name="chevronLeft" size={18} color="var(--fg)" /></button>
-          <div className="ig-bar-title">
-            <span className="ig-bar-group">{groupOf(cur)?.title}</span>
-            <span><b>{cur?.key} · </b>{cur?.title}</span>
+          <div className="seg seg-sm" role="radiogroup" aria-label="Tema del teléfono" title="Tema del teléfono">
+            {([[false, '☀'], [true, '☾']] as const).map(([v, l]) => (
+              <button key={String(v)} role="radio" aria-checked={cfg.dark === v} className={cfg.dark === v ? 'on' : ''} onClick={() => set({ dark: v })}>{l}</button>
+            ))}
           </div>
-          <span className="pos">{index + 1} de {V3_ENTRIES.length}</span>
-          <button className="nav-btn" aria-label={nextE ? `Siguiente: ${nextE.title}` : 'Siguiente'} disabled={!nextE} onClick={() => nextE && open(nextE)}><Icon name="chevronRight" size={18} color="var(--fg)" /></button>
+          <button className="icon-btn square" onClick={() => cur && open(cur)} title="Reiniciar la pantalla" aria-label="Reiniciar"><Icon name="refresh" size={14} color="var(--fg)" /></button>
+          <button className="toggle v3-sim" role="switch" aria-checked={cfg.sim} onClick={() => set({ sim: !cfg.sim })} title="Simular el viaje y las ofertas">
+            <span className={`switch${cfg.sim ? ' on' : ''}`}><span /></span>
+            <span style={{ font: '500 12px Roboto, sans-serif', color: 'var(--fg)' }}>Simular</span>
+          </button>
         </div>
-        <div ref={box} className="ig-phone" style={{ paddingTop: 11 * scale }}>
-          <div style={{ width: 390 * scale, height: 844 * scale }}>
-            <div style={{ transform: `scale(${scale})`, transformOrigin: 'top left', width: 390, height: 844, borderRadius: 44, overflow: 'hidden', boxShadow: '0 30px 80px var(--phone-shadow), 0 0 0 10px var(--frame), 0 0 0 11px var(--frame-ring)' }}>
-              <AutoV3Phone ref={phone} {...cfg} onPlace={onPlace} />
-            </div>
+        <button className="nav-btn" aria-label={nextE ? `Siguiente: ${nextE.title}` : 'Siguiente'} disabled={!nextE} onClick={() => nextE && open(nextE)}><Icon name="chevronRight" size={18} color="var(--fg)" /></button>
+      </div>
+      <div ref={box} className="ig-phone" style={{ paddingTop: 11 * scale }}>
+        <div style={{ width: 390 * scale, height: 844 * scale }}>
+          <div style={{ transform: `scale(${scale})`, transformOrigin: 'top left', width: 390, height: 844, borderRadius: 44, overflow: 'hidden', boxShadow: '0 30px 80px var(--phone-shadow), 0 0 0 10px var(--frame), 0 0 0 11px var(--frame-ring)' }}>
+            <AutoV3Phone ref={phone} {...cfg} onPlace={onPlace} />
           </div>
         </div>
       </div>
-
-      <nav className="ig-index" aria-label="Pantallas de Auto v3">
-        <label className="search" style={{ height: 40 }}>
-          <Icon name="search" size={16} color="var(--fg3)" />
-          <input value={query} onChange={(ev) => setQuery(ev.target.value)} placeholder="Buscar pantalla…" aria-label="Buscar en Auto v3" />
-        </label>
-        {groups.map((g) => (
-          <div key={g.title} className="group">
-            <div className="group-head">{g.title}</div>
-            {g.entries.map((x) => (
-              <button key={x.key} className={`side-item${key === x.key ? ' on' : ''}`} aria-current={key === x.key ? 'page' : undefined} onClick={() => open(x)}>
-                <span className="code">{x.key}</span>
-                <span className="title">{x.title}</span>
-              </button>
-            ))}
-          </div>
-        ))}
-        {!groups.length && <p className="ig-hint">No hay pantallas con «{query}».</p>}
-      </nav>
+      <div className="v3-notes">
+        {groupOf(cur)?.note && <p className="v3-note">{groupOf(cur)!.note}</p>}
+        <p className="v3-note muted">PIN: <b>{cfg.country === 'PY' ? '4827' : '3156'}</b></p>
+      </div>
     </div>
   );
 }

@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { Settings, useApp } from '../store';
 import { Entry, MODULES, Module, Version, entriesOf, groupsIn } from '../registry';
 import { Icon } from '../ui/kit';
-import { R } from '../theme';
 import { Collapsible, GREEN, Segmented, Toggle, norm } from './controls';
 import { TourList } from './Presenter';
 import { Tour } from '../registry';
@@ -60,20 +59,16 @@ export function SideMenu({ module, page, onJump, onModule, query, setQuery, sear
   const results = q ? groups.flatMap((g) => (g.page ? [] : g.entries.filter(match))) : [];
   const [cursor, setCursor] = useState(0);
 
+  const moduleColor = module === 'auto' ? '#4BAC4F' : '#F0A500';
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar sidebar-${module}`} style={{ '--module-color': moduleColor } as React.CSSProperties}>
       <div className="side-top">
       <div className="module-intro">
-        <span className="module-icon"><Icon name={MODULES[module].icon} size={20} color="#000000" /></span>
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <span style={{ font: '700 16px Poppins, sans-serif', color: 'var(--fg)' }}>Chambito {MODULES[module].label}</span>
-          <span style={{ font: R(12), color: 'var(--fg2)' }}>{MODULES[module].tagline}</span>
-        </div>
+        <span className="module-icon" style={{ background: moduleColor }}><Icon name={MODULES[module].icon} size={18} color="#000000" /></span>
+        <span style={{ font: '700 15px Poppins, sans-serif', color: 'var(--fg)', flex: 1 }}>Chambito {MODULES[module].label}</span>
+        <span className="v-pill" style={{ '--v': version.color } as React.CSSProperties} title={version.label}>{version.id}</span>
       </div>
 
-      <span className="v-now" style={{ '--v': version.color } as React.CSSProperties} title="Las versiones se eligen al lado del teléfono">
-        <span className="v-chip">{version.id}</span>{version.label}
-      </span>
       <div className="search-wrap">
         <div className={`search${q ? ' has-query' : ''}`}>
           <Icon name="search" size={18} color={q ? 'var(--accent-fg)' : 'var(--fg3)'} />
@@ -200,8 +195,7 @@ export function SideMenu({ module, page, onJump, onModule, query, setQuery, sear
       </button>
 
       <div className="shortcuts">
-        <span><kbd>←</kbd><kbd>→</kbd> anterior / siguiente</span>
-        <span><kbd>/</kbd> buscar · <kbd>R</kbd> reiniciar · <kbd>P</kbd> presentar · <kbd>T</kbd> tema del teléfono</span>
+        <span><kbd>←</kbd><kbd>→</kbd> navegar · <kbd>/</kbd> buscar · <kbd>P</kbd> presentar</span>
       </div>
     </aside>
   );

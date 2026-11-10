@@ -198,8 +198,7 @@ export function IntegradaPage() {
     <div className="ig-stage">
       <aside className="ig-side" aria-label="Ajustes de la app integrada">
         <div className="ig-intro">
-          <h1>App integrada</h1>
-          <p>Una sola app con Servicios, Auto y Market, con datos de prueba y sin backend. Por defecto navega con el selector de sección del Prototipo Auto. Colores, tipografía y componentes del brief de diseño del 09/11/2026.</p>
+          <h1>App Unificada</h1>
         </div>
         <div className="side-block">
           <div className="block-body" style={{ paddingTop: 14 }}>
@@ -226,7 +225,7 @@ export function IntegradaPage() {
           </div>
         </div>
         {groupOf(cur)?.note && <p className="ig-hint">{groupOf(cur)!.note}</p>}
-        <p className="ig-hint">El PIN del pasajero para el conductor es <b>4827</b>. El viaje, la oferta al conductor y la compra protegida avanzan solos. <kbd>←</kbd> <kbd>→</kbd> recorren el menú.</p>
+        <p className="ig-hint">PIN del pasajero: <b>4827</b></p>
       </aside>
 
       <div className="ig-center">

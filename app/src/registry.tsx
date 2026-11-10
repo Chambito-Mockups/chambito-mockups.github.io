@@ -211,7 +211,7 @@ export interface Version {
   /** settings this version uses */
   flags?: Partial<Settings>;
   /** reference page instead of screens */
-  page?: 'integration';
+  page?: 'integration' | 'autov3';
   /** first screen when the version is chosen */
   first?: string;
   /** viewer colour of the version (outside the phone) */
@@ -227,7 +227,7 @@ export const VERSIONS: Record<Module, Version[]> = {
   auto: [
     { id: 'v1', label: 'Pestaña Auto', hint: 'Auto es un destino de la barra', source: 'Chambito Auto v3', flags: { navModel: 'tabs' }, first: 'A0', color: '#4BAC4F', bar: ['Inicio', 'Auto', 'Actividad', 'Perfil'], what: 'Auto tiene su propia pestaña en la barra.', refs: 'tabs' },
     { id: 'v2', label: 'Selector de sección', hint: 'Servicios · Auto · Market arriba; barra Inicio · Actividad · Perfil', source: 'Prototipo Auto', flags: { navModel: 'explorer' }, first: 'X1', color: '#E0A100', bar: ['Inicio', 'Actividad', 'Perfil'], what: 'Se cambia de sección con «Servicios ▾» arriba; la barra no cambia.', refs: 'explorer' },
-    { id: 'v3', label: 'Navegación estable', hint: 'Inicio · Explorar/Trabajo · Actividad · Perfil', source: 'Propuestas de Inicio', page: 'integration', color: '#9B8AFB', bar: ['Inicio', 'Explorar', 'Actividad', 'Perfil'], what: 'Cliente y prestador, con Explorar o Trabajo. Abre la página de propuestas.', refs: 'estable' },
+    { id: 'v3', label: 'Auto v3 navegable', hint: 'Prototipo navegable del lienzo «Chambito Auto v3»', source: 'Chambito Auto v3', page: 'autov3', color: '#9B8AFB', bar: ['Inicio', 'Actividad', 'Perfil'], what: 'Explorador como barra fija, modos Viaje/Moto/Envío y vista conductor.', refs: 'estable' },
   ],
   market: [
     { id: 'v1', label: 'Tarjeta en Inicio', hint: 'La Tienda se abre desde una tarjeta (combinación 2)', source: 'Chambito Market', flags: { navModel: 'tabs', tiendaEntry: 'card' }, first: 'EB1', color: '#4BAC4F', bar: ['Inicio', 'Auto', 'Actividad', 'Perfil'], what: 'La Tienda entra por una tarjeta en Inicio y se apila con flecha atrás.', refs: 'tabs' },

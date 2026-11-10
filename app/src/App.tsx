@@ -6,6 +6,7 @@ import { IntegrationPage } from './integration';
 import { IntegradaPage } from './integrada/IntegradaPage';
 import { DesignSystemPage } from './integrada/DesignSystemPage';
 import { AutoV3Page } from './autov3/AutoV3Page';
+import { AutoV3Sidebar } from './autov3/AutoV3Sidebar';
 import { MarketProvider, useMarket, emptyDraft } from './market/state';
 import { FitPhone } from './shell/Phone';
 import { GREEN, isTyping } from './shell/controls';
@@ -215,12 +216,16 @@ export function Shell() {
   }, []);
 
   return (
-    <div className={`shell${menuOpen ? ' menu-open' : ''}${present ? ' presenting' : ''}${page.kind === 'integrada' || page.kind === 'sistema' || page.kind === 'autov3' ? ' wide' : ''}`}>
+    <div className={`shell${menuOpen ? ' menu-open' : ''}${present ? ' presenting' : ''}${page.kind === 'integrada' || page.kind === 'sistema' ? ' wide' : ''}`}>
       <TopNav module={module} onModule={switchModule} onMenu={() => setMenuOpen((o) => !o)} ui={ui} onUi={setUi} navOn={page.kind === 'integration' || page.kind === 'sistema'} onNav={() => { setPage({ kind: 'sistema' }); setMenuOpen(false); }}
         appOn={page.kind === 'integrada'} onApp={() => { setPage({ kind: 'integrada' }); setMenuOpen(false); }}
         v3On={page.kind === 'autov3'} onV3={() => { setPage({ kind: 'autov3' }); setMenuOpen(false); }} />
       <div className="scrim" onClick={() => setMenuOpen(false)} />
-      <SideMenu module={module} page={page} onJump={jump} onModule={switchModule} query={query} setQuery={setQuery} searchRef={searchRef} onStartTour={startTour} version={version} />
+      {page.kind === 'autov3' ? (
+        <AutoV3Sidebar />
+      ) : (
+        <SideMenu module={module} page={page} onJump={jump} onModule={switchModule} query={query} setQuery={setQuery} searchRef={searchRef} onStartTour={startTour} version={version} />
+      )}
       <main className="main">
         {page.kind === 'screen' ? (
           <>
@@ -236,9 +241,18 @@ export function Shell() {
           </>
         ) : (
           <div className="page">
-            <button className="back-link" onClick={() => jumpKey(lastKey.current[module])}>
-              <Icon name="arrowLeft" size={16} color={GREEN} /> Volver al prototipo
-            </button>
+            <div className="page-topbar">
+              <button className="back-pill" onClick={() => jumpKey(lastKey.current[module])} title="Volver al prototipo principal">
+                <Icon name="arrowLeft" size={14} color={GREEN} />
+                <span>Volver a Chambito {module === 'auto' ? 'Auto' : 'Market'}</span>
+              </button>
+              <span className="page-tag">
+                {page.kind === 'autov3' ? 'Auto v3 navegable'
+                  : page.kind === 'integrada' ? 'App Unificada'
+                  : page.kind === 'sistema' ? 'Sistema de diseño'
+                  : 'Propuestas'}
+              </span>
+            </div>
             {page.kind === 'autov3' ? <AutoV3Page />
               : page.kind === 'integrada' ? <IntegradaPage />
               : page.kind === 'sistema' ? <DesignSystemPage onRefs={() => { setRefVersion(versionOf(module, settings)); setPage({ kind: 'integration' }); }} />

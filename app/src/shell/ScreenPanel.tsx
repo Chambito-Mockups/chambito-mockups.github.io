@@ -31,10 +31,9 @@ export function ScreenToolbar({ module, version, entry, index, total, prevEntry,
         </div>
         <div className="tool-actions">
           <div role="radiogroup" aria-label="Tema del teléfono" className="theme-seg" title="Tema del teléfono (T)">
-            <span className="theme-seg-label"><Icon name="phone" size={14} color="var(--fg3)" /> Teléfono</span>
             {(['dark', 'light'] as const).map((v) => (
               <button key={v} role="radio" aria-checked={settings.theme === v} aria-label={v === 'dark' ? 'Teléfono oscuro' : 'Teléfono claro'} className={settings.theme === v ? 'on' : ''} onClick={() => set({ theme: v })}>
-                <span aria-hidden>{v === 'dark' ? '☾' : '☀'}</span> {v === 'dark' ? 'Oscuro' : 'Claro'}
+                <span aria-hidden>{v === 'dark' ? '☾' : '☀'}</span>
               </button>
             ))}
           </div>
@@ -95,8 +94,7 @@ export function NotesPanel({ entry, module }: { entry?: Entry; module: Module })
       )}
       {pinHint && <NoteCard icon="lock" title="Para probar">{pinHint}</NoteCard>}
       <div className="note-meta">
-        <span><Icon name="mapPin" size={14} color="var(--fg3)" /> {settings.country === 'PY' ? 'Paraguay · Bancard o efectivo · Gs.' : 'Argentina · Mercado Pago · $'}</span>
-        <span><Icon name="info" size={14} color="var(--fg3)" /> Tocá el teléfono: todo es interactivo.</span>
+        <span><Icon name="mapPin" size={14} color="var(--fg3)" /> {settings.country === 'PY' ? 'Paraguay · Gs.' : 'Argentina · $'}</span>
       </div>
     </aside>
   );
