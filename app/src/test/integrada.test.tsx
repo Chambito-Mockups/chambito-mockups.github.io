@@ -194,7 +194,7 @@ describe('app integrada en el visor', () => {
   it('se abre desde la barra de arriba y con #integrada, y el índice salta a cada pantalla', () => {
     window.location.hash = '';
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: 'App integrada' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Unificada' }));
     expect(window.location.hash).toMatch(/^#integrada\//);
     const index = screen.getByRole('navigation', { name: 'Pantallas de la app integrada' });
     fireEvent.click(within(index).getByRole('button', { name: 'Ficha del producto' }));

@@ -28,6 +28,7 @@ export function AutoV3Sidebar() {
 
   const open = (en: V3Entry) => {
     window.location.hash = `#autov3/${en.key}`;
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
     setKey(en.key);
   };
 

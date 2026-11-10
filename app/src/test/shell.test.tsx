@@ -113,7 +113,7 @@ describe('toolbar and keyboard', () => {
     openRefs();
     fireEvent.click(screen.getByRole('tab', { name: 'Barra inferior' }));
     expect(screen.getAllByRole('navigation', { name: 'Navegación principal' }).length).toBeGreaterThan(1);
-    fireEvent.click(screen.getByRole('button', { name: /Volver al prototipo/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Volver a Chambito/ }));
     expect(heading()).toHaveTextContent('Portada de Auto');
   });
 
@@ -123,7 +123,7 @@ describe('toolbar and keyboard', () => {
     expect(window.location.hash).toBe('#componentes');
     // it opens on the version you were viewing (v1 from A0); the Inicio designs belong to v3
     expect(screen.queryByRole('tab', { name: 'Diseños de Inicio' })).toBeNull();
-    fireEvent.click(within(screen.getByRole('radiogroup', { name: 'Versión de Auto' })).getByRole('radio', { name: 'v3 · Navegación estable' }));
+    fireEvent.click(within(screen.getByRole('radiogroup', { name: 'Versión de Auto' })).getByRole('radio', { name: 'v3 · Auto v3 navegable' }));
     expect(screen.getByRole('tab', { name: 'Diseños de Inicio' })).toHaveAttribute('aria-selected', 'true');
     // recommended first: the stable navigation
     expect(screen.getByRole('group', { name: 'Cliente, estable' })).toBeInTheDocument();
@@ -316,7 +316,7 @@ describe('versions (v1, v2, v3) to see each way to navigate on its own', () => {
     const panel = within(main).getByRole('region', { name: 'Versiones de Auto' });
     const v1 = within(panel).getByRole('radio', { name: 'v1 · Pestaña Auto' });
     expect(v1).toHaveTextContent('Estás viendo');
-    expect(within(panel).getByLabelText('Barra: Inicio, Actividad, Perfil')).toBeInTheDocument();
+    expect(within(panel).getAllByLabelText('Barra: Inicio, Actividad, Perfil').length).toBeGreaterThan(0);
   });
 
   it('shows only the screens of the chosen Auto version and walks them', () => {
@@ -331,9 +331,9 @@ describe('versions (v1, v2, v3) to see each way to navigate on its own', () => {
     expect(groupNames().some((g) => g.includes('Explorador'))).toBe(true);
     expect(screen.getByText(`${entriesIn('auto', 'v2').findIndex((e) => e.key === 'X1') + 1} de ${entriesIn('auto', 'v2').length}`)).toBeInTheDocument();
 
-    // v3 is the page with the stable-navigation proposals
-    fireEvent.click(within(versions).getByRole('radio', { name: 'v3 · Navegación estable' }));
-    expect(screen.getByRole('tab', { name: 'Diseños de Inicio' })).toBeInTheDocument();
+    // v3 opens the Auto v3 navegable prototype (in the shell, not a separate page)
+    fireEvent.click(within(versions).getByRole('radio', { name: 'v3 · Auto v3 navegable' }));
+    expect(screen.getByRole('navigation', { name: 'Pantallas de Auto v3' })).toBeInTheDocument();
   });
 
   it('has its own versions in Market: card, tab and section', () => {
@@ -378,7 +378,7 @@ describe('«Componentes»: the rail keeps everything in view', () => {
     start('#componentes');
     const panel = screen.getByRole('region', { name: 'Versiones de Auto' });
     // only the chosen version opens (its bar and what changes); the others are one line
-    expect(within(panel).getByRole('radio', { name: 'v3 · Navegación estable' })).toHaveTextContent('Inicio');
+    expect(within(panel).getByRole('radio', { name: 'v3 · Auto v3 navegable' })).toHaveTextContent('Inicio');
     expect(within(panel).getByRole('radio', { name: 'v1 · Pestaña Auto' })).not.toHaveTextContent('Auto tiene su propia pestaña');
     const toc = screen.getByRole('tablist', { name: 'En esta versión' });
     expect(within(toc).getAllByRole('tab').map((t) => t.textContent)).toEqual(['Diseños de Inicio', 'Opciones de barra', 'Arquitectura', 'Reglas', 'Componentes', 'Barra inferior']);

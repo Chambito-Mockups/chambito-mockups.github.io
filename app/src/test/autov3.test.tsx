@@ -143,7 +143,7 @@ describe('Auto v3 en el visor', () => {
   it('se abre desde la barra de arriba, el menú abre cada pantalla con su estado y el enlace la recuerda', () => {
     window.location.hash = '';
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: 'Auto v3' }));
+    fireEvent.click(screen.getByRole('button', { name: /Auto v3 navegable/ }));
     expect(window.location.hash).toBe('#autov3/A0');
     const menu = screen.getByRole('navigation', { name: 'Pantallas de Auto v3' });
     fireEvent.click(within(menu).getByRole('button', { name: /E1/ }));

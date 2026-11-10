@@ -386,6 +386,7 @@ kbd { font: 500 11px Roboto, sans-serif; color: var(--fg2); background: var(--li
 .vp-id { flex: none; font: 700 13px Poppins, sans-serif; color: #000000; background: var(--v); border-radius: 7px; padding: 1px 8px; }
 .vp-card:not(.on) .vp-id { background: transparent; color: var(--v); box-shadow: inset 0 0 0 1.5px var(--v); }
 .vp-name { flex: 1; min-width: 0; font: 700 13px Poppins, sans-serif; color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vp-here { flex: none; font: 500 10px Roboto, sans-serif; color: var(--fg); background: var(--hover2); border-radius: 999px; padding: 2px 8px; }
 .vp-bar { display: flex; gap: 3px; flex-wrap: wrap; }
 .vp-bar span { font: 500 10px Roboto, sans-serif; color: var(--fg2); background: var(--sunken); border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px; }
 .vp-bar span.first { color: var(--fg); border-color: var(--v); }

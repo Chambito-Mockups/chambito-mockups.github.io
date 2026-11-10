@@ -39,13 +39,14 @@ export function VersionPanel({ module, version, onVersion, compact }: {
               <span className="vp-top">
                 <span className="vp-id">{v.id}</span>
                 <span className="vp-name">{v.label}</span>
+                {on && <span className="vp-here">Estás viendo</span>}
               </span>
-              {on && (
+              {(!compact || on) && (
                 <span className="vp-bar" aria-label={`Barra: ${v.bar.join(', ')}`}>
                   {v.bar.map((tab) => <span key={tab} className={tab === 'Inicio' ? 'first' : undefined}>{tab}</span>)}
                 </span>
               )}
-              {on && <span className="vp-meta">{count === null ? 'Propuestas' : `${count} pantallas`}</span>}
+              {(!compact || on) && <span className="vp-meta">{v.source}{count === null ? '' : ` · ${count} pantallas`}</span>}
             </button>
           );
         })}

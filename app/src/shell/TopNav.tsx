@@ -30,7 +30,7 @@ function ModeTab({
       className={`mode-tab${active ? ' on' : ''}${related ? ' related' : ''}`}
       data-mode={kind}
       style={{ '--mode': color } as CSSProperties}
-      aria-pressed={active}
+      aria-current={active ? 'page' : undefined}
       onClick={onClick}
       title={label}
     >
@@ -72,7 +72,7 @@ export function TopNav({
       </div>
 
       {/* Tres formas de explorar el prototipo, cada una con su color propio. */}
-      <nav className="mode-deck" aria-label="Elegí qué explorar">
+      <nav className="mode-deck" aria-label="Módulo">
         <ModeTab
           kind="auto"
           color={MODULE_COLOR.auto}
@@ -103,7 +103,7 @@ export function TopNav({
       </nav>
 
       {/* Acciones secundarias del módulo activo + utilidad Sistema de diseño. */}
-      <div className="topbar-utils" aria-label="Más opciones">
+      <nav className="topbar-utils" aria-label="Referencia">
         {(autoActive || v3On) && onV3 && (
           <button
             className={`util-btn util-mode${v3On ? ' on' : ''}`}
@@ -125,7 +125,7 @@ export function TopNav({
             <span>Sistema de diseño</span>
           </button>
         )}
-      </div>
+      </nav>
 
       <div className="top-right">
         <div className="seg seg-sm" role="radiogroup" aria-label="País">
