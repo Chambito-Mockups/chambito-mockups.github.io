@@ -2,6 +2,7 @@ import { usePersistent } from './persist';
 import { createContext, ReactNode, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { Country, CountryData, DATA, Level } from './data';
 import { Theme, ThemeName, themes } from './theme';
+import { Plan } from './commission';
 
 export type ScreenId =
   | 'inicio' | 'perfil' | 'equipos' | 'comercios'
@@ -10,7 +11,9 @@ export type ScreenId =
   | 'D0' | 'D1' | 'D2' | 'D3' | 'D5' | 'D6' | 'D7' | 'D8' | 'D9'
   // Chambito Market (Tienda)
   | 'M01' | 'M03' | 'M04' | 'M05' | 'M06' | 'M09' | 'M10' | 'M11' | 'EA4'
-  | 'V14' | 'V15' | 'V16' | 'V17' | 'V18' | 'V19' | 'V21' | 'V22';
+  | 'V14' | 'V15' | 'V16' | 'V17' | 'V18' | 'V19' | 'V21' | 'V22'
+  // ventas y cobros del vendedor (comisiones, fase 2)
+  | 'C2' | 'C3' | 'C4' | 'C5' | 'C6' | 'C7' | 'C8' | 'C9';
 
 export type Overlay = null | 'sos' | 'details' | 'offer' | 'cancel' | 'report' | 'guest' | 'draft' | 'actions' | 'limit' | 'explorer';
 export type Section = 'servicios' | 'auto' | 'market';
@@ -38,6 +41,8 @@ export interface Settings {
   sellerStatus: 'verificado' | 'sin-verificar' | 'en-revision' | 'suspendido';
   manualReview: boolean;
   atLimit: boolean;
+  /** cómo paga el vendedor (fase 2): B · comisión por venta, o A · un nivel de membresía sin comisión */
+  sellerPlan: Plan;
 }
 
 export interface Trip {
@@ -96,6 +101,7 @@ export const defaultSettings: Settings = {
   sellerStatus: 'verificado',
   manualReview: false,
   atLimit: false,
+  sellerPlan: 'comision',
 };
 
 const newTrip = (d: CountryData): Trip => ({

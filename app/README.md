@@ -97,7 +97,25 @@ npm test         # Vitest: registry, navigation, every screen in both themes/cou
 - **Buyer**: Tienda home (and the almost-empty version), search, results (Productos | Servicios), filters, product detail (sold, unavailable, error, cross-sell marked Phase 2), seller profile, consult chat, Guardados, report and guest sheets.
 - **Seller**: welcome, identity (verified, unverified, under review, suspended), Publicar 1–3, published or under review, resume a draft, My listings with tabs and actions, edit, limit of 50.
 - **Actividad**: Servicios | Tienda selector (Mis consultas + Mis pedidos, Phase 2). **Notificaciones**: the 4 of the brief.
-- Phase 2 (protected purchase) is not built: the design marks it «después».
+- Phase 2 (protected purchase) is not built for the buyer here: the design marks it «después». The seller side of Phase 2 is (below).
+
+### Seller side of Phase 2: products, stock, shipping, plans and payouts (example business rules)
+
+Classic Market (groups «Vendedor · productos, stock y envío» ST1–ST7 and «Vendedor · ventas y cobros» C1–C9) and App Unificada (groups «Market · productos, stock y envío» S1–S6 and «Market · ventas y cobros» C1–C9; they switch the phone to Phase 2):
+
+- **Publicar**: photos, name, description, price, category, **stock** and **who pays shipping** (seller = free shipping, or buyer). Under the price, how much you receive.
+- **Stock**: the seller sees and edits units in Mis publicaciones (− / +). At 0 the listing shows «Sin stock» and can't be bought («Avisarme cuando haya»).
+- **Business profile**: business name, category, description, owner, hours, zone and its products; opened from any product detail.
+- **Shipping**: the product detail says who pays shipping before buying; the cart charges it only when the buyer pays.
+- **Search**: search and results screens (existing), with «Sin stock» on cards.
+- **Cómo pagás** (plans screen) to choose between the two options:
+
+| Option | Rule |
+|---|---|
+| A · Membership, no commission | Emprendedor USD 20/month (15 active listings) · Comercio USD 45 (50) · Negocio USD 80 (no limit). No sale pays commission. Charged in USD to the card |
+| B · Commission per sale | No fixed cost, 10 active listings. Tecnología 8 %, Deportes 8 %, Hogar 10 %, Otros 10 %, Ropa 12 %; min Gs. 5.000, cap Gs. 300.000; first 3 sales free |
+
+Common rules: moving to a membership or up a tier applies now, down or back to commission at month end; failed membership payment = 7 days grace, then back to commission; commission only on protected purchases, base is product price, shipping goes to the seller, IVA 10 % included; money pending until the buyer confirms or 5 days after delivery; no dispatch in 48 h cancels the sale; claims hold money up to 10 days; payouts only to the seller's own account, min Gs. 50.000, 1 free per week. The sidebar's **Cobro al vendedor** sets the starting option. Logic and rules: `src/commission.ts` (tested in `src/test/commission.test.ts` and `src/test/cobros.test.tsx`).
 
 ### Brand (guide of 05/11/2026 + `design-system/TOKENS.json` v1.27.0; where they differ, TOKENS wins)
 

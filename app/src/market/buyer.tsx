@@ -1,3 +1,4 @@
+import { SHIP_FEE } from '../commission';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useApp } from '../store';
 import { P, R } from '../theme';
@@ -409,6 +410,8 @@ export function M06() {
   }
 
   const sold = l.status === 'vendida';
+  const noStock = !sold && l.stock === 0;
+  const freeShip = l.ship === 'vendedor';
   const crossSell = l.category === 'Hogar' || l.category === 'Tecnología';
   const consult = () => gate(() => { setChatListing(l.id); go('M10'); });
   return (
@@ -417,6 +420,14 @@ export function M06() {
         <MFooter>
           {sold ? (
             <Button onClick={() => { setQuery(''); setFilters({ ...DEFAULT_FILTERS, category: l.category }); go('M04'); }}>Ver parecidos</Button>
+          ) : noStock ? (
+            <>
+              <span style={{ font: R(13), color: t.text2 }}>Sin stock: el vendedor todavía no cargó más unidades.</span>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <HeartButton id={l.id} size={52} onSurface />
+                <Button kind="secondary" icon="bell" style={{ flex: 1 }} onClick={() => showToast('Te avisamos cuando vuelva a haber stock')}>Avisarme cuando haya</Button>
+              </div>
+            </>
           ) : (
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -457,6 +468,7 @@ export function M06() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ font: P(26) }}>{money(l.price)}</span>
             <span style={{ font: R(12, 500), background: t.mChip, borderRadius: 10, padding: '3px 8px' }}>{l.condition}</span>
+            {!sold && <span style={{ font: R(12, 500), color: noStock ? t.warn : t.text, background: noStock ? 'rgba(255,181,71,0.16)' : t.mChip, borderRadius: 10, padding: '3px 8px' }}>{noStock ? 'Sin stock' : l.stock === 1 ? 'Último disponible' : `Quedan ${l.stock}`}</span>}
           </div>
           <span style={{ font: R(17, 500), ...pretty }}>{l.title}</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -472,6 +484,15 @@ export function M06() {
             ))}
           </div>
           {l.description && <span style={{ font: R(14), color: t.text2, ...pretty }}>{l.description}</span>}
+          {!sold && (
+            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: 12, borderRadius: 16, background: freeShip ? t.greenSoft : t.mSurface }}>
+              <Icon name="shoppingBag" size={20} color={freeShip ? t.success : t.icon} />
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <span style={{ font: R(15, 500) }}>{freeShip ? 'Envío gratis' : 'Envío a cargo del comprador'}</span>
+                <span style={{ font: R(13), color: t.text2, ...pretty }}>{freeShip ? 'Lo paga el vendedor. También podés retirarlo sin costo.' : `Si pedís envío pagás ${money(SHIP_FEE)}. Retirarlo o verse en un punto de encuentro es gratis.`}</span>
+              </div>
+            </div>
+          )}
           {crossSell && !sold && (
             <button className="press" onClick={() => showToast('Fase 2: abre el pedido de servicio con el rubro sugerido')} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 12, borderRadius: 16, border: `1.5px dashed ${t.dashed}`, textAlign: 'left' }}>
               <span style={{ width: 40, height: 40, borderRadius: 20, background: t.mChip, display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}><Icon name="settings" size={20} /></span>
@@ -498,6 +519,8 @@ export function M09() {
   const gate = useRequireLogin();
   const loading = useFirstLoad();
   const items = LISTINGS.filter((l) => l.seller === sellerId && (l.status === 'activa' || l.status === 'vendida'));
+  const zone = useZone();
+  const zoneOf = (l?: (typeof items)[number]) => (l ? zone(l).split(' · ')[0] : '—');
   return (
     <MScreen>
       <MTopBar onBack={back} right={<RoundBtn icon="more" label="Denunciar usuario" onClick={() => gate(() => setOverlay('report'), 'denunciar')} />} />
@@ -511,23 +534,33 @@ export function M09() {
         <div style={{ padding: '8px 20px 40px', display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, textAlign: 'center' }}>
             <span style={{ width: 80, height: 80, borderRadius: 40, background: t.mChip, display: 'flex', alignItems: 'center', justifyContent: 'center', font: P(26) }}>{s.initials}</span>
-            <span style={{ font: P(22) }}>{s.name}</span>
+            <span style={{ font: P(22) }}>{s.biz}</span>
+            <span style={{ font: R(14), color: t.text2 }}>{s.rubro}</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Verified size={13} />
               <StarRating value={s.rating} />
               <span style={{ font: R(13), color: t.text2 }}>· {s.reviews} calificaciones</span>
             </div>
-            <span style={{ font: R(13), color: t.text2 }}>En Chambito desde {s.since}</span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
-            {[[String(s.listings), 'publicaciones'], [String(s.sold), 'vendidas'], [s.responds, 'para responder']].map(([v, k]) => (
+            {[[String(items.length), 'productos'], [String(s.sold), 'vendidas'], [s.responds, 'para responder']].map(([v, k]) => (
               <div key={k} style={{ background: t.mSurface, borderRadius: 14, padding: '10px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                 <span style={{ font: P(18) }}>{v}</span>
                 <span style={{ font: R(12), color: t.text2 }}>{k}</span>
               </div>
             ))}
           </div>
-          <span style={{ font: P(18) }}>Publicaciones ({s.listings})</span>
+          <div style={{ background: t.mSurface, borderRadius: 16, padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <span style={{ font: P(16) }}>Sobre el negocio</span>
+            <span style={{ font: R(14), color: t.text2, ...pretty }}>{s.about}</span>
+            {([['Responsable', s.name], ['Horario', s.hours], ['Zona', `${zoneOf(items[0])} · aproximada`], ['En Chambito desde', s.since]] as [string, string][]).map(([k, v]) => (
+              <div key={k} style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                <span style={{ font: R(14), color: t.text2 }}>{k}</span>
+                <span style={{ font: R(14, 500), textAlign: 'right' }}>{v}</span>
+              </div>
+            ))}
+          </div>
+          <span style={{ font: P(18) }}>Productos ({items.length})</span>
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: '20px 12px' }}>
             {items.map((l) => <ListingCard key={l.id} l={l} onOpen={open} />)}
           </div>

@@ -17,7 +17,7 @@ function phone(props: Parameters<typeof IntegradaPhone>[0] = {}) {
 
 afterEach(() => vi.useRealTimers());
 
-describe('app integrada: las 38 pantallas', () => {
+describe('app integrada: todas las pantallas', () => {
   it('el menú del visor tiene todas las pantallas, con claves únicas', () => {
     expect([...new Set(IG_ENTRIES.map((x) => x.screen))].sort()).toEqual([...ALL].sort());
     expect(new Set(IG_ENTRIES.map((x) => x.key)).size).toBe(IG_ENTRIES.length);

@@ -261,6 +261,9 @@ export function Ficha() {
           ) : null}
         </div>
         <h1 style={{ margin: "4px 0 0", font: "700 18px/26px Poppins, Arial, sans-serif" }}>{pv.title}</h1>
+        {pv.sold ? null : (
+          <span style={{ alignSelf: "flex-start", display: "inline-flex", marginTop: 6, height: 24, padding: "0 10px", alignItems: "center", borderRadius: 9999, background: pv.noStock ? t.warnSubtle : t.fill, color: pv.noStock ? t.warning : t.text, font: "500 12px/16px Roboto, Arial, sans-serif", letterSpacing: 0.2 }}>{pv.stockTxt}</span>
+        )}
         <span style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, fontSize: 14, lineHeight: "20px", color: t.text2 }}><I name="mappin" size={16} />{pv.where} · zona aproximada</span>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8, marginTop: 16 }}>
           {(pv.attrs as any[]).map((x: any, i: number) => (
@@ -271,6 +274,15 @@ export function Ficha() {
           ))}
         </div>
         <p style={{ margin: "16px 0 0", fontSize: 15, lineHeight: "22px" }}>{pv.desc}</p>
+        {pv.sold ? null : (
+          <div style={{ display: "flex", gap: 12, alignItems: "flex-start", marginTop: 16, padding: 14, borderRadius: 16, background: pv.envioFree ? t.brandSubtle : t.fill }}>
+            <I name="bag" size={20} style={{ color: pv.envioFree ? t.success : t.text }} />
+            <span style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+              <span style={{ fontWeight: 500 }}>{pv.envioTitle}</span>
+              <span style={{ fontSize: 13, lineHeight: "18px", color: t.text2 }}>{pv.envioSub}</span>
+            </span>
+          </div>
+        )}
         {pv.cross ? (
           <button style={{ marginTop: 16, width: "100%", display: "flex", alignItems: "center", gap: 12, padding: 14, boxSizing: "border-box", borderRadius: 16, background: "transparent", outline: `1.5px dashed ${t.bDefault}`, outlineOffset: -1.5, color: t.text }} onClick={a.svcTecnico}>
             <span aria-hidden="true" style={{ flex: "none", width: 40, height: 40, borderRadius: 12, background: t.brand, color: t.onBrand, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -285,17 +297,18 @@ export function Ficha() {
         ) : null}
         {pv.notMine ? (
           <section style={{ marginTop: 16 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, padding: 14, borderRadius: 16, boxShadow: `inset 0 0 0 1px ${t.line}` }}>
+            <button aria-label={`Ver el perfil de ${pv.bizName}`} onClick={pv.openSeller} style={{ width: "100%", textAlign: "left", color: t.text, display: "flex", alignItems: "center", gap: 12, padding: 14, borderRadius: 16, boxShadow: `inset 0 0 0 1px ${t.line}` }}>
               <span aria-hidden="true" style={{ flex: "none", width: 48, height: 48, borderRadius: 9999, background: t.brandSubtle, display: "flex", alignItems: "center", justifyContent: "center", font: "700 16px/1 Poppins, Arial, sans-serif" }}>{pv.ini}</span>
               <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
-                <span style={{ fontWeight: 500 }}>{pv.seller}</span>
+                <span style={{ fontWeight: 500 }}>{pv.bizName}</span>
                 <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, lineHeight: "18px", color: t.text2 }}>
                   <span style={{ display: "inline-flex", alignItems: "center", gap: 4, font: "500 12px/16px Roboto, Arial, sans-serif", letterSpacing: 0.2, color: t.success }}><I name="shield" size={14} />Verificado</span>
                   <span style={{ display: "inline-flex", alignItems: "center", gap: 2 }}><I name="star" size={13} style={{ color: t.warning }} />{pv.rating} ({pv.reviews})</span>
                 </span>
-                <span style={{ fontSize: 12, lineHeight: "16px", color: t.text2 }}>En Chambito desde {pv.since}</span>
+                <span style={{ fontSize: 12, lineHeight: "16px", color: t.text2 }}>{pv.seller} · en Chambito desde {pv.since}</span>
               </div>
-            </div>
+              <I name="chevronright" size={20} style={{ color: t.text2 }} />
+            </button>
           </section>
         ) : null}
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 16, fontSize: 13, lineHeight: "18px", color: t.text2 }}><I name="lock" size={16} />Nunca pagues por adelantado fuera de Chambito</div>
@@ -322,6 +335,12 @@ export function Ficha() {
         ) : null}
         {pv.showSold ? (
           <Btn kind="secondary" onClick={pv.similar}>Ver similares</Btn>
+        ) : null}
+        {pv.showNoStock ? (
+          <>
+            <Btn kind="secondary" onClick={pv.notify}>Avisarme cuando haya stock</Btn>
+            <span style={{ fontSize: 12, lineHeight: "16px", color: t.text2 }}>Sin stock: el vendedor todavía no cargó más unidades.</span>
+          </>
         ) : null}
         {pv.showMine ? (
           <div style={{ display: "flex", gap: 8 }}>
@@ -486,13 +505,21 @@ export function MisPublicaciones() {
                   ) : null}
                 </span>
               </button>
+              <div role="group" aria-label={`Stock de ${p.title}`} style={{ flex: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+                <span style={{ fontSize: 12, lineHeight: "16px", color: p.noStock ? t.warning : t.text2 }}>Stock</span>
+                <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <button aria-label={`Restar una unidad de ${p.title}`} onClick={p.dec} style={{ width: 32, height: 32, borderRadius: 9999, background: t.fill, color: t.text, display: "flex", alignItems: "center", justifyContent: "center" }}><I name="minus" size={16} /></button>
+                  <span aria-live="polite" style={{ minWidth: 24, textAlign: "center", fontWeight: 500 }}>{p.stock}</span>
+                  <button aria-label={`Sumar una unidad de ${p.title}`} onClick={p.inc} style={{ width: 32, height: 32, borderRadius: 9999, background: t.fill, color: t.text, display: "flex", alignItems: "center", justifyContent: "center" }}><I name="plus" size={16} /></button>
+                </span>
+              </div>
             </div>
           ))}
         </div>
         <section style={{ marginTop: 16 }}>
           <div role="status" style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: "12px 14px", borderRadius: 12, background: t.fill, fontSize: 14, lineHeight: "20px" }}>
             <I name="info" size={20} style={{ color: t.text }} />
-            <span style={{ flex: 1 }}>Las publicaciones se revisan en minutos. Si una foto no muestra el producto, te avisamos para corregirla.</span>
+            <span style={{ flex: 1 }}>Cambiá el stock con − y +. Con 0, la publicación se ve «Sin stock» y no se puede comprar. Las publicaciones nuevas se revisan en minutos.</span>
           </div>
         </section>
         <div aria-hidden="true" style={{ height: 24 }} />
@@ -506,7 +533,7 @@ export function MisPublicaciones() {
 
 /** vender */
 export function Vender() {
-  const { a, go, t } = useVM();
+  const { a, fase2, go, t } = useVM();
   return (
     <Screen id="vender">
       <StatusSpace />
@@ -523,7 +550,8 @@ export function Vender() {
             </span>
             <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <span style={{ fontWeight: 500 }}>Publicar es gratis</span>
-              <span style={{ fontSize: 14, lineHeight: "20px", color: t.text2 }}>No cobramos comisión en esta etapa.</span>
+              <span style={{ fontSize: 14, lineHeight: "20px", color: t.text2 }}>{fase2 ? "Elegí: membresía sin comisión o comisión solo cuando vendés." : "No cobramos comisión en esta etapa."}</span>
+              {fase2 ? <button style={{ alignSelf: "flex-start", color: t.link, font: "500 14px/20px Roboto, Arial, sans-serif" }} onClick={go.planes}>Ver membresías y comisiones</button> : null}
             </div>
           </div>
           <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
@@ -611,7 +639,7 @@ export function Publicar1() {
 
 /** pub2 */
 export function Publicar2() {
-  const { a, go, pub, t } = useVM();
+  const { a, cb, fase2, go, pub, t } = useVM();
   return (
     <Screen id="pub2">
       <StatusSpace />
@@ -638,6 +666,12 @@ export function Publicar2() {
             <span style={{ font: "500 14px/20px Roboto, Arial, sans-serif", letterSpacing: 0.1 }}>Precio</span>
             <span style={{ minHeight: 52, padding: "14px 16px", boxSizing: "border-box", borderRadius: 12, boxShadow: `inset 0 0 0 1px ${t.bField}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>Gs. 300.000<I name="edit" size={18} style={{ color: t.text2 }} /></span>
           </label>
+          {fase2 ? (
+              <span style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", fontSize: 13, lineHeight: "18px", color: t.text2 }}>
+                <span>{cb.pub.member ? <>Con tu membresía no pagás comisión · </> : <>Comisión {cb.pub.rate} ({cb.pub.feeTxt}) · </>}<b style={{ color: t.text, fontWeight: 500 }}>Recibís {cb.pub.netTxt}</b></span>
+                <button style={{ color: t.link, font: "500 13px/18px Roboto, Arial, sans-serif" }} onClick={go.tarifas}>Cómo cobramos</button>
+              </span>
+            ) : null}
           <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <span style={{ font: "500 14px/20px Roboto, Arial, sans-serif", letterSpacing: 0.1 }}>Descripción</span>
             <span style={{ minHeight: 52, padding: "14px 16px", boxSizing: "border-box", borderRadius: 12, boxShadow: `inset 0 0 0 1px ${t.bField}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>Madera maciza, 90 × 50 cm. Algunas marcas de uso.<I name="edit" size={18} style={{ color: t.text2 }} /></span>
@@ -652,6 +686,28 @@ export function Publicar2() {
               <Chip key={i} aria-pressed={c.pressed} onClick={c.pick} c={c}>{c.on ? (   <I name="check" size={16} /> ) : null}{c.label}</Chip>
             ))}
           </div>
+        </section>
+        <section style={{ marginTop: 20 }}>
+          <SectionHead>
+            <H2>Stock</H2>
+          </SectionHead>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ flex: 1, fontSize: 14, lineHeight: "20px", color: t.text2 }}>Unidades que tenés para vender. Cada venta descuenta una.</span>
+            <button aria-label="Restar una unidad" aria-disabled={pub.canDec ? undefined : true} onClick={a.stockDec} style={{ width: 40, height: 40, borderRadius: 9999, background: t.fill, color: pub.canDec ? t.text : t.text3, display: "flex", alignItems: "center", justifyContent: "center" }}><I name="minus" size={18} /></button>
+            <span aria-live="polite" style={{ minWidth: 28, textAlign: "center", font: "700 18px/26px Poppins, Arial, sans-serif" }}>{pub.stock}</span>
+            <button aria-label="Sumar una unidad" onClick={a.stockInc} style={{ width: 40, height: 40, borderRadius: 9999, background: t.fill, color: t.text, display: "flex", alignItems: "center", justifyContent: "center" }}><I name="plus" size={18} /></button>
+          </div>
+        </section>
+        <section style={{ marginTop: 20 }}>
+          <SectionHead>
+            <H2>¿Quién paga el envío?</H2>
+          </SectionHead>
+          <div role="group" aria-label="Quién paga el envío" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {(pub.ships as any[]).map((c: any, i: number) => (
+              <Chip key={i} aria-pressed={c.pressed} onClick={c.pick} c={c}>{c.on ? (   <I name="check" size={16} /> ) : null}{c.label}</Chip>
+            ))}
+          </div>
+          <span style={{ display: "block", marginTop: 8, fontSize: 13, lineHeight: "18px", color: t.text2 }}>El comprador lo ve en la publicación antes de comprar.</span>
         </section>
         <section style={{ marginTop: 20 }}>
           <SectionHead>
@@ -699,7 +755,8 @@ export function Publicar3() {
           <span style={{ font: "700 18px/26px Poppins, Arial, sans-serif" }}>Gs. 300.000</span>
           <span style={{ fontWeight: 500 }}>Mesa ratona de madera</span>
           <span style={{ fontSize: 13, lineHeight: "18px", color: t.text2 }}>{pub.catLabel} · {pub.cond} · Lambaré</span>
-          <span style={{ fontSize: 13, lineHeight: "18px", color: t.text2 }}>{pub.photosTxt}</span>
+          <span style={{ fontSize: 13, lineHeight: "18px", color: t.text2 }}>{pub.photosTxt} · Stock: {pub.stockTxt}</span>
+          <span style={{ fontSize: 13, lineHeight: "18px", color: t.text2 }}>{pub.shipTxt}</span>
         </div>
         <section style={{ marginTop: 12 }}>
           <div role="status" style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: "12px 14px", borderRadius: 12, background: t.fill, fontSize: 14, lineHeight: "20px" }}>

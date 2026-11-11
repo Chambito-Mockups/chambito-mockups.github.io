@@ -99,6 +99,7 @@ export function Shell() {
     if (mk.myTab) market.setMyTab(mk.myTab);
     market.setWelcomed(mk.welcomed ?? true);
     if (mk.draft) market.setDraft({ ...emptyDraft(), title: 'Bicicleta Trek rodado 29', price: '1.450.000', attrs: { Rodado: '29', Talle: 'M', Marca: 'Trek' }, description: 'Poco uso, cambios Shimano de 21 velocidades. Incluye luces.', step: e.key === 'V18' ? 3 : 2, savedAt: Date.now() - 2 * 3600 * 1000, editing: e.key === 'V22' ? 'm1' : undefined, photos: e.key === 'V16' ? [] : [0, 1, 2].map((i) => ({ id: i, state: 'lista' as const, ph: (i % 3) as 0 | 1 | 2 })) });
+    market.setCobros({ feePreview: !!mk.feePreview, ...(mk.sale ? { saleId: mk.sale } : {}) });
     if (mk.review !== undefined) market.setLastPublished({ title: 'Bicicleta Trek rodado 29', price: 1450000, review: mk.review });
     resetTrip();
     if (e.phase) setTrip({ phase: e.phase });

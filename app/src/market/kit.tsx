@@ -143,6 +143,7 @@ export function ListingCard({ l, width, onOpen }: { l: Listing; width?: number; 
       <Photo ph={l.ph} cat={l.category} dim={l.status === 'vendida'}>
         <span style={{ position: 'absolute', top: 8, right: 8 }}><HeartButton id={l.id} /></span>
         {l.status === 'vendida' && <SoldStrip small />}
+        {l.status !== 'vendida' && l.stock === 0 && <SoldStrip small text="Sin stock" />}
       </Photo>
       <span style={{ font: P(16) }}>{money(l.price)}</span>
       <span style={{ font: R(14), height: 36, ...clamp2 }}>{l.title}</span>
@@ -155,9 +156,9 @@ export function ListingCard({ l, width, onOpen }: { l: Listing; width?: number; 
   );
 }
 
-export function SoldStrip({ small }: { small?: boolean }) {
+export function SoldStrip({ small, text = 'Vendido' }: { small?: boolean; text?: string }) {
   return (
-    <span style={{ position: 'absolute', left: 0, right: 0, top: small ? '42%' : '45%', background: '#000000', color: '#FFFFFF', font: P(small ? 13 : 16), textAlign: 'center', padding: small ? '4px 0' : '8px 0', letterSpacing: 0.5 }}>Vendido</span>
+    <span style={{ position: 'absolute', left: 0, right: 0, top: small ? '42%' : '45%', background: '#000000', color: '#FFFFFF', font: P(small ? 13 : 16), textAlign: 'center', padding: small ? '4px 0' : '8px 0', letterSpacing: 0.5 }}>{text}</span>
   );
 }
 
@@ -179,13 +180,13 @@ export function SellerRow({ id, onClick, me }: { id: string; onClick?: () => voi
       <span style={{ width: 44, height: 44, borderRadius: 22, background: t.mChip, display: 'flex', alignItems: 'center', justifyContent: 'center', font: P(15), flex: 'none' }}>{me ? 'LG' : s.initials}</span>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ font: P(15) }}>{me ? 'Vos' : s.name}</span>
+          <span style={{ font: P(15) }}>{me ? 'Vos' : s.biz}</span>
           <Verified />
         </div>
         {!me && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <StarRating value={s.rating} />
-            <span style={{ font: R(13), color: t.text2 }}>({s.reviews}) · En Chambito desde {s.since}</span>
+            <span style={{ font: R(13), color: t.text2 }}>({s.reviews}) · {s.name} · Ver negocio</span>
           </div>
         )}
       </div>
@@ -246,6 +247,7 @@ export function StatusTag({ status }: { status: string }) {
     Vendida: [t.chipSelText, t.chipSelBg],
     Rechazada: [t.error, t.name === 'dark' ? 'rgba(255,107,107,0.16)' : 'rgba(183,28,28,0.08)'],
     'Bajó de precio': [t.success, t.greenSoft],
+    'Sin stock': [t.warn, 'rgba(255,181,71,0.16)'],
   };
   const [c, bg] = map[status] ?? [t.text2, t.mChip];
   return <span style={{ font: R(12, 500), color: c, background: bg, borderRadius: 10, padding: '2px 8px', alignSelf: 'flex-start', whiteSpace: 'nowrap' }}>{status}</span>;

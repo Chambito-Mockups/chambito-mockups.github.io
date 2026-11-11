@@ -6,6 +6,7 @@
  */
 import { createContext, useContext } from 'react';
 import { tokens } from './tokens';
+import { balances, calcSale, CatKey, commissionOf, DISPATCH_HOURS, HOLD_DAYS, isMember, limitTxt, monthTotals, MONTHS, PAYOUT, PAYOUTS, Plan, planName, rateLabel, rules, SALES, saleCalc, SaleStatus, SHIP_FEE, STATUS_LABEL, STATUS_TONE, tierOf, TIERS, usd } from '../commission';
 
 /* The design's view model is dynamic (built per render from the state), so it is typed loosely. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -20,6 +21,8 @@ export interface IntegradaProps {
   dark?: boolean;
   /** categorías de la Tienda: círculos en una fila, o mosaicos (CategoryTile del sistema de diseño) */
   categorias?: 'Círculos' | 'Mosaicos';
+  /** cómo paga el vendedor al arrancar (fase 2): B · comisión por venta, o A · un nivel de membresía sin comisión */
+  cobro?: Plan;
 }
 
 export interface ModelIO {
@@ -43,7 +46,7 @@ export function useVM(): VM {
 }
 
 export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: ModelIO): VM {
-  const SCREENS: Any = ["inicio", "explorar", "actividad", "perfil", "notifs", "svc", "svcPros", "svcConfirm", "svcOk", "tienda", "mBuscar", "ficha", "chat", "guardados", "misPubs", "vender", "pub1", "pub2", "pub3", "pubOk", "carrito", "confirmar", "compraOk", "orden", "devolucion", "auto", "aDestino", "aPunto", "aConfirmar", "viaje", "aCalificar", "sInicio", "trabajo", "dHome", "dBuscar", "dPin", "dViaje", "dCobro"];
+  const SCREENS: Any = ["inicio", "explorar", "actividad", "perfil", "notifs", "svc", "svcPros", "svcConfirm", "svcOk", "tienda", "mBuscar", "ficha", "chat", "guardados", "misPubs", "vender", "pub1", "pub2", "pub3", "pubOk", "carrito", "confirmar", "compraOk", "orden", "devolucion", "auto", "aDestino", "aPunto", "aConfirmar", "viaje", "aCalificar", "sInicio", "trabajo", "dHome", "dBuscar", "dPin", "dViaje", "dCobro", "ventas", "venta", "retirar", "retiroOk", "cuentaCobro", "tarifas", "planes", "facturas", "vendedor"];
   const startKey = P_.pantallaInicial || 'Inicio (cliente)';
   const START: Any = {
     'Inicio (cliente)': ['inicio', 'cliente'], 'Tienda': ['tienda', 'cliente'], 'Auto': ['auto', 'cliente'],
@@ -119,6 +122,22 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
     { id: 'mesa', title: 'Mesa de luz de madera', price: 250000, place: 'Lambaré', km: 0, rating: '4,9', reviews: 6, seller: 'Lucía Giménez', ini: 'LG', since: 'ago. 2026', cat: 'hogar', cond: 'Usado', tone: 1, mine: true, status: 'ok', kw: 'mesa luz', desc: 'Madera maciza, dos cajones.', attrs: [['Material', 'Madera'], ['Cajones', '2'], ['Alto', '55 cm']] },
     { id: 'coche', title: 'Cochecito de bebé plegable', price: 400000, place: 'Lambaré', km: 0, rating: '4,9', reviews: 6, seller: 'Lucía Giménez', ini: 'LG', since: 'ago. 2026', cat: 'otros', cond: 'Usado', tone: 2, mine: true, status: 'review', hidden: true, kw: 'cochecito bebe', desc: 'Plegable, con capota y canasto.', attrs: [['Edad', '0 a 3 años'], ['Plegable', 'Sí'], ['Color', 'Gris']] }
   ];
+  // stock y quién paga el envío (los elige el vendedor al publicar); el vendedor puede cambiar el stock en Mis publicaciones
+  const STOCK0: Any = { bici: 1, nike: 3, silla: 2, iphone: 0, campera: 1, heladera: 1, notebook: 0, mesa: 2, coche: 1 };
+  const ENVIO: Any = { bici: 'comprador', nike: 'vendedor', silla: 'comprador', iphone: 'vendedor', campera: 'vendedor', heladera: 'comprador', notebook: 'vendedor', mesa: 'comprador', coche: 'comprador' };
+  const stockOf = st.stockOf || {};
+  PRODUCTS.forEach(function (p?: Any) { p.envio = ENVIO[p.id] || 'comprador'; p.stock = stockOf[p.id] != null ? stockOf[p.id] : STOCK0[p.id]; });
+  /** perfil de negocio de cada vendedor */
+  const BIZ: Any = {
+    'Carla Benítez': ['Bici Lambaré', 'Bicicletas y accesorios', 'Bicicletas usadas revisadas, repuestos y accesorios. Te ayudamos a elegir el rodado.', 'Lun a sáb · 8:00 a 18:00', 42, '1 h'],
+    'Fernanda Ayala': ['Fer Calzados', 'Calzado y ropa', 'Zapatillas originales nuevas y con poco uso. Cambios de talle dentro de los 7 días.', 'Lun a vie · 9:00 a 19:00', 67, '30 min'],
+    'Diego Ortiz': ['Ortiz Muebles', 'Muebles de oficina y hogar', 'Sillas, escritorios y muebles usados en buen estado. Armamos y desarmamos.', 'Lun a sáb · 8:00 a 17:00', 18, '3 h'],
+    'Ana Rolón': ['Rolón Celulares', 'Celulares y tecnología', 'Celulares revisados con garantía de 30 días. Te mostramos la batería antes de comprar.', 'Lun a sáb · 9:00 a 20:00', 95, '30 min'],
+    'Rocío Cáceres': ['Ropero de Rocío', 'Ropa usada', 'Ropa usada seleccionada, lavada y lista para usar.', 'Mar a sáb · 10:00 a 18:00', 23, '2 h'],
+    'Martín Sosa': ['Sosa Electro', 'Electrodomésticos', 'Heladeras, lavarropas y cocinas usadas, probadas antes de publicar.', 'Lun a vie · 8:00 a 18:00', 31, '1 h'],
+    'Gustavo Rojas': ['GR Informática', 'Computadoras', 'Notebooks y PC reacondicionadas con disco SSD. Instalamos los programas.', 'Lun a vie · 9:00 a 18:00', 54, '1 h'],
+    'Lucía Giménez': ['Casa Lucía', 'Muebles y deco', 'Muebles de madera restaurados a mano.', 'Sáb y dom · 9:00 a 13:00', 6, '1 h']
+  };
   const CATS: Any = [['ropa', 'Ropa', 'tag'], ['tecnologia', 'Tecnología', 'phone'], ['deportes', 'Deportes', 'flag'], ['hogar', 'Hogar', 'home'], ['otros', 'Otros', 'more']];
   const catName: Any = {}; CATS.forEach(function (c?: Any) { catName[c[0]] = c[1]; });
   const pubs = st.pubs || [];
@@ -140,12 +159,13 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
     const where = p.mine ? 'Tu publicación · ' + p.place : p.place + ' · a ' + p.km + ' km';
     let tag = '', tagBg = t.fill, tagFg = t.text;
     if (p.sold) { tag = 'Vendida'; tagBg = t.dangerSubtle; tagFg = t.danger; }
+    else if (p.stock === 0) { tag = 'Sin stock'; tagBg = t.warnSubtle; tagFg = t.warning; }
     else if (p.was) { tag = 'Bajó de precio'; tagBg = t.brandSubtle; tagFg = t.success; }
     else if (p.mine && p.status === 'review') { tag = 'Revisá la foto de portada'; tagBg = t.warnSubtle; tagFg = t.warning; }
     else if (p.mine) { tag = p.isNew ? 'Activa · nueva' : 'Activa'; tagBg = t.brandSubtle; tagFg = t.success; }
     return {
       t: t, id: p.id, title: p.title, priceTxt: fmt(p.price), hasWas: !!p.was, wasTxt: p.was ? fmt(p.was) : '', where: where, rating: p.rating,
-      ph: TONES[p.tone || 0], op: p.sold ? 0.55 : 1, sold: !!p.sold, aria: p.title + ', ' + fmt(p.price),
+      ph: TONES[p.tone || 0], op: p.sold || p.stock === 0 ? 0.55 : 1, sold: !!p.sold, aria: p.title + ', ' + fmt(p.price),
       open: openProduct(p.id), toggleSave: toggleSave(p.id), saveLabel: on ? 'Quitar de Guardados' : 'Guardar',
       savedStr: on ? 'true' : 'false', heart: on ? t.iconBrand : t.text3, hasTag: !!tag, tag: tag, tagBg: tagBg, tagFg: tagFg
     };
@@ -294,12 +314,25 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
   const pvb = pview(pr);
   const pv = assign(pvb, {
     cond: pr.cond, desc: pr.desc, cross: !!pr.cross, seller: pr.seller, ini: pr.ini, reviews: pr.reviews, since: pr.since,
+    stock: pr.stock, noStock: pr.stock === 0 && !pr.sold, hasStock: pr.stock > 0 && !pr.sold,
+    stockTxt: pr.stock === 0 ? 'Sin stock' : pr.stock === 1 ? 'Último disponible' : 'Quedan ' + pr.stock,
+    envioFree: pr.envio === 'vendedor', envioTitle: pr.envio === 'vendedor' ? 'Envío gratis' : 'Envío a cargo del comprador',
+    envioSub: pr.envio === 'vendedor' ? 'Lo paga el vendedor. También podés retirarlo sin costo.' : 'Si elegís envío pagás ' + fmt(SHIP_FEE) + '. Retiro y punto de encuentro son gratis.',
+    bizName: BIZ[pr.seller] ? BIZ[pr.seller][0] : pr.seller, openSeller: function () { go('vendedor', { seller: pr.seller }); },
+    notify: function () { toast('Te avisamos cuando vuelva a haber stock'); },
     notMine: !pr.mine, attrs: pr.attrs.map(function (x?: Any) { return { t: t, k: x[0], v: x[1] }; }),
-    showF1: !fase2 && !pr.sold && !pr.mine, showF2: fase2 && !pr.sold && !pr.mine, showSold: !!pr.sold && !pr.mine, showMine: !!pr.mine,
+    showF1: !fase2 && !pr.sold && !pr.mine && pr.stock !== 0, showF2: fase2 && !pr.sold && !pr.mine && pr.stock !== 0, showNoStock: !pr.sold && !pr.mine && pr.stock === 0, showSold: !!pr.sold && !pr.mine, showMine: !!pr.mine,
     consult: function () { go('chat', { cpid: pr.id }); },
     buy: function () { const c = (cs().cart || []).slice(); if (c.indexOf(pr.id) < 0) c.push(pr.id); go('carrito', { cart: c }); },
     similar: function () { go('mBuscar', { q: catName[pr.cat].toLowerCase() }); }
   });
+
+  const bizSeller = st.seller || pr.seller;
+  const bz = BIZ[bizSeller] || [bizSeller, 'Vendedor', '', '', 0, '1 h'];
+  const bizP = ALL.filter(function (p?: Any) { return p.seller === bizSeller && !p.hidden; });
+  const biz: Any = { name: bz[0], owner: bizSeller, ini: bizP.length ? bizP[0].ini : 'CH', rubro: bz[1], desc: bz[2], horario: bz[3], ventas: bz[4], responde: bz[5],
+    rating: bizP.length ? bizP[0].rating : '5,0', reviews: bizP.length ? bizP[0].reviews : 0, since: bizP.length ? bizP[0].since : '', place: bizP.length ? bizP[0].place : '',
+    count: bizP.length, items: bizP.map(pview), chat: function () { go('chat', { cpid: bizP.length ? bizP[0].id : 'bici' }); } };
 
   // chat
   const SEEDS: Any = {
@@ -341,25 +374,36 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
   a.sellerChat = function () { go('chat', { cpid: 'mesa' }); };
 
   const savedItems = ALL.filter(function (p?: Any) { return saved[p.id]; }).map(pview);
-  const mineItems = ALL.filter(function (p?: Any) { return p.mine; }).map(pview).reverse();
+  function setStock(id?: Any, n?: Any) { const m = copy(cs().stockOf || {}); m[id] = Math.max(0, n); S({ stockOf: m }); if (n <= 0) toast('Sin stock: ya no se puede comprar hasta que cargues más'); }
+  const mineItems = ALL.filter(function (p?: Any) { return p.mine; }).map(function (p?: Any) {
+    const s0 = p.stock == null ? 1 : p.stock;
+    return assign(pview(p), { stock: s0, stockTxt: s0 === 0 ? 'Sin stock' : s0 + (s0 === 1 ? ' unidad' : ' unidades'), noStock: s0 === 0,
+      inc: function () { setStock(p.id, s0 + 1); }, dec: function () { setStock(p.id, s0 - 1); } });
+  }).reverse();
 
   // publish
   const photos = st.photos || 0;
   const pcat = st.pcat || 'hogar', pcond = st.pcond || 'Usado';
+  const pstock = st.pstock == null ? 1 : st.pstock, pship = st.pship || 'comprador';
   const pub: Any = {
     canAdd: photos < 6, count: photos + ' de 6 fotos', nextOp: photos ? 1 : 0.45,
     tiles: Array.apply(null, Array(photos)).map(function (_?: Any, i?: Any) { return { t: t, bg: TONES[i % 3], cover: i === 0, label: 'Quitar foto ' + (i + 1), remove: function () { S({ photos: Math.max(0, (cs().photos || 0) - 1) }); } }; }),
     cats: CATS.map(function (c?: Any) { return chip(c[1], c[0] === pcat, function () { S({ pcat: c[0] }); }); }),
     conds: ['Nuevo', 'Usado', 'Para repuesto'].map(function (c?: Any) { return chip(c, c === pcond, function () { S({ pcond: c }); }); }),
+    stock: pstock, stockTxt: pstock + (pstock === 1 ? ' unidad' : ' unidades'), canDec: pstock > 1,
+    ships: [['comprador', 'Lo paga el comprador'], ['vendedor', 'Lo pago yo (envío gratis)']].map(function (x?: Any) { return chip(x[1], x[0] === pship, function () { S({ pship: x[0] }); }); }),
+    shipTxt: pship === 'vendedor' ? 'Envío gratis: lo pagás vos' : 'Envío a cargo del comprador (' + fmt(SHIP_FEE) + ')',
     catLabel: catName[pcat], cond: pcond, photosTxt: photos + (photos === 1 ? ' foto' : ' fotos')
   };
+  a.stockInc = function () { S({ pstock: (cs().pstock == null ? 1 : cs().pstock) + 1 }); };
+  a.stockDec = function () { S({ pstock: Math.max(1, (cs().pstock == null ? 1 : cs().pstock) - 1) }); };
   a.addPhoto = function () { S({ photos: Math.min(6, (cs().photos || 0) + 1) }); };
   a.pub1Next = function () { if (!(cs().photos > 0)) { toast('Agregá al menos una foto'); return; } go('pub2'); };
   a.publish = function () {
     const list = (cs().pubs || []).slice(); const id = 'n' + (list.length + 1);
     list.push({ id: id, title: 'Mesa ratona de madera', price: 300000, place: 'Lambaré', km: 0, rating: '4,9', reviews: 6, seller: 'Lucía Giménez', ini: 'LG', since: 'ago. 2026',
-      cat: pcat, cond: pcond, tone: 0, mine: true, status: 'ok', isNew: true, kw: 'mesa ratona madera', desc: 'Madera maciza, 90 × 50 cm. Algunas marcas de uso.', attrs: [['Medidas', '90 × 50 cm'], ['Material', 'Madera'], ['Estado', pcond]] });
-    replace('pubOk', { pubs: list, lastPub: id, photos: 0 }, ['vender', 'pub1', 'pub2', 'pub3']);
+      cat: pcat, cond: pcond, stock: pstock, envio: pship, tone: 0, mine: true, status: 'ok', isNew: true, kw: 'mesa ratona madera', desc: 'Madera maciza, 90 × 50 cm. Algunas marcas de uso.', attrs: [['Medidas', '90 × 50 cm'], ['Material', 'Madera'], ['Estado', pcond]] });
+    replace('pubOk', { pubs: list, lastPub: id, photos: 0, pstock: 1, pship: null }, ['vender', 'pub1', 'pub2', 'pub3']);
   };
   a.viewLastPub = function () { replace('ficha', { pid: cs().lastPub || 'mesa' }, ['pubOk']); };
 
@@ -367,9 +411,10 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
   const cartItems = cart.map(byId);
   const subtotal = cartItems.reduce(function (s0?: Any, p?: Any) { return s0 + p.price; }, 0);
   const entrega = st.entrega || 'retiro';
-  const ship = entrega === 'envio' ? 25000 : 0;
+  const shipFree = cartItems.length > 0 && cartItems.every(function (p?: Any) { return p.envio === 'vendedor'; });
+  const ship = entrega === 'envio' && !shipFree ? SHIP_FEE : 0;
   const firstPlace = cartItems.length ? cartItems[0].place : 'Lambaré';
-  const ENTREGAS: Any = [['retiro', 'Retiro en ' + firstPlace, 'Coordinás día y hora por el chat', 'Gratis'], ['encuentro', 'Punto de encuentro', 'Un lugar público y concurrido', 'Gratis'], ['envio', 'Envío del vendedor', 'Llega en 24 a 48 h', fmt(25000)]];
+  const ENTREGAS: Any = [['retiro', 'Retiro en ' + firstPlace, 'Coordinás día y hora por el chat', 'Gratis'], ['encuentro', 'Punto de encuentro', 'Un lugar público y concurrido', 'Gratis'], ['envio', 'Envío del vendedor', shipFree ? 'Llega en 24 a 48 h · lo paga el vendedor' : 'Llega en 24 a 48 h · lo pagás vos', shipFree ? 'Gratis' : fmt(SHIP_FEE)]];
   const cartV: Any = {
     items: cartItems.map(function (p?: Any) { return assign(pview(p), { remove: function () { S({ cart: (cs().cart || []).filter(function (x?: Any) { return x !== p.id; }) }); toast('Lo quitaste del carrito'); } }); }),
     has: cart.length > 0, empty: cart.length === 0, count: cart.length, subtotalTxt: fmt(subtotal), shipTxt: ship ? fmt(ship) : 'Gratis', totalTxt: fmt(subtotal + ship),
@@ -405,6 +450,104 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
   const reason = st.reason == null ? 0 : st.reason;
   const claimV: Any = { reasons: REASONS.map(function (r?: Any, i?: Any) { return assign({ t: t, label: r, pick: function () { S({ reason: i }); } }, radioV(i === reason)); }) };
   a.sendClaim = function () { back(); S({ claim: true }); toast('Recibimos tu reclamo'); };
+
+  // ventas y cobros del vendedor (fase 2): A · membresía sin comisión o B · comisión por venta (src/commission.ts)
+  const cPlan: Plan = st.plan || P_.cobro || 'comision';
+  const member = isMember(cPlan);
+  const neg = function (n?: Any) { return n ? '−' + fmt(n) : fmt(0); };
+  const released = !!st.v6ok;
+  function statusOf(sl?: Any): SaleStatus { return sl.id === 'v6' && released ? 'disponible' : sl.status; }
+  const withdrawn = st.withdrawn || 0;
+  const bal0 = balances(cPlan);
+  const v6net = saleCalc(SALES[0], cPlan).net;
+  const disp = bal0.disponible + (released ? v6net : 0) - withdrawn;
+  const pend = bal0.pendiente - (released ? v6net : 0);
+  const pubPrice = 300000;
+  const pubCalc = calcSale({ price: pubPrice, cat: pcat as CatKey, plan: cPlan });
+  const vFilter = st.vFilter || 'todas';
+  const VF: Any = [['todas', 'Todas'], ['pendiente', 'Pendientes'], ['disponible', 'Disponibles'], ['reclamo', 'Con reclamo']];
+  const sid = st.saleId || 'v6';
+  const sale = SALES.filter(function (x?: Any) { return x.id === sid; })[0] || SALES[0];
+  const sStatus = statusOf(sale);
+  const sc = saleCalc(sale, cPlan);
+  const rows: Any = [['Precio del producto', fmt(sale.price)]];
+  if (sale.ship) rows.push(['Envío que pagó ' + sale.buyer.split(' ')[0], fmt(sale.ship)]);
+  if (sStatus === 'cancelada') rows.push(['Devuelto al comprador', neg(sc.refund)]);
+  else {
+    if (sc.refund) rows.push(['Reembolso al comprador', neg(sc.refund)]);
+    if (sc.member) rows.push(['Comisión (' + planName(cPlan) + ')', fmt(0)]);
+    else if (sc.gross) rows.push(['Comisión ' + sc.pct + ' %' + (sc.clamp === 'min' ? ' (mínimo)' : sc.clamp === 'cap' ? ' (tope)' : ''), neg(sc.gross)]);
+    if (sc.welcome) rows.push(['Bonificación de bienvenida', fmt(sc.welcome)]);
+  }
+  const steps: Any = sale.id === 'v6' && released
+    ? [['Pagado', 'Andrea pagó en la app. El dinero está protegido.', true], ['En camino', 'Despachaste el pedido hoy a las 15:20.', true], ['Entregado', 'Andrea confirmó que lo recibió.', true], ['Disponible', 'Ya lo podés retirar a tu cuenta.', true]]
+    : sale.steps;
+  const curStep = steps.filter(function (x?: Any) { return x[2]; }).length - 1;
+  const freeLeft = !st.payCount;
+  const payFee = freeLeft ? 0 : PAYOUT.extraFee;
+  const acct = st.acct === false ? '' : 'Banco Itaú •••• 4410';
+  const payouts = (st.newPayouts || []).concat(PAYOUTS.map(function (x?: Any) { return assign({ account: 'Banco Itaú •••• 4410' }, x); }));
+  const exCom = calcSale({ price: pubPrice, cat: 'hogar', plan: 'comision' });
+  const pick: Plan = st.planPick || cPlan;
+  const octCom = commissionOf(MONTHS[1]);
+  function planOpt(k?: Any) {
+    const tr = tierOf(k);
+    return assign({ t: t, key: k, name: tr ? tr.name : 'Comisión por venta', priceTxt: tr ? usd(tr.usd) + ' por mes' : 'Sin costo fijo', limit: limitTxt(k), perks: tr ? tr.perks : [],
+      current: k === cPlan, on: pick === k, pick: function () { S({ planPick: k }); } }, radioV(pick === k));
+  }
+  const cb: Any = {
+    plan: cPlan, member: member, planName: planName(cPlan), planNext: st.planNext ? planName(st.planNext) : '', limitTxt: limitTxt(cPlan),
+    pub: { rate: rateLabel(cPlan, pcat as CatKey), feeTxt: neg(pubCalc.fee), netTxt: fmt(pubCalc.net), priceTxt: fmt(pubPrice), member: member },
+    dispTxt: fmt(disp), pendTxt: fmt(pend), retTxt: fmt(bal0.retenido), canWithdraw: disp >= PAYOUT.min, hasRet: bal0.retenido > 0,
+    chips: VF.map(function (f?: Any) { return chip(f[1], f[0] === vFilter, function () { S({ vFilter: f[0] }); }); }),
+    sales: SALES.filter(function (x?: Any) { return vFilter === 'todas' || statusOf(x) === vFilter; }).map(function (x?: Any) {
+      const c = saleCalc(x, cPlan); const stt = statusOf(x);
+      return { id: x.id, title: x.title, sub: x.buyer + ' · ' + x.when, netTxt: fmt(c.net), status: STATUS_LABEL[stt], tone: STATUS_TONE[stt], open: function () { go('venta', { saleId: x.id }); } };
+    }),
+    sale: {
+      title: sale.title, buyer: sale.buyer, ini: sale.buyerIni, when: sale.when, status: STATUS_LABEL[sStatus], tone: STATUS_TONE[sStatus],
+      rows: rows, netTxt: fmt(sc.net), feeTxt: fmt(sc.fee), ivaTxt: fmt(sc.iva), paidTxt: fmt(sc.paid),
+      claim: sStatus === 'reclamo', partial: sStatus === 'parcial', cancelled: sStatus === 'cancelada', pending: sStatus === 'pendiente', welcome: !!sc.welcome, member: sc.member,
+      netLabel: sStatus === 'cancelada' ? 'Recibís' : sStatus === 'pendiente' ? 'Vas a recibir' : sStatus === 'reclamo' ? 'Retenido por el reclamo' : 'Recibiste',
+      steps: steps.map(function (x?: Any, i?: Any) { return { label: x[0], sub: String(x[1]).replace('{cuenta}', 'Banco Itaú •••• 4410'), done: !!x[2], current: i === curStep, last: i === steps.length - 1, next: !!(steps[i + 1] && steps[i + 1][2]) }; }),
+      holdTxt: 'Si ' + sale.buyer.split(' ')[0] + ' no confirma ni reclama, lo liberamos ' + HOLD_DAYS + ' días después de entregado.',
+      dispatchTxt: 'Si no se despacha en ' + DISPATCH_HOURS + ' h, la venta se cancela sola y no cobramos comisión.'
+    },
+    payout: { amountTxt: fmt(disp), feeTxt: payFee ? fmt(payFee) : 'Gratis', receiveTxt: fmt(Math.max(0, disp - payFee)), acct: acct, hasAcct: !!acct, eta: PAYOUT.eta, minTxt: fmt(PAYOUT.min),
+      freeTxt: freeLeft ? 'Tenés 1 retiro gratis esta semana.' : 'Ya usaste el retiro gratis de esta semana; este cuesta ' + fmt(PAYOUT.extraFee) + '.', lastTxt: fmt(st.lastPayout || 0) },
+    payouts: payouts.map(function (x?: Any) { return { title: fmt(x.amount), sub: x.account + ' · ' + x.when, status: x.status }; }),
+    auto: !!st.autoPay, autoDay: PAYOUT.autoDay,
+    optA: TIERS.map(function (x?: Any) { return planOpt(x.key); }), optB: planOpt('comision'),
+    optBex: 'Ej.: en una venta de ' + fmt(pubPrice) + ' (Hogar) pagás ' + fmt(exCom.fee) + ' y recibís ' + fmt(exCom.net) + '.',
+    optAex: 'En octubre vendiste por ' + fmt(monthTotals(MONTHS[1], 'comision').sold) + ': con comisión pagaste ' + fmt(octCom) + '. Con membresía, ' + fmt(0) + ' de comisión.',
+    pickName: planName(pick), planSame: pick === cPlan,
+    months: MONTHS.map(function (mo?: Any) {
+      const r = monthTotals(mo, cPlan);
+      return { label: mo.label, soldTxt: fmt(r.sold), count: r.count + (r.count === 1 ? ' venta' : ' ventas'), feeTxt: fmt(r.fee), ivaTxt: fmt(r.iva), memberTxt: r.membershipUsd ? usd(r.membershipUsd) : '', closed: mo.key !== 'nov' };
+    }),
+    rules: rules(fmt),
+    example: { price: fmt(pubPrice), feeTxt: neg(exCom.fee), netTxt: fmt(exCom.net) }
+  };
+  a.release = function () { S({ v6ok: true }); toast('Andrea confirmó. Liberamos ' + fmt(v6net) + ' a tu saldo'); };
+  a.withdraw = function () { if (!(disp >= PAYOUT.min)) { toast('El mínimo para retirar es ' + fmt(PAYOUT.min)); return; } go('retirar'); };
+  a.confirmWithdraw = function () {
+    if (!acct) { go('cuentaCobro'); return; }
+    const amount = disp - payFee;
+    replace('retiroOk', { withdrawn: withdrawn + disp, payCount: (st.payCount || 0) + 1, lastPayout: amount, newPayouts: [{ when: 'Hoy', amount: amount, account: acct, status: 'En camino' }].concat(st.newPayouts || []) }, ['retirar']);
+  };
+  a.toVentas = function () { replace('ventas', {}, ['retiroOk', 'retirar', 'ventas']); };
+  a.toggleAuto = function () { S({ autoPay: !st.autoPay }); toast(!st.autoPay ? 'Retiro automático activado: todos los ' + PAYOUT.autoDay : 'Desactivaste el retiro automático'); };
+  a.saveAcct = function () { S({ acct: true }); back(); toast('Guardamos tu cuenta de cobro'); };
+  /** pasar a membresía o subir de nivel aplica ya; bajar o volver a comisión, al terminar el mes */
+  a.applyPlan = function () {
+    if (pick === cPlan) { back(); return; }
+    const rank = function (p?: Any) { const tr = tierOf(p); return tr ? tr.usd : 0; };
+    const now = rank(pick) > rank(cPlan);
+    S({ plan: now ? pick : cPlan, planNext: now ? null : pick, planPick: null }); back();
+    toast(now ? 'Listo: ' + planName(pick) + '. Desde ahora no pagás comisión' : 'Pasás a ' + planName(pick) + ' cuando termine el mes');
+  };
+  a.invoice = function () { toast('Te mandamos la factura por correo'); };
+  a.replyClaim = function () { go('chat', { cpid: 'mesa' }); };
 
   // auto
   const mode = st.mode || 'viaje';
@@ -557,7 +700,7 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
   const works: Any = [];
   if (jobSt !== 'rejected') works.push(item('servicios', 'Limpieza del hogar · 4 h', 'Mañana 10:00 · Villa Morra', jobSt === 'accepted' ? 'Aceptado' : 'Nuevo pedido', jobSt === 'accepted' ? 'ok' : 'warn', 'Hace 5 min', function () { root('sInicio'); }));
   works.push(item('auto', 'Viajes en Asunción', dOnline ? 'Disponible · ×1,4 en Villa Morra' : 'Conectate para recibir viajes', dOnline ? 'Conectado' : 'Desconectado', dOnline ? 'live' : 'neutral', dTrips + ' hoy', function () { go('dHome'); }));
-  works.push(item('market', fase2 ? 'Pedido · Mesa de luz de madera' : 'Andrea · Mesa de luz de madera', fase2 ? 'Gs. 250.000 · Coordiná la entrega' : 'Hola, ¿la mesa de luz sigue disponible?', fase2 ? 'Nuevo pedido' : 'Consulta', 'live', '15:20', function () { go('chat', { cpid: 'mesa' }); }));
+  works.push(item('market', fase2 ? 'Pedido · Mesa de luz de madera' : 'Andrea · Mesa de luz de madera', fase2 ? 'Gs. 250.000 · Coordiná la entrega' : 'Hola, ¿la mesa de luz sigue disponible?', fase2 ? 'Nuevo pedido' : 'Consulta', 'live', '15:20', function () { if (fase2) go('venta', { saleId: 'v6' }); else go('chat', { cpid: 'mesa' }); }));
   works.push(item('market', 'Cochecito de bebé plegable', 'La foto de portada muestra otro producto', 'Corregir', 'warn', 'Lun', function () { go('misPubs'); }));
   const workFilter = st.workFilter || 'todo';
   const work: Any = {
@@ -572,6 +715,9 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
     { icon: 'tag', ibg: t.fill, ifg: t.text, title: 'Bajó el precio de algo que guardaste', body: '«Campera de jean talle M» ahora cuesta Gs. 180.000.', when: 'Ayer', open: openProduct('campera') },
     { icon: 'warning', ibg: t.warnSubtle, ifg: t.warning, title: 'No pudimos publicar «Cochecito de bebé plegable»', body: 'Motivo: la foto de portada muestra otro producto. Tocá para corregirla.', when: 'Lun', open: function () { go('misPubs'); } }
   ].map(function (n?: Any) { n.t = t; return n; });
+  if (fase2) notifs.unshift(released
+    ? { t: t, icon: 'wallet', ibg: t.brandSubtle, ifg: t.success, title: 'Liberamos ' + fmt(v6net) + ' a tu saldo', body: 'Andrea confirmó que recibió «Mesa de luz de madera». Ya lo podés retirar.', when: 'Ahora', open: function () { go('ventas'); } }
+    : { t: t, icon: 'bag', ibg: t.fill, ifg: t.text, title: 'Vendiste «Mesa de luz de madera»', body: 'Andrea pagó con compra protegida. Despachá antes de ' + DISPATCH_HOURS + ' h. Vas a recibir ' + fmt(v6net) + '.', when: '15:20', open: function () { go('venta', { saleId: 'v6' }); } });
 
   const perfil: Any = {
     roleLabel: role === 'socio' ? 'Modo socio' : 'Modo cliente',
@@ -582,7 +728,7 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
   };
 
   const gonav: Any = {};
-  ['notifs', 'explorar', 'auto', 'tienda', 'svcPros', 'svcConfirm', 'carrito', 'guardados', 'mBuscar', 'misPubs', 'vender', 'pub1', 'pub2', 'pub3', 'confirmar', 'devolucion', 'aDestino', 'aConfirmar', 'viaje']
+  ['notifs', 'explorar', 'auto', 'tienda', 'svcPros', 'svcConfirm', 'carrito', 'guardados', 'mBuscar', 'misPubs', 'vender', 'pub1', 'pub2', 'pub3', 'confirmar', 'devolucion', 'aDestino', 'aConfirmar', 'viaje', 'ventas', 'tarifas', 'planes', 'facturas', 'cuentaCobro']
     .forEach(function (id?: Any) { gonav[id] = nav(id); });
   gonav.notifs = function () { go('notifs', { notifsRead: true }); };
 
@@ -591,7 +737,7 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
     .map(function (x?: Any) { return chip(x[0], false, x[1]); }) };
 
   const s: Any = {}; SCREENS.forEach(function (x?: Any) { s[x] = x === screen; });
-  const TALL: Any = ['svcOk', 'pubOk', 'compraOk', 'vender', 'confirmar', 'svc', 'svcConfirm', 'carrito', 'ficha', 'dCobro'];
+  const TALL: Any = ['svcOk', 'pubOk', 'compraOk', 'vender', 'confirmar', 'svc', 'svcConfirm', 'carrito', 'ficha', 'dCobro', 'ventas', 'venta', 'retirar', 'retiroOk', 'cuentaCobro', 'planes'];
   const MAPS: Any = ['aPunto', 'aConfirmar', 'viaje', 'dHome', 'dBuscar', 'dViaje'];
   const onMap = MAPS.indexOf(screen) >= 0;
   const toastV: Any = { show: !!st.toast, msg: st.toast || '', top: onMap ? '108px' : 'auto', bottom: onMap ? 'auto' : (showTabs ? tabPad + 8 : (TALL.indexOf(screen) >= 0 ? 190 : 120)) + 'px' };
@@ -600,6 +746,6 @@ export function buildModel(P_: IntegradaProps, { st, cs, S, later, reset }: Mode
     toast: toastV, notifDot: notifDot, fase2: fase2, fabBottom: showTabs ? tabPad - 8 : 34, sheetSos: st.sheet === 'sos', offer: offer,
     home: home, explore: explore, act: act, perfil: perfil, notifs: notifs, svc: svc, m: m, pv: pv, chat: chat,
     saved: { items: savedItems, empty: savedItems.length === 0 }, mine: { items: mineItems }, pub: pub, cart: cartV, order: orderV, claim: claimV,
-    trip: trip_, auto: auto, rate: rate, d: d, job: job, socio: socio, work: work
+    trip: trip_, auto: auto, rate: rate, d: d, job: job, socio: socio, work: work, cb: cb, biz: biz
   };
 }

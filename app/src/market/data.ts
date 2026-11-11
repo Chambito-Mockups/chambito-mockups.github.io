@@ -1,3 +1,4 @@
+import { ShipPay } from '../commission';
 // Mock data for Chambito Market (Tienda), taken from "Chambito Market.dc.html".
 // Prices are in guaraníes; Argentina shows them ÷ 10 (the brief's AR example: Gs. 350.000 → $ 35.000).
 import { Country } from '../data';
@@ -25,13 +26,18 @@ export interface Seller {
   listings: number;
   sold: number;
   responds: string;
+  /** perfil de negocio */
+  biz: string;
+  rubro: string;
+  about: string;
+  hours: string;
 }
 
 export const SELLERS: Record<string, Seller> = {
-  carla: { id: 'carla', name: 'Carla Benítez', initials: 'CB', rating: '4,9', reviews: 23, since: 'ago. 2026', listings: 12, sold: 8, responds: '1 h' },
-  diego: { id: 'diego', name: 'Diego Ortiz', initials: 'DO', rating: '5,0', reviews: 11, since: 'sep. 2026', listings: 4, sold: 2, responds: '3 h' },
-  ana: { id: 'ana', name: 'Ana Rolón', initials: 'AR', rating: '4,8', reviews: 31, since: 'jul. 2026', listings: 9, sold: 14, responds: '30 min' },
-  marcos: { id: 'marcos', name: 'Marcos Vera', initials: 'MV', rating: '4,7', reviews: 6, since: 'oct. 2026', listings: 3, sold: 1, responds: '2 h' },
+  carla: { id: 'carla', name: 'Carla Benítez', initials: 'CB', rating: '4,9', reviews: 23, since: 'ago. 2026', listings: 12, sold: 8, responds: '1 h', biz: 'Bici Lambaré', rubro: 'Bicicletas y hogar', about: 'Bicicletas usadas revisadas, repuestos y algunas cosas de la casa. Te ayudo a elegir el rodado.', hours: 'Lun a sáb · 8:00 a 18:00' },
+  diego: { id: 'diego', name: 'Diego Ortiz', initials: 'DO', rating: '5,0', reviews: 11, since: 'sep. 2026', listings: 4, sold: 2, responds: '3 h', biz: 'Ortiz Muebles', rubro: 'Muebles y hogar', about: 'Sillas, escritorios y electrodomésticos chicos, usados y en buen estado.', hours: 'Lun a sáb · 8:00 a 17:00' },
+  ana: { id: 'ana', name: 'Ana Rolón', initials: 'AR', rating: '4,8', reviews: 31, since: 'jul. 2026', listings: 9, sold: 14, responds: '30 min', biz: 'Rolón Tecnología', rubro: 'Celulares y bicis', about: 'Celulares revisados con garantía de 30 días. Te muestro la batería antes de comprar.', hours: 'Lun a sáb · 9:00 a 20:00' },
+  marcos: { id: 'marcos', name: 'Marcos Vera', initials: 'MV', rating: '4,7', reviews: 6, since: 'oct. 2026', listings: 3, sold: 1, responds: '2 h', biz: 'Vera Usados', rubro: 'Ropa y niños', about: 'Ropa y cosas de chicos que ya no usamos, todo lavado y revisado.', hours: 'Sáb y dom · 9:00 a 13:00' },
 };
 
 export interface Listing {
@@ -51,6 +57,10 @@ export interface Listing {
   ph: 0 | 1 | 2;
   status: 'activa' | 'vendida' | 'no-disponible' | 'error';
   recent?: boolean;
+  /** unidades disponibles; con 0 se ve «Sin stock» */
+  stock?: number;
+  /** quién paga el envío */
+  ship?: ShipPay;
 }
 
 export const LISTINGS: Listing[] = [
@@ -67,6 +77,11 @@ export const LISTINGS: Listing[] = [
   { id: 'gone', title: 'Mesa de comedor de madera para 6', price: 1200000, zone: 'Asunción', zoneAR: 'Belgrano', km: 3, condition: 'Usado', category: 'Hogar', attrs: [['Material', 'Madera'], ['Lugares', '6'], ['Medidas', '1,8 m']], description: '', seller: 'ana', photos: 3, ph: 0, status: 'no-disponible' },
   { id: 'broken', title: 'Parlante JBL Flip 5', price: 420000, zone: 'Asunción', zoneAR: 'Recoleta', km: 2, condition: 'Usado', category: 'Tecnología', attrs: [['Marca', 'JBL']], description: '', seller: 'ana', photos: 1, ph: 2, status: 'error' },
 ];
+
+// stock y envío de cada publicación (los elige el vendedor al publicar)
+const STOCK: Record<string, number> = { trek: 1, nike: 3, silla: 2, campera: 1, caloi: 1, spec: 1, nino: 2, heladera: 1, ventilador: 0 };
+const SHIP: Record<string, ShipPay> = { nike: 'vendedor', campera: 'vendedor', ventilador: 'vendedor', iphone: 'vendedor' };
+LISTINGS.forEach((l) => { l.stock = STOCK[l.id] ?? 1; l.ship = SHIP[l.id] ?? 'comprador'; });
 
 /** Neighborhood + distance, by country. */
 export const zoneLabel = (l: Listing, c: Country) => `${c === 'PY' ? l.zone : l.zoneAR} · a ${l.km} km`;
@@ -85,12 +100,14 @@ export interface MyListing {
   ph: 0 | 1 | 2;
   reason?: string;
   rejectedOn?: string;
+  /** unidades disponibles (el vendedor las cambia en Mis publicaciones) */
+  stock?: number;
 }
 
 export const MY_LISTINGS: MyListing[] = [
-  { id: 'm1', title: 'Bicicleta Trek rodado 29, cambios Shimano', price: 1450000, status: 'Activas', views: 128, questions: 4, ph: 0 },
-  { id: 'm2', title: 'Zapatillas Nike Air talle 42, sin uso', price: 350000, status: 'Activas', views: 56, questions: 1, ph: 2 },
-  { id: 'm3', title: 'Silla de oficina ergonómica con apoyabrazos', price: 650000, status: 'Activas', views: 12, questions: 0, ph: 2 },
+  { id: 'm1', title: 'Bicicleta Trek rodado 29, cambios Shimano', price: 1450000, status: 'Activas', views: 128, questions: 4, ph: 0, stock: 1 },
+  { id: 'm2', title: 'Zapatillas Nike Air talle 42, sin uso', price: 350000, status: 'Activas', views: 56, questions: 1, ph: 2, stock: 3 },
+  { id: 'm3', title: 'Silla de oficina ergonómica con apoyabrazos', price: 650000, status: 'Activas', views: 12, questions: 0, ph: 2, stock: 0 },
   { id: 'm4', title: 'Lámpara de pie nórdica', price: 240000, status: 'Pausadas', views: 30, questions: 2, ph: 1 },
   { id: 'm5', title: 'Mochila Samsonite para notebook', price: 310000, status: 'En revisión', views: 0, questions: 0, ph: 0 },
   { id: 'm6', title: 'Monitor Samsung 24"', price: 890000, status: 'Vendidas', views: 210, questions: 9, ph: 1 },

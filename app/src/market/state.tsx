@@ -1,6 +1,7 @@
 import { setCodec, usePersistent } from '../persist';
 import { createContext, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 import { Category, ChatMsg, LISTINGS, MY_LISTINGS, MyListing, MyStatus } from './data';
+import { Plan, ShipPay } from '../commission';
 
 export interface Filters {
   category: Category | null;
@@ -23,10 +24,14 @@ export interface Draft {
   attrs: Record<string, string>;
   description: string;
   zone: string;
+  /** unidades para vender */
+  stock?: number;
+  /** quién paga el envío */
+  shipping?: ShipPay;
   editing?: string; // id of MyListing when editing
   savedAt?: number;
 }
-export const emptyDraft = (): Draft => ({ step: 1, photos: [], title: '', category: 'Deportes', condition: 'Usado', price: '', attrs: {}, description: '', zone: 'Lambaré' });
+export const emptyDraft = (): Draft => ({ step: 1, photos: [], title: '', category: 'Deportes', condition: 'Usado', price: '', attrs: {}, description: '', zone: 'Lambaré', stock: 1, shipping: 'comprador' });
 
 export interface Notif {
   id: string;
@@ -75,7 +80,30 @@ interface MarketCtx {
   pendingAction: (() => void) | null;
   pendingVerb: string;
   setPendingAction: (f: (() => void) | null, verb?: string) => void;
+  /** ventas y cobros del vendedor (fase 2) */
+  cobros: Cobros;
+  setCobros: (patch: Partial<Cobros>) => void;
 }
+
+/** Estado de la demo de ventas y cobros: qué venta se mira, plan, retiros hechos y ajustes. */
+export interface Cobros {
+  saleId: string;
+  filter: 'todas' | 'pendiente' | 'disponible' | 'reclamo';
+  /** el comprador de la venta pendiente confirmó (pasa a disponible) */
+  released: boolean;
+  planPick: Plan | null;
+  /** plan al que se baja al terminar el mes */
+  planNext: Plan | null;
+  /** guaraníes ya retirados en la demo */
+  withdrawn: number;
+  payCount: number;
+  lastPayout: number;
+  newPayouts: { when: string; amount: number; status: string }[];
+  autoPay: boolean;
+  /** C1: Publicar 2 muestra cuánto recibís con compra protegida */
+  feePreview: boolean;
+}
+export const DEFAULT_COBROS: Cobros = { saleId: 'v6', filter: 'todas', released: false, planPick: null, planNext: null, withdrawn: 0, payCount: 0, lastPayout: 0, newPayouts: [], autoPay: false, feePreview: false };
 
 const Ctx = createContext<MarketCtx | null>(null);
 
@@ -111,6 +139,8 @@ export function MarketProvider({ children }: { children: ReactNode }) {
   const [pendingAction, setPending] = useState<(() => void) | null>(null);
   const [pendingVerb, setPendingVerb] = useState('consultar');
   const [activityTab, setActivityTab] = useState<'Servicios' | 'Tienda'>('Servicios');
+  const [cobros, setCobrosState] = useState<Cobros>(DEFAULT_COBROS);
+  const setCobros = useCallback((patch: Partial<Cobros>) => setCobrosState((c) => ({ ...c, ...patch })), []);
 
   const toggleSaved = useCallback((id: string) => {
     const was = saved.has(id);
@@ -147,8 +177,9 @@ export function MarketProvider({ children }: { children: ReactNode }) {
       welcomed, setWelcomed, lastPublished, setLastPublished,
       notifs: NOTIFS, activityTab, setActivityTab,
       pendingAction, pendingVerb, setPendingAction: (f, verb) => { setPending(() => f); if (verb) setPendingVerb(verb); },
+      cobros, setCobros,
     }),
-    [activityTab, pendingVerb, saved, toggleSaved, listingId, sellerId, query, recentSearches, filters, resultsTab, chats, sendMsg, chatListing, mine, myTab, actionsFor, draft, welcomed, lastPublished, pendingAction],
+    [cobros, setCobros, activityTab, pendingVerb, saved, toggleSaved, listingId, sellerId, query, recentSearches, filters, resultsTab, chats, sendMsg, chatListing, mine, myTab, actionsFor, draft, welcomed, lastPublished, pendingAction],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

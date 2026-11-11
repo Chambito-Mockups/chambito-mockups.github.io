@@ -7,6 +7,7 @@ import {
   Carrito, CompraHecha, ConfirmarCompra, Consulta, Devolucion, Ficha, Guardados, MisPublicaciones, Orden, Publicado, Publicar1, Publicar2, Publicar3, Tienda, TiendaBuscar, Vender,
 } from './screens/market';
 import { AutoCalificar, AutoConfirmar, AutoDestino, AutoInicio, AutoPunto, Viaje } from './screens/auto';
+import { CuentaCobro, Facturas, Planes, RetiroHecho, Retirar, Tarifas, Vendedor, Venta, Ventas } from './screens/cobros';
 import { ConductorBuscar, ConductorCobro, ConductorInicio, ConductorPin, ConductorViaje, SocioInicio, Trabajo } from './screens/socio';
 import './integrada.css';
 
@@ -14,7 +15,8 @@ export type IgScreen =
   | 'inicio' | 'explorar' | 'actividad' | 'perfil' | 'notifs' | 'svc' | 'svcPros' | 'svcConfirm' | 'svcOk'
   | 'tienda' | 'mBuscar' | 'ficha' | 'chat' | 'guardados' | 'misPubs' | 'vender' | 'pub1' | 'pub2' | 'pub3' | 'pubOk' | 'carrito' | 'confirmar' | 'compraOk' | 'orden' | 'devolucion'
   | 'auto' | 'aDestino' | 'aPunto' | 'aConfirmar' | 'viaje' | 'aCalificar'
-  | 'sInicio' | 'trabajo' | 'dHome' | 'dBuscar' | 'dPin' | 'dViaje' | 'dCobro';
+  | 'sInicio' | 'trabajo' | 'dHome' | 'dBuscar' | 'dPin' | 'dViaje' | 'dCobro'
+  | 'ventas' | 'venta' | 'retirar' | 'retiroOk' | 'cuentaCobro' | 'tarifas' | 'planes' | 'facturas' | 'vendedor';
 
 export const IG_SCREENS: Record<IgScreen, ComponentType> = {
   inicio: Inicio, explorar: Explorar, actividad: Actividad, perfil: Perfil, notifs: Notificaciones,
@@ -23,6 +25,7 @@ export const IG_SCREENS: Record<IgScreen, ComponentType> = {
   pub1: Publicar1, pub2: Publicar2, pub3: Publicar3, pubOk: Publicado, carrito: Carrito, confirmar: ConfirmarCompra, compraOk: CompraHecha, orden: Orden, devolucion: Devolucion,
   auto: AutoInicio, aDestino: AutoDestino, aPunto: AutoPunto, aConfirmar: AutoConfirmar, viaje: Viaje, aCalificar: AutoCalificar,
   sInicio: SocioInicio, trabajo: Trabajo, dHome: ConductorInicio, dBuscar: ConductorBuscar, dPin: ConductorPin, dViaje: ConductorViaje, dCobro: ConductorCobro,
+  ventas: Ventas, venta: Venta, retirar: Retirar, retiroOk: RetiroHecho, cuentaCobro: CuentaCobro, tarifas: Tarifas, planes: Planes, facturas: Facturas, vendedor: Vendedor,
 };
 
 /** Pantallas del socio (prestador y conductor): al abrirlas desde el índice, la cuenta pasa a socio. */
@@ -38,7 +41,7 @@ const SECTION_OF: Partial<Record<IgScreen, string>> = { inicio: 'servicios', aut
 
 export interface IntegradaHandle {
   /** abre una pantalla desde el menú del visor (sin historial, con la cuenta que le corresponde); `sheet` abre además una hoja */
-  jump: (id: IgScreen, sheet?: IgSheet) => void;
+  jump: (id: IgScreen, sheet?: IgSheet, state?: Record<string, unknown>) => void;
   /** vuelve al estado inicial */
   reset: () => void;
 }
@@ -73,10 +76,10 @@ function useIntegrada(props: IntegradaProps, onPlace?: (p: IgPlace) => void) {
 }
 
 export const IntegradaPhone = forwardRef<IntegradaHandle, IntegradaProps & { onPlace?: (p: IgPlace) => void }>(function IntegradaPhone({ onPlace, ...props }, ref) {
-  const stable = useMemo(() => props, [props.navegacion, props.faseMarket, props.pantallaInicial, props.dark, props.categorias]); // eslint-disable-line react-hooks/exhaustive-deps
+  const stable = useMemo(() => props, [props.navegacion, props.faseMarket, props.pantallaInicial, props.dark, props.categorias, props.cobro]); // eslint-disable-line react-hooks/exhaustive-deps
   const { vm, S, reset } = useIntegrada(stable, onPlace);
   useImperativeHandle(ref, () => ({
-    jump: (id, sheet) => S({ screen: id, hist: [], sheet: sheet ?? null, role: SOCIO_SCREENS.includes(id) ? 'socio' : 'cliente', ...(SECTION_OF[id] ? { section: SECTION_OF[id] } : {}) }),
+    jump: (id, sheet, state) => S({ ...(state ?? {}), screen: id, hist: [], sheet: sheet ?? null, role: SOCIO_SCREENS.includes(id) ? 'socio' : 'cliente', ...(SECTION_OF[id] ? { section: SECTION_OF[id] } : {}) }),
     reset,
   }), [S, reset]);
   const Current = IG_SCREENS[vm.screen as IgScreen] ?? Inicio;

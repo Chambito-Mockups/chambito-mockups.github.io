@@ -10,10 +10,12 @@ import { isTyping } from '../shell/controls';
 import { Icon } from '../ui/kit';
 import { IgPlace, IgScreen, IgSheet, IntegradaHandle, IntegradaPhone } from './IntegradaPhone';
 import { IntegradaProps } from './model';
+import { Plan, PLAN_OPTIONS } from '../commission';
 
 export const SELECTOR = 'Selector de sección';
 const NAVS = [SELECTOR, 'Explorar (prototipo)', 'Combinación 1 · Auto y Tienda', 'Combinación 2 · Auto', 'Tienda en la barra'];
 const FASES = ['Fase 1 · consulta por chat', 'Fase 2 · compra protegida'];
+const FASE2 = FASES[1];
 const INICIOS = ['Inicio (cliente)', 'Tienda', 'Auto', 'Socio · Inicio', 'Conductor'];
 
 export interface IgEntry {
@@ -29,6 +31,12 @@ export interface IgEntry {
   nav?: string;
   /** forma de las categorías de la Tienda que aplica al abrirla */
   cats?: IntegradaProps['categorias'];
+  /** fase del Market que aplica al abrirla (las de ventas y cobros necesitan la fase 2) */
+  fase?: string;
+  /** forma de cobro al vendedor que aplica al abrirla */
+  cobro?: Plan;
+  /** estado del teléfono que prepara al abrirla (p. ej. qué venta mostrar) */
+  state?: Record<string, unknown>;
 }
 export interface IgGroup { title: string; note?: string; entries: IgEntry[] }
 
@@ -68,6 +76,38 @@ export const IG_GROUPS: IgGroup[] = [
   {
     title: 'Market · vender',
     entries: [e('misPubs', 'Mis publicaciones'), e('vender', 'Vender'), e('pub1', 'Publicar · fotos'), e('pub2', 'Publicar · datos'), e('pub3', 'Publicar · revisar'), e('pubOk', 'Publicado')],
+  },
+  {
+    title: 'Market · productos, stock y envío',
+    note: 'El vendedor carga stock y elige quién paga el envío al publicar; el comprador lo ve en la ficha antes de comprar. Con stock 0 el producto se ve «Sin stock».',
+    entries: [
+      { key: 'S1', code: 'S1', title: 'Ficha con envío gratis y stock', screen: 'ficha', fase: FASE2, state: { pid: 'nike' } },
+      { key: 'S2', code: 'S2', title: 'Ficha con envío a cargo del comprador', screen: 'ficha', fase: FASE2, state: { pid: 'silla' } },
+      { key: 'S3', code: 'S3', title: 'Producto sin stock', screen: 'ficha', fase: FASE2, state: { pid: 'notebook' } },
+      { key: 'S4', code: 'S4', title: 'Perfil del negocio', screen: 'vendedor', fase: FASE2, state: { seller: 'Carla Benítez' } },
+      { key: 'S5', code: 'S5', title: 'Mis publicaciones · stock', screen: 'misPubs', fase: FASE2 },
+      { key: 'S6', code: 'S6', title: 'Búsqueda y resultados', screen: 'mBuscar', fase: FASE2, state: { q: 'bicicleta' } },
+    ],
+  },
+  {
+    title: 'Market · ventas y cobros',
+    note: 'Fase 2, lado vendedor. Los montos cambian con «Cobro al vendedor» (a la izquierda): A · membresía sin comisión o B · comisión por venta. Reglas de ejemplo en «Tarifas y comisiones».',
+    entries: [
+      { key: 'C1', code: 'C1', title: 'Publicar · datos, stock y envío', screen: 'pub2', fase: FASE2 },
+      { key: 'C2', code: 'C2', title: 'Tarifas y comisiones', screen: 'tarifas', fase: FASE2 },
+      { key: 'C3', code: 'C3', title: 'Cómo pagás: membresía o comisión', screen: 'planes', fase: FASE2 },
+      { key: 'C4', code: 'C4', title: 'Mis ventas y cobros', screen: 'ventas', fase: FASE2 },
+      { key: 'C4m', code: 'C4', title: 'Ventas con membresía Negocio', screen: 'ventas', fase: FASE2, cobro: 'negocio' },
+      { key: 'C5', code: 'C5', title: 'Venta · pendiente', screen: 'venta', fase: FASE2, state: { saleId: 'v6' } },
+      { key: 'C5b', code: 'C5b', title: 'Venta · con reclamo', screen: 'venta', fase: FASE2, state: { saleId: 'v4' } },
+      { key: 'C5c', code: 'C5c', title: 'Venta · reembolso parcial', screen: 'venta', fase: FASE2, state: { saleId: 'v3' } },
+      { key: 'C5d', code: 'C5d', title: 'Venta · bonificada', screen: 'venta', fase: FASE2, state: { saleId: 'v2' } },
+      { key: 'C5e', code: 'C5e', title: 'Venta · cancelada', screen: 'venta', fase: FASE2, state: { saleId: 'v1' } },
+      { key: 'C6', code: 'C6', title: 'Retirar dinero', screen: 'retirar', fase: FASE2 },
+      { key: 'C7', code: 'C7', title: 'Retiro en camino', screen: 'retiroOk', fase: FASE2, state: { lastPayout: 488000 } },
+      { key: 'C8', code: 'C8', title: 'Cuenta de cobro', screen: 'cuentaCobro', fase: FASE2 },
+      { key: 'C9', code: 'C9', title: 'Resumen y facturas', screen: 'facturas', fase: FASE2 },
+    ],
   },
   {
     title: 'Auto · cliente',
@@ -122,7 +162,7 @@ function Select({ label, value, options, onChange }: { label: string; value: str
 
 export function IntegradaPage() {
   const [cfg, setCfg] = usePersistent<Required<IntegradaProps>>('integrada', () => ({
-    navegacion: SELECTOR, faseMarket: FASES[0], pantallaInicial: INICIOS[0], dark: false, categorias: 'Círculos',
+    navegacion: SELECTOR, faseMarket: FASES[0], pantallaInicial: INICIOS[0], dark: false, categorias: 'Círculos', cobro: 'comision',
   }));
   const set = (o: Partial<IntegradaProps>) => setCfg((c) => ({ ...c, ...o }));
   const phone = useRef<IntegradaHandle>(null);
@@ -135,7 +175,9 @@ export function IntegradaPage() {
   const open = useCallback((en: IgEntry) => {
     if (en.nav) setCfg((c) => ({ ...c, navegacion: en.nav! }));
     if (en.cats) setCfg((c) => ({ ...c, categorias: en.cats! }));
-    phone.current?.jump(en.screen, en.sheet);
+    if (en.fase) setCfg((c) => ({ ...c, faseMarket: en.fase! }));
+    if (en.cobro) setCfg((c) => ({ ...c, cobro: en.cobro! }));
+    phone.current?.jump(en.screen, en.sheet, en.state);
     setKey(en.key);
   }, [setCfg]);
 
@@ -204,6 +246,7 @@ export function IntegradaPage() {
           <div className="block-body" style={{ paddingTop: 14 }}>
             <Select label="Barra de navegación" value={cfg.navegacion} options={NAVS} onChange={(v) => set({ navegacion: v })} />
             <Select label="Chambito Market" value={cfg.faseMarket} options={FASES} onChange={(v) => set({ faseMarket: v })} />
+            <Select label="Cobro al vendedor (fase 2)" value={(PLAN_OPTIONS.find((m) => m.key === cfg.cobro) ?? PLAN_OPTIONS[0]).label} options={PLAN_OPTIONS.map((m) => m.label)} onChange={(v) => set({ cobro: PLAN_OPTIONS.find((m) => m.label === v)!.key })} />
             <Select label="Empezar en" value={cfg.pantallaInicial} options={INICIOS} onChange={(v) => set({ pantallaInicial: v })} />
             <div className="field">
               <span className="side-label">Tema del teléfono</span>

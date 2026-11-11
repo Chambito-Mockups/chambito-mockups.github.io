@@ -7,6 +7,7 @@ import { StubScreen } from './screens/common';
 import { M01, M03, M04, M05, M06, M09, M10, M11 } from './market/buyer';
 import { V14, V15, V16, V17, V18, V19, V21, V22 } from './market/seller';
 import { Actividad, EA4, Inicio, Perfil } from './market/entry';
+import { C2, C3, C4, C5, C6, C7, C8, C9 } from './market/payouts';
 import { MyStatus } from './market/data';
 import { useApp } from './store';
 import { ExplorerActivity, InicioExplorer } from './ui/explorer';
@@ -19,6 +20,7 @@ export const SCREENS: Record<ScreenId, ComponentType> = {
   A0, A0b, A2, A3, A4, A5, A5b, A6, A7, A8, A9, A11: ActividadScreen,
   M01, M03, M04, M05, M06, M09, M10, M11, EA4,
   V14, V15, V16, V17, V18, V19, V21, V22,
+  C2, C3, C4, C5, C6, C7, C8, C9,
   inicio: InicioScreen,
   perfil: Perfil,
   E1, E2, E3, E4,
@@ -39,7 +41,7 @@ export interface Entry {
   uses: string;
   changes: string;
   /** Market state to prepare when jumping from the index */
-  mk?: { listing?: string; activity?: 'Servicios' | 'Tienda'; myTab?: MyStatus; draft?: boolean; welcomed?: boolean; review?: boolean };
+  mk?: { listing?: string; activity?: 'Servicios' | 'Tienda'; myTab?: MyStatus; draft?: boolean; welcomed?: boolean; review?: boolean; sale?: string; feePreview?: boolean; plan?: 'gratis' | 'pro' | 'tienda' };
   /** versions that show this entry (default: the group's, or every version) */
   versions?: string[];
 }
@@ -164,6 +166,43 @@ export const GROUPS: Group[] = [
       { key: 'V21b', code: 'V21b', title: 'Mis publicaciones · Rechazadas', screen: 'V21', role: P, mk: { myTab: 'Rechazadas' }, uses: 'Banner de error.', changes: 'Muestra el motivo y «Corregir», que abre Editar.' },
       { key: 'V22', code: 'V22', title: 'Editar publicación', screen: 'V22', role: P, mk: { draft: true }, uses: 'Publicar 2 y fotos en una sola pantalla.', changes: 'Si cambian título, precio o fotos, vuelve a revisión. Bajar el precio avisa a quienes la guardaron.' },
       { key: 'V23', code: 'V23', title: 'Límite alcanzado', screen: 'V21', overlay: 'limit', role: P, flags: { atLimit: true }, uses: 'BottomSheet.', changes: 'Al intentar publicar con 50 activas.' },
+    ],
+  },
+  {
+    title: 'Vendedor · productos, stock y envío',
+    module: 'market',
+    icon: 'shoppingBag',
+    note: 'El vendedor carga el stock y elige quién paga el envío al publicar; el comprador lo ve en el detalle antes de comprar. Con stock 0 el producto se ve «Sin stock».',
+    entries: [
+      { key: 'ST1', code: 'ST1', title: 'Detalle · envío gratis', screen: 'M06', role: P, mk: { listing: 'nike' }, uses: 'Detalle del producto (M06) con una tarjeta de envío.', changes: 'Muestra «Quedan 3» y que el envío lo paga el vendedor, antes de consultar o comprar.' },
+      { key: 'ST2', code: 'ST2', title: 'Detalle · envío a cargo del comprador', screen: 'M06', role: P, mk: { listing: 'silla' }, uses: 'La misma tarjeta de envío.', changes: 'El comprador ve cuánto paga si pide envío; retirar o verse en un punto es gratis.' },
+      { key: 'ST3', code: 'ST3', title: 'Detalle · sin stock', screen: 'M06', role: P, mk: { listing: 'ventilador' }, uses: 'Etiqueta «Sin stock» y botón secundario.', changes: 'No se puede consultar para comprar: «Avisarme cuando haya». En las tarjetas, franja «Sin stock».' },
+      { key: 'ST4', code: 'ST4', title: 'Perfil del negocio', screen: 'M09', role: P, uses: 'Perfil del vendedor (M09) con datos del negocio.', changes: 'Nombre del negocio, rubro, descripción, responsable, horario y zona, con la lista de sus productos. Se llega desde el detalle de cualquier producto.' },
+      { key: 'ST5', code: 'ST5', title: 'Mis publicaciones · stock', screen: 'V21', role: P, mk: { myTab: 'Activas' }, uses: 'Mis publicaciones (V21) con − y + por fila.', changes: 'El vendedor ve y cambia las unidades. Con 0 la etiqueta pasa a «Sin stock». El límite de activas sigue la forma de cobro.' },
+      { key: 'ST6', code: 'ST6', title: 'Búsqueda rápida', screen: 'M03', role: P, uses: 'Buscar (M03) con sugerencias y recientes.', changes: 'Escribir o tocar una sugerencia lleva a los resultados.' },
+      { key: 'ST7', code: 'ST7', title: 'Resultados de búsqueda', screen: 'M04', role: P, uses: 'Resultados (M04) con tarjetas.', changes: 'Las tarjetas sin stock se ven con la franja «Sin stock».' },
+    ],
+  },
+  {
+    title: 'Vendedor · ventas y cobros',
+    module: 'market',
+    icon: 'wallet',
+    note: 'Fase 2, con compra protegida. Los montos cambian con «Cobro al vendedor» en el menú lateral: A · membresía sin comisión o B · comisión por venta. Las reglas de ejemplo están en C2.',
+    entries: [
+      { key: 'C1', code: 'C1', title: 'Publicar 2 · Datos, stock y envío', screen: 'V17', role: P, mk: { draft: true, feePreview: true }, uses: 'Publicar 2 (V17), un contador de stock, FilterChip para el envío e InfoNote debajo del precio.', changes: 'Fotos, nombre, descripción, precio, categoría, stock y quién paga el envío. Debajo del precio: cuánto recibís según la forma de cobro.' },
+      { key: 'C2', code: 'C2', title: 'Tarifas y comisiones', screen: 'C2', role: P, uses: 'MTopBar, tarjeta de ejemplo y listas de reglas.', changes: 'Las reglas de negocio de ejemplo: cuándo se cobra, cuánto (según el modelo), liberación, reclamos, retiros y cambios.' },
+      { key: 'C3', code: 'C3', title: 'Cómo pagás: membresía o comisión', screen: 'C3', role: P, uses: 'Tarjetas con radio, como los niveles de viaje, agrupadas en A y B.', changes: 'A · Membresía sin comisión (Emprendedor USD 20, Comercio USD 45, Negocio USD 80; el nivel define las publicaciones activas) o B · comisión por venta. Compara con lo que pagó de comisión el mes anterior.' },
+      { key: 'C4m', code: 'C4', title: 'Ventas con membresía Negocio', screen: 'C4', role: P, flags: { sellerPlan: 'negocio' }, uses: 'El mismo panel de C4.', changes: 'Con la membresía ninguna venta paga comisión: el saldo es el precio completo.' },
+      { key: 'C4', code: 'C4', title: 'Ventas y cobros', screen: 'C4', role: P, uses: 'Panel de saldo (como la Billetera D9), FilterChip y filas de venta con etiqueta de estado.', changes: 'Disponible, pendiente y retenido por reclamo. Cada venta muestra lo que recibís, ya sin comisión.' },
+      { key: 'C5', code: 'C5', title: 'Venta · pendiente', screen: 'C5', role: P, mk: { sale: 'v6' }, uses: 'Desglose con Row y línea de tiempo como el seguimiento de la compra.', changes: 'Precio, envío, comisión e IVA incluido. «Simular» pasa la venta a disponible y suma al saldo.' },
+      { key: 'C5b', code: 'C5b', title: 'Venta · con reclamo', screen: 'C5', role: P, mk: { sale: 'v4' }, uses: 'InfoNote de advertencia.', changes: 'El dinero queda retenido hasta resolver el reclamo (máximo 10 días).' },
+      { key: 'C5c', code: 'C5c', title: 'Venta · reembolso parcial', screen: 'C5', role: P, mk: { sale: 'v3' }, uses: 'El mismo desglose con la línea de reembolso.', changes: 'La comisión se calcula sobre lo que se queda el vendedor.' },
+      { key: 'C5d', code: 'C5d', title: 'Venta · bonificada', screen: 'C5', role: P, mk: { sale: 'v2' }, uses: 'El mismo desglose con la línea de bonificación.', changes: 'Una de las 3 primeras ventas: la comisión se bonifica entera.' },
+      { key: 'C5e', code: 'C5e', title: 'Venta · cancelada', screen: 'C5', role: P, mk: { sale: 'v1' }, uses: 'InfoNote y desglose sin comisión.', changes: 'No se despachó en 48 h: se devuelve todo al comprador y no se cobra comisión.' },
+      { key: 'C6', code: 'C6', title: 'Retirar dinero', screen: 'C6', role: P, uses: 'ListRow de la cuenta y desglose con Row.', changes: 'Retira todo lo disponible. Un retiro gratis por semana; mínimo y plazo a la vista.' },
+      { key: 'C7', code: 'C7', title: 'Retiro en camino', screen: 'C7', role: P, uses: 'FlowStatusView.', changes: 'Confirma el monto, la cuenta y el plazo de acreditación.' },
+      { key: 'C8', code: 'C8', title: 'Cuenta de cobro', screen: 'C8', role: P, uses: 'Campos de Publicar 2 y un Switch.', changes: 'Cuenta a nombre del vendedor (en Argentina, CVU o CBU) y retiro automático los lunes.' },
+      { key: 'C9', code: 'C9', title: 'Resumen y facturas', screen: 'C9', role: P, uses: 'Tarjetas por mes con Row.', changes: 'Ventas, comisiones, mensualidad del plan e IVA de cada mes, y la factura por correo.' },
     ],
   },
   {

@@ -232,7 +232,7 @@ export function Actividad() {
 
 /** perfil */
 export function Perfil() {
-  const { a, canBack, go, perfil, t, tabPad } = useVM();
+  const { a, canBack, cb, fase2, go, perfil, t, tabPad } = useVM();
   return (
     <Screen id="perfil">
       <StatusSpace />
@@ -271,6 +271,32 @@ export function Perfil() {
               <I name="chevronright" size={20} style={{ color: t.text2 }} />
             </button>
             <Divider />
+            {fase2 ? (
+              <>
+                <button style={{ display: "flex", alignItems: "center", gap: 12, minHeight: 60, width: "100%", padding: "8px 0", boxSizing: "border-box" }} onClick={go.ventas}>
+                  <span aria-hidden="true" style={{ flex: "none", width: 44, height: 44, borderRadius: 12, background: t.fill, color: t.text, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <I name="wallet" size={22} />
+                  </span>
+                  <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
+                    <span style={{ fontWeight: 500 }}>Ventas y cobros</span>
+                    <span style={{ fontSize: 13, lineHeight: "18px", color: t.text2 }}>{cb.dispTxt} disponible</span>
+                  </span>
+                  <I name="chevronright" size={20} style={{ color: t.text2 }} />
+                </button>
+                <Divider />
+                <button style={{ display: "flex", alignItems: "center", gap: 12, minHeight: 60, width: "100%", padding: "8px 0", boxSizing: "border-box" }} onClick={go.planes}>
+                  <span aria-hidden="true" style={{ flex: "none", width: 44, height: 44, borderRadius: 12, background: t.fill, color: t.text, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <I name="star" size={22} />
+                  </span>
+                  <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
+                    <span style={{ fontWeight: 500 }}>Membresía o comisión</span>
+                    <span style={{ fontSize: 13, lineHeight: "18px", color: t.text2 }}>{cb.planName}</span>
+                  </span>
+                  <I name="chevronright" size={20} style={{ color: t.text2 }} />
+                </button>
+                <Divider />
+              </>
+            ) : null}
             <button style={{ display: "flex", alignItems: "center", gap: 12, minHeight: 60, width: "100%", padding: "8px 0", boxSizing: "border-box" }} onClick={go.guardados}>
               <span aria-hidden="true" style={{ flex: "none", width: 44, height: 44, borderRadius: 12, background: t.fill, color: t.text, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <I name="heart" size={22} />

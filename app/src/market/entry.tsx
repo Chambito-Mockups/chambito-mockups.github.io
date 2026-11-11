@@ -1,3 +1,4 @@
+import { planName } from '../commission';
 import { useState } from 'react';
 import { useApp } from '../store';
 import { P, R } from '../theme';
@@ -149,6 +150,8 @@ export function Perfil() {
 
           <MenuGroup title="Tienda">
             <MenuItem icon="tag" label="Mis publicaciones" hint={`${active} activas`} tag="Nuevo" tagTone="new" onClick={() => go('V21')} />
+            <MenuItem icon="wallet" label="Ventas y cobros" hint="Fase 2 · compra protegida" onClick={() => go('C4')} />
+            <MenuItem icon="star" label="Membresía o comisión" hint={planName(settings.sellerPlan ?? 'comision')} tag="Nuevo" tagTone="new" onClick={() => go('C3')} />
             <MenuItem icon="plus" label="Vender en la Tienda" hint="Publicar es gratis" accent onClick={vender} />
             <MenuItem icon="heart" label="Guardados" hint={saved.size ? `${saved.size} guardados` : 'Todavía nada'} onClick={() => go('M11')} last />
           </MenuGroup>

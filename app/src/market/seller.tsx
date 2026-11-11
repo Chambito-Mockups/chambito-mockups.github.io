@@ -4,6 +4,8 @@ import { P, R } from '../theme';
 import { Button, Icon } from '../ui/kit';
 import { Category, CATEGORIES, CATEGORY_ATTRS, MY_TABS, MyListing, MyStatus, priceFor } from './data';
 import { Draft, emptyDraft, PhotoState, useMarket } from './state';
+import { RecibisNote } from './payouts';
+import { catKey, limitOf, SHIP_LABEL } from '../commission';
 import { EmptyBlock, FilterChip, InfoNote, MFooter, MScreen, MSheet, MTopBar, Photo, pretty, RoundBtn, StatusTag, UnderlineTabs, useMoney, useRequireLogin, Verified } from './kit';
 
 const demoDraft = (): Draft => ({
@@ -57,6 +59,7 @@ export function V14() {
       footer={
         <MFooter gap={10}>
           <Button onClick={() => { setWelcomed(true); if (settings.sellerStatus !== 'verificado') go('V15', { replace: true }); else proceed(); }}>Empezar</Button>
+          <button className="press" onClick={() => go('C3')} style={{ font: R(14, 500), color: t.link, alignSelf: 'center', minHeight: 40 }}>Ver membresías y comisiones</button>
           <span style={{ font: R(13), color: t.text2, textAlign: 'center' }}>Te lleva menos de 2 minutos</span>
         </MFooter>
       }
@@ -239,7 +242,8 @@ function useInputStyle() {
 }
 
 function DataForm({ d, onChange }: { d: Draft; onChange: (p: Partial<Draft>) => void }) {
-  const { t, d: cd } = useApp();
+  const { t, d: cd, settings } = useApp();
+  const { cobros } = useMarket();
   const input = useInputStyle();
   const cur = cd.currency(0).replace(/\s?0$/, '');
   const cat = CATEGORY_ATTRS[d.category];
@@ -267,6 +271,7 @@ function DataForm({ d, onChange }: { d: Draft; onChange: (p: Partial<Draft>) => 
           <input inputMode="numeric" value={d.price} onChange={(e) => onChange({ price: fmt(e.target.value) })} placeholder="0" aria-label="Precio" style={{ font: R(15, 500), color: t.text }} />
         </div>
       </Field>
+      {cobros.feePreview && num(d.price) > 0 && <RecibisNote priceGs={settings.country === 'PY' ? num(d.price) : num(d.price) * 10} category={catKey(d.category)} />}
       <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(3, cat.attrs.length)},minmax(0,1fr))`, gap: 8 }}>
         {cat.attrs.map((a) => (
           <Field key={a} label={a}>
@@ -274,6 +279,20 @@ function DataForm({ d, onChange }: { d: Draft; onChange: (p: Partial<Draft>) => 
           </Field>
         ))}
       </div>
+      <Field label="Stock" hint="Unidades que tenés para vender. Cada venta descuenta una.">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button type="button" aria-label="Restar una unidad" className="press" onClick={() => onChange({ stock: Math.max(1, (d.stock ?? 1) - 1) })} style={{ width: 44, height: 44, borderRadius: 22, background: t.mSurface, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="minus" size={18} /></button>
+          <span aria-live="polite" style={{ font: P(20), minWidth: 32, textAlign: 'center' }}>{d.stock ?? 1}</span>
+          <button type="button" aria-label="Sumar una unidad" className="press" onClick={() => onChange({ stock: (d.stock ?? 1) + 1 })} style={{ width: 44, height: 44, borderRadius: 22, background: t.mSurface, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="plus" size={18} /></button>
+          <span style={{ font: R(14), color: t.text2 }}>{(d.stock ?? 1) === 1 ? 'unidad' : 'unidades'}</span>
+        </div>
+      </Field>
+      <Field label="¿Quién paga el envío?" hint="El comprador lo ve en la publicación antes de comprar.">
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <FilterChip selected={(d.shipping ?? 'comprador') === 'comprador'} onClick={() => onChange({ shipping: 'comprador' })}>Lo paga el comprador</FilterChip>
+          <FilterChip selected={d.shipping === 'vendedor'} onClick={() => onChange({ shipping: 'vendedor' })}>Lo pago yo (envío gratis)</FilterChip>
+        </div>
+      </Field>
       <Field label="Descripción">
         <textarea value={d.description} onChange={(e) => onChange({ description: e.target.value })} rows={3} placeholder="Contá el estado, qué incluye y por qué lo vendés." style={{ ...input, padding: 14, resize: 'none', border: 0, outline: 'none', fontFamily: 'Roboto, sans-serif' }} />
       </Field>
@@ -309,7 +328,7 @@ export function V18() {
   const publish = () => {
     const review = settings.manualReview;
     const gs = settings.country === 'PY' ? price : price * 10;
-    setMine((m) => [{ id: 'n' + Date.now(), title: draft.title, price: gs, status: review ? 'En revisión' : 'Activas', views: 0, questions: 0, ph: draft.photos[0]?.ph ?? 0 }, ...m]);
+    setMine((m) => [{ id: 'n' + Date.now(), title: draft.title, price: gs, status: review ? 'En revisión' : 'Activas', views: 0, questions: 0, ph: draft.photos[0]?.ph ?? 0, stock: draft.stock ?? 1 }, ...m]);
     setLastPublished({ title: draft.title, price: gs, review });
     setDraft(null);
     go('V19', { replace: true });
@@ -329,6 +348,7 @@ export function V18() {
             </div>
             <span style={{ font: R(16, 500) }}>{draft.title}</span>
             <span style={{ font: R(13), color: t.text2, display: 'flex', alignItems: 'center', gap: 4 }}><Icon name="mapPin" size={14} color={t.text2} />{draft.zone} · zona aproximada</span>
+            <span style={{ font: R(13), color: t.text2 }}>Stock: {draft.stock ?? 1} · {SHIP_LABEL[draft.shipping ?? 'comprador']}</span>
             {attrs.length > 0 && <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>{attrs.map(([k, v]) => <span key={k} style={{ font: R(12, 500), background: t.mSurface, borderRadius: 10, padding: '3px 8px' }}>{k} {v}</span>)}</div>}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingTop: 4 }}>
               <span style={{ width: 32, height: 32, borderRadius: 16, background: t.mChip, display: 'flex', alignItems: 'center', justifyContent: 'center', font: P(12) }}>LG</span>
@@ -394,6 +414,11 @@ export function V21() {
   const offline = settings.offline;
   const counts = Object.fromEntries(MY_TABS.map((k) => [k, mine.filter((m) => m.status === k).length])) as Record<MyStatus, number>;
   const rows = mine.filter((m) => m.status === myTab);
+  const setStock = (m: MyListing, n: number) => {
+    const v = Math.max(0, n);
+    setMine((all) => all.map((x) => (x.id === m.id ? { ...x, stock: v } : x)));
+    if (v === 0) showToast('Sin stock: no se puede comprar hasta que cargues más');
+  };
   const move = (id: string, status: MyStatus, msg: string) => { setMine((m) => m.map((x) => (x.id === id ? { ...x, status } : x))); showToast(msg); };
   const edit = (m: MyListing) => {
     setDraft({ ...emptyDraft(), title: m.title, price: fmt(String(priceFor(m.price, settings.country))), editing: m.id, photos: [0, 1, 2, 3].map((i) => ({ id: i, state: 'lista', ph: ((m.ph + i) % 3) as 0 | 1 | 2 })) });
@@ -418,13 +443,13 @@ export function V21() {
           <span style={{ font: R(14), color: t.text2, textAlign: 'center', padding: '32px 0' }}>No tenés publicaciones {statusLabel[myTab].toLowerCase()}s.</span>
         ) : (
           <>
-            {myTab === 'Activas' && <span style={{ font: R(13), color: t.text2 }}>{counts.Activas} de 50 publicaciones activas</span>}
+            {myTab === 'Activas' && <span style={{ font: R(13), color: t.text2 }}>{limitOf(settings.sellerPlan ?? 'comision') == null ? `${counts.Activas} publicaciones activas · sin límite con tu membresía` : `${counts.Activas} de ${limitOf(settings.sellerPlan ?? 'comision')} publicaciones activas`}. Con stock 0 se ven «Sin stock».</span>}
             {rows.map((m) => (
               <div key={m.id} style={{ background: t.mSurface, borderRadius: 18, padding: 12, display: 'flex', flexDirection: 'column', gap: 12, opacity: offline ? 0.8 : 1 }}>
                 <div style={{ display: 'flex', gap: 12 }}>
                   <div style={{ width: 72, flex: 'none' }}><Photo ph={m.ph} radius={12} iconSize={20} dim={m.status === 'Pausadas' || m.status === 'Vendidas'} /></div>
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
-                    <StatusTag status={statusLabel[m.status]} />
+                    <StatusTag status={m.status === 'Activas' && m.stock === 0 ? 'Sin stock' : statusLabel[m.status]} />
                     <span style={{ font: R(14, 500), whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.title}</span>
                     <span style={{ font: P(15) }}>{money(m.price)}</span>
                     <span style={{ font: R(12), color: t.text2 }}>
@@ -444,6 +469,13 @@ export function V21() {
                     </div>
                     <span style={{ font: R(12), color: t.text2 }}>Cuando la corregís, la revisamos de nuevo.</span>
                   </>
+                )}
+                {(m.status === 'Activas' || m.status === 'Pausadas') && (
+                  <div role="group" aria-label={`Stock de ${m.title}`} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ flex: 1, font: R(14, 500), color: m.stock === 0 ? t.warn : t.text }}>Stock: {m.stock ?? 1} {(m.stock ?? 1) === 1 ? 'unidad' : 'unidades'}</span>
+                    <button aria-label={`Restar una unidad de ${m.title}`} disabled={offline} className="press" onClick={() => setStock(m, (m.stock ?? 1) - 1)} style={{ width: 36, height: 36, borderRadius: 18, background: t.mChip, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="minus" size={16} /></button>
+                    <button aria-label={`Sumar una unidad de ${m.title}`} disabled={offline} className="press" onClick={() => setStock(m, (m.stock ?? 1) + 1)} style={{ width: 36, height: 36, borderRadius: 18, background: t.mChip, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="plus" size={16} /></button>
+                  </div>
                 )}
                 {m.status === 'Activas' && (
                   <div style={{ display: 'flex', gap: 8 }}>

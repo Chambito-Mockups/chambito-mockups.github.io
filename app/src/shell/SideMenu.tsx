@@ -1,5 +1,6 @@
 /** Viewer side menu: one per module (Auto or Market) with its settings, search and screen index. */
 import React, { useEffect, useState } from 'react';
+import { PLAN_OPTIONS } from '../commission';
 import { Settings, useApp } from '../store';
 import { Entry, MODULES, Module, Version, entriesOf, groupsIn } from '../registry';
 import { Icon } from '../ui/kit';
@@ -171,6 +172,12 @@ export function SideMenu({ module, page, onJump, onModule, query, setQuery, sear
                   <option value="sin-verificar">Sin verificar</option>
                   <option value="en-revision">En revisión</option>
                   <option value="suspendido">Suspendida</option>
+                </select>
+              </div>
+              <div className="field">
+                <span className="side-label">Cobro al vendedor (fase 2)</span>
+                <select className="side-select" value={settings.sellerPlan ?? 'comision'} onChange={(e) => set({ sellerPlan: e.target.value as Settings['sellerPlan'] })} aria-label="Cobro al vendedor">
+                  {PLAN_OPTIONS.map((m) => <option key={m.key} value={m.key}>{m.label}</option>)}
                 </select>
               </div>
             </>
