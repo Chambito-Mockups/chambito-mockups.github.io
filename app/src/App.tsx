@@ -19,6 +19,7 @@ import { useIsPhone } from './shell/device';
 import { MobileHome, ScreensSheet } from './shell/MobileNav';
 import { VersionsPage } from './shell/VersionsPage';
 import { link } from './shell/bus';
+import { NARRATION } from './narration';
 
 /* ---------------- Root ---------------- */
 const initialKey = () => {
@@ -362,7 +363,8 @@ export function Shell() {
       {present && page.kind === 'screen' && (
         <PresentBar module={module} entry={entry} tour={tour?.t ?? null} step={tour?.step ?? 0} playing={playing} index={index} total={list.length}
           onPrev={pPrev} onNext={pNext} onPlay={() => setPlaying((p) => !p)} onExit={exitPresent} onStep={toStep}
-          onMenu={isPhone ? () => setSheet(true) : undefined} />
+          onMenu={isPhone ? () => setSheet(true) : undefined}
+          narration={module === 'market' && !reference && entry ? NARRATION.market[entry.key] : undefined} />
       )}
       {isPhone && sheet && present && page.kind === 'screen' && (
         <ScreensSheet

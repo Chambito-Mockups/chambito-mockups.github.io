@@ -3,15 +3,23 @@ import { TouchEvent, useEffect, useRef } from 'react';
 import { usePersistent } from '../persist';
 import { MODULES, Module, TOURS, Tour } from '../registry';
 import { Icon } from '../ui/kit';
+import { canSpeak, speak, stop } from './narrator';
 
 export const TOUR_STEP_MS = 6000;
 
-export function PresentBar({ module, entry, tour, step, playing, index, total, onPrev, onNext, onPlay, onExit, onStep, onMenu }: {
+export function PresentBar({ module, entry, tour, step, playing, index, total, onPrev, onNext, onPlay, onExit, onStep, onMenu, narration }: {
   module: Module; entry?: { code: string; title: string }; tour: Tour | null; step: number; playing: boolean; index: number; total: number;
   onPrev: () => void; onNext: () => void; onPlay: () => void; onExit: () => void; onStep: (i: number) => void;
   /** on a phone: the first button opens the screens sheet instead of leaving */
   onMenu?: () => void;
+  /** what this screen does, read aloud when the 🔊 button is on */
+  narration?: string;
 }) {
+  // narration: the device's Spanish voice reads each screen; in a guided flow, the next step comes when it finishes
+  const [narrate, setNarrate] = usePersistent<boolean>('narrar', () => false);
+  const voiceOn = narrate && !!narration && canSpeak();
+  const flowRef = useRef({ tour, playing });
+  flowRef.current = { tour, playing };
   // on a phone a sideways swipe on the bar moves to the previous / next screen; a hint shows until the first swipe
   const [swiped, setSwiped] = usePersistent<boolean>('swiped', () => false);
   const touch = useRef<{ x: number; y: number } | null>(null);
@@ -31,10 +39,19 @@ export function PresentBar({ module, entry, tour, step, playing, index, total, o
   const nextRef = useRef(onNext);
   nextRef.current = onNext;
   useEffect(() => {
-    if (!tour || !playing) return;
+    if (!tour || !playing || voiceOn) return;
     const id = window.setTimeout(() => nextRef.current(), TOUR_STEP_MS);
     return () => window.clearTimeout(id);
-  }, [tour, playing, step]);
+  }, [tour, playing, step, voiceOn]);
+  useEffect(() => {
+    if (!voiceOn || (tour && !playing)) return; // paused flow: silent
+    let id = 0;
+    speak(narration!, () => {
+      const f = flowRef.current;
+      if (f.tour && f.playing) id = window.setTimeout(() => nextRef.current(), 700);
+    });
+    return () => { window.clearTimeout(id); stop(); };
+  }, [voiceOn, narration, playing]);
 
   const atStart = tour ? step <= 0 : index <= 0;
   const atEnd = tour ? step >= tour.steps.length - 1 : index < 0 || index >= total - 1;
@@ -61,7 +78,7 @@ export function PresentBar({ module, entry, tour, step, playing, index, total, o
           <div className="pb-dots" role="tablist" aria-label="Pasos del recorrido">
             {tour.steps.map((k, i) => (
               <button key={k} role="tab" aria-selected={i === step} aria-label={`Paso ${i + 1}`} className={i === step ? 'on' : i < step ? 'done' : ''} onClick={() => onStep(i)}>
-                {i === step && playing && <span className="pb-fill" key={step} style={{ animationDuration: `${TOUR_STEP_MS}ms` }} />}
+                {i === step && playing && !voiceOn && <span className="pb-fill" key={step} style={{ animationDuration: `${TOUR_STEP_MS}ms` }} />}
               </button>
             ))}
           </div>
@@ -70,6 +87,11 @@ export function PresentBar({ module, entry, tour, step, playing, index, total, o
       {tour && (
         <button className="pb-btn pb-play" onClick={onPlay} aria-label={playing ? 'Pausar' : 'Reproducir'} title={playing ? 'Pausar (espacio)' : 'Reproducir (espacio)'}>
           {playing ? <span style={{ font: '700 13px Poppins, sans-serif', color: '#000000' }}>❚❚</span> : <span style={{ font: '700 14px Poppins, sans-serif', color: '#000000', marginLeft: 2 }}>▶</span>}
+        </button>
+      )}
+      {narration && canSpeak() && (
+        <button className={`pb-btn pb-voice${narrate ? ' on' : ''}`} onClick={() => setNarrate((v) => !v)} aria-pressed={narrate} aria-label="Narrar cada pantalla" title={narrate ? 'Silenciar la narración' : 'Escuchar qué hace cada pantalla'}>
+          <Icon name={narrate ? 'volumeOn' : 'volumeOff'} size={18} color="var(--fg)" />
         </button>
       )}
       <button className="pb-btn" onClick={onNext} disabled={atEnd} aria-label="Pantalla siguiente" title="Siguiente (→)">
