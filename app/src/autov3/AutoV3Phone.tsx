@@ -15,7 +15,8 @@ export interface AutoV3Handle {
   reset: () => void;
 }
 
-export const AutoV3Phone = forwardRef<AutoV3Handle, V3Props & { onPlace?: (s: V3State) => void }>(function AutoV3Phone({ onPlace, ...props }, ref) {
+/** `bare`: en un celular, sin barra de estado ni indicador de inicio dibujados, `height` de alto. */
+export const AutoV3Phone = forwardRef<AutoV3Handle, V3Props & { onPlace?: (s: V3State) => void; bare?: boolean; height?: number }>(function AutoV3Phone({ onPlace, bare = false, height = 844, ...props }, ref) {
   const [st, setSt] = useState<V3State>(INITIAL);
   const latest = useRef(st);
   const set = useCallback((o: Partial<V3State>) => { latest.current = { ...latest.current, ...o }; setSt(latest.current); }, []);
@@ -66,7 +67,7 @@ export const AutoV3Phone = forwardRef<AutoV3Handle, V3Props & { onPlace?: (s: V3
   const { t } = vm;
   return (
     <VMContext.Provider value={vm}>
-      <div className="ig" data-theme={p.dark ? 'dark' : 'light'} style={{ position: 'relative', width: 390, height: 844, overflow: 'hidden', background: t.bg, color: t.text, fontFamily: 'Roboto, Arial, sans-serif', fontSize: 15, lineHeight: '22px' }}>
+      <div className="ig" data-theme={p.dark ? 'dark' : 'light'} style={{ position: 'relative', width: 390, height, overflow: 'hidden', background: t.bg, color: t.text, fontFamily: 'Roboto, Arial, sans-serif', fontSize: 15, lineHeight: '22px' }}>
         <Current />
         <Bars />
         <ExplorerSheet />
@@ -74,8 +75,8 @@ export const AutoV3Phone = forwardRef<AutoV3Handle, V3Props & { onPlace?: (s: V3
         <DetallesSheet />
         <OfferSheetV3 />
         <Toast />
-        <PhoneStatusBar />
-        <HomeIndicator />
+        {!bare && <PhoneStatusBar />}
+        {!bare && <HomeIndicator />}
       </div>
     </VMContext.Provider>
   );

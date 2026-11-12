@@ -3,10 +3,16 @@
  * App integrada), con los colores, la tipografía y los componentes del sistema de diseño. Menú con todas las pantallas
  * y estados del lienzo, anterior / siguiente (← →) y un enlace por pantalla: #autov3/<código>.
  */
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { RefObject, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { usePersistent } from '../persist';
+import { PHONE_QUERY, useIsPhone } from '../shell/device';
 import { isTyping } from '../shell/controls';
 import { Icon } from '../ui/kit';
+import { dark as darkTheme, light as lightTheme } from '../theme';
+import { Module } from '../registry';
+import { useBareSize } from '../shell/Phone';
+import { PresentBar } from '../shell/Presenter';
+import { ScreensSheet } from '../shell/MobileNav';
 import { AutoV3Handle, AutoV3Phone } from './AutoV3Phone';
 import { Country, V3Screen, V3State } from './model';
 
@@ -66,6 +72,7 @@ function useFit() {
       const top = el.getBoundingClientRect().top;
       const availW = el.clientWidth - 20;
       const availH = window.innerHeight - top - 40;
+      if (window.matchMedia?.(PHONE_QUERY).matches) { setScale(Math.min(1.2, el.clientWidth / 390)); return; }
       setScale(Math.max(0.6, Math.min(1.25, availW / 412, availH / 866)));
     };
     const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(fit);
@@ -74,15 +81,35 @@ function useFit() {
     window.addEventListener('resize', fit);
     return () => { ro?.disconnect(); window.removeEventListener('resize', fit); };
   }, []);
-  return { box, scale };
+  const bare = useIsPhone();
+  return { box, scale, bare };
 }
 
-export function AutoV3Page() {
+/** En el celular, Auto v3 se presenta igual que Market v3: pantalla a todo el alto y la barra de abajo. */
+export interface V3Present { onModule: (m: Module) => void; onHome: () => void; onExit: () => void }
+
+/** El teléfono sin marco, del alto que haya entre el borde de arriba y la barra (el mismo cálculo que Market). */
+function BareV3({ phone, cfg, onPlace }: { phone: RefObject<AutoV3Handle>; cfg: { country: Country; dark: boolean; sim: boolean }; onPlace: (s: V3State) => void }) {
+  const box = useRef<HTMLDivElement>(null);
+  const { scale, height } = useBareSize(box);
+  return (
+    <div ref={box} className="bare-phone" style={{ width: '100%', display: 'flex', justifyContent: 'center', background: (cfg.dark ? darkTheme : lightTheme).bg }}>
+      <div style={{ width: 390 * scale, height: height * scale, overflow: 'hidden' }}>
+        <div style={{ transform: `scale(${scale})`, transformOrigin: 'top left' }}>
+          <AutoV3Phone ref={phone} {...cfg} onPlace={onPlace} bare height={height} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function AutoV3Page({ present }: { present?: V3Present }) {
+  const [sheet, setSheet] = useState(false);
   const [cfg, setCfg] = usePersistent<{ country: Country; dark: boolean; sim: boolean }>('autov3', () => ({ country: 'PY', dark: true, sim: true }));
   const set = (o: Partial<typeof cfg>) => setCfg((c) => ({ ...c, ...o }));
   const phone = useRef<AutoV3Handle>(null);
   const [key, setKey] = useState<string>(() => keyFromHash() ?? 'A0');
-  const { box, scale } = useFit();
+  const { box, scale, bare } = useFit();
 
   const open = useCallback((en: V3Entry) => { phone.current?.jump(en.screen, en.setup); setKey(en.key); }, []);
   useEffect(() => {
@@ -125,6 +152,34 @@ export function AutoV3Page() {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
+  if (present) {
+    return (
+      <div className="v3-stage v3-present">
+        <div className="phone-wrap">
+          <BareV3 phone={phone} cfg={cfg} onPlace={onPlace} />
+        </div>
+        <PresentBar
+          module="auto" entry={cur ? { code: cur.key, title: cur.title } : undefined} tour={null} step={0} playing={false} index={index} total={V3_ENTRIES.length}
+          onPrev={() => prevE && open(prevE)} onNext={() => nextE && open(nextE)} onPlay={() => {}} onExit={present.onExit} onStep={() => {}}
+          onMenu={() => setSheet(true)}
+        />
+        {sheet && (
+          <ScreensSheet
+            module="auto" groups={V3_GROUPS.map((g) => ({ title: g.title, entries: g.entries.map((x) => ({ key: x.key, code: x.key, title: x.title })) }))}
+            current={key} inTour={false} dark={cfg.dark}
+            onModule={(m) => { setSheet(false); if (m !== 'auto') present.onModule(m); }}
+            onPick={(k) => { const en = V3_ENTRIES.find((x) => x.key === k); if (en) open(en); setSheet(false); }}
+            onHome={() => { setSheet(false); present.onHome(); }}
+            onTheme={() => set({ dark: !cfg.dark })}
+            onExit={() => { setSheet(false); present.onExit(); }}
+            onEndTour={() => {}}
+            onClose={() => setSheet(false)}
+          />
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="v3-stage">
       <div className="v3-bar">
@@ -153,9 +208,9 @@ export function AutoV3Page() {
         </div>
         <button className="nav-btn" aria-label={nextE ? `Siguiente: ${nextE.title}` : 'Siguiente'} disabled={!nextE} onClick={() => nextE && open(nextE)}><Icon name="chevronRight" size={18} color="var(--fg)" /></button>
       </div>
-      <div ref={box} className="ig-phone" style={{ paddingTop: 11 * scale }}>
+      <div ref={box} className="ig-phone" style={{ paddingTop: bare ? 0 : 11 * scale }}>
         <div style={{ width: 390 * scale, height: 844 * scale }}>
-          <div style={{ transform: `scale(${scale})`, transformOrigin: 'top left', width: 390, height: 844, borderRadius: 44, overflow: 'hidden', boxShadow: '0 30px 80px var(--phone-shadow), 0 0 0 10px var(--frame), 0 0 0 11px var(--frame-ring)' }}>
+          <div style={{ transform: `scale(${scale})`, transformOrigin: 'top left', width: 390, height: 844, overflow: 'hidden', ...(bare ? {} : { borderRadius: 44, boxShadow: '0 30px 80px var(--phone-shadow), 0 0 0 10px var(--frame), 0 0 0 11px var(--frame-ring)' }) }}>
             <AutoV3Phone ref={phone} {...cfg} onPlace={onPlace} />
           </div>
         </div>

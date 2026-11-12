@@ -514,3 +514,154 @@ kbd { font: 500 11px Roboto, sans-serif; color: var(--fg2); background: var(--li
 .ds-icons > span { display: flex; flex-direction: column; align-items: center; gap: 6px; font: 400 11px Roboto, sans-serif; opacity: .9; }
 .ds-rules { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; font: 400 15px/1.5 Roboto, sans-serif; color: var(--fg); }
 @media (max-width: 900px) { .ds-both { grid-template-columns: 1fr; } }
+
+/* ---------- on a real phone (Android / iPhone): the screen fills the display ---------- */
+.pb-short { display: none; }
+.pb-short small { margin-left: 8px; font: 500 12px Roboto, sans-serif; color: var(--fg3); }
+@media (max-width: 600px) {
+  html, body { overscroll-behavior: none; }
+  /* presentation: screen on top, a slim bar docked at the bottom, inside the safe areas */
+  .shell.presenting { display: flex; flex-direction: column; height: 100vh; height: 100dvh; min-height: 0; overflow: hidden; }
+  .presenting .main { flex: 1; min-height: 0; padding: 0; padding-top: env(safe-area-inset-top); display: block; }
+  .presenting .stage { display: block; height: 100%; gap: 0; }
+  .presenting .phone-wrap { height: 100%; }
+  .present-bar { position: static; transform: none; left: auto; bottom: auto; flex: none; width: 100%; max-width: none; border-radius: 0; border: 0; border-top: 1px solid var(--line); box-shadow: none; gap: 6px; padding: 6px 10px calc(6px + env(safe-area-inset-bottom)); animation: none; }
+  .pb-btn { width: 44px; height: 44px; }
+  .pb-info { flex: 1; width: auto; max-width: none; align-items: center; text-align: center; padding: 0 4px; }
+  .pb-long { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .pb-short { display: block; max-width: 100%; }
+  .pb-dots { width: 100%; }
+  /* viewer: the screen also fills the width, without the drawn frame */
+  .main { padding: 12px 0 20px; }
+  .main .toolbar { margin: 0 12px; }
+  .main .stage { gap: 12px; }
+  .main .notes, .main .version-panel { padding: 0 12px; }
+  .bare-phone { touch-action: pan-y; }
+}
+@media (max-width: 600px) {
+  /* pages (App Unificada, Auto v3, Sistema de diseño): the screen first and edge to edge, settings below */
+  .main:has(.page) { padding: 0; }
+  .page { padding: 0 12px 24px; min-height: 0; }
+  .page-topbar { top: 64px; }
+  .page-tag { display: none; }
+  .ig-stage, .v3-stage { gap: 12px; }
+  .ig-center { order: -1; }
+  .ig-phone { margin: 0 -12px; width: calc(100% + 24px) !important; }
+  .ig-bar { padding: 0 2px; }
+  .ig-side .ig-hint:not(:last-child), .v3-note:not(.muted) { display: none; }
+  .ig-side, .ig-index { max-width: none; }
+  .v3-controls { flex-wrap: wrap; gap: 6px; }
+  /* Sistema de diseño: the sections as one row that scrolls sideways */
+  .ref-toc, .toc-group { flex-wrap: nowrap; }
+  .ref-toc { overflow-x: auto; margin: 0 -12px; padding: 10px 12px 4px; scrollbar-width: none; }
+  .ref-toc::-webkit-scrollbar { display: none; }
+  .toc-item { flex: none; height: 36px; white-space: nowrap; background: var(--panel); border: 1px solid var(--line); }
+  .ds-2col { grid-template-columns: 1fr; }
+  .ds-pane { padding: 36px 14px 14px; }
+  .ds-table { display: block; overflow-x: auto; }
+}
+@media (max-width: 600px) {
+  .ref-toc > .vp-title, .ref-head .crumbs { display: none; }
+  .ref-layout { gap: 12px; }
+  .ref-rail { position: sticky; top: 117px; z-index: 10; background: var(--bg); margin: 0 -12px; padding: 0; gap: 0; }
+  .ref-toc { margin: 0; border-top: 0; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+}
+@media (max-width: 600px) {
+  /* top bar fits a phone: no logo, tighter gaps, scrolls sideways if it still doesn't fit */
+  .topbar { gap: 6px; padding: 0 8px; overflow-x: auto; scrollbar-width: none; padding-top: env(safe-area-inset-top); height: calc(64px + env(safe-area-inset-top)); }
+  .topbar::-webkit-scrollbar { display: none; }
+  .brand { display: none; }
+  .menu-btn { flex: none; }
+  .mode-deck { flex: none; }
+  .topbar-utils { flex: none; padding-left: 6px; gap: 4px; }
+  .top-right { flex: none; gap: 4px; margin-left: auto; }
+  .top-right .seg-sm button { padding: 0 6px; }
+  .icon-btn { padding: 0 10px; }
+}
+
+/* ---------- phone: home screen (Auto · Market · tours) and the screens sheet ---------- */
+.pb-hint { display: none; }
+@media (max-width: 600px) {
+  .pb-hint { display: block; font: 400 11px Roboto, sans-serif; color: var(--fg3); }
+  .pb-menu { background: var(--accent-soft); }
+  .m-home { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; gap: 12px; padding: calc(20px + env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom)); background: var(--bg); }
+  .m-home-head { display: flex; align-items: center; gap: 10px; }
+  .m-home-head img { width: 40px; height: 40px; border-radius: 12px; background: #FFFFFF; }
+  .m-home-head div { display: flex; flex-direction: column; line-height: 1.2; }
+  .m-home-name { font: 700 17px Poppins, sans-serif; color: var(--fg); }
+  .m-home-sub { font: 400 13px Roboto, sans-serif; color: var(--fg3); }
+  .m-home-title { margin: 20px 0 4px; font: 700 26px Poppins, sans-serif; color: var(--fg); }
+  .m-card { display: flex; align-items: center; gap: 14px; min-height: 84px; padding: 14px 16px; border-radius: 20px; background: var(--panel); border: 1px solid var(--line); text-align: left; }
+  .m-card:active { transform: scale(.98); }
+  .m-card-icon { flex: none; width: 48px; height: 48px; border-radius: 14px; background: var(--m, var(--accent)); display: flex; align-items: center; justify-content: center; }
+  .m-play { font: 700 18px Poppins, sans-serif; color: #000000; padding-left: 3px; }
+  .m-card-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .m-card-text b { font: 700 17px Poppins, sans-serif; color: var(--fg); }
+  .m-card-text span { font: 400 14px Roboto, sans-serif; color: var(--fg2); }
+  .m-tours { display: flex; flex-direction: column; gap: 2px; padding: 4px; border-radius: 16px; background: var(--panel); border: 1px solid var(--line); margin-top: -4px; }
+  .m-tour { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 12px; border-radius: 12px; }
+  .m-tour:active { background: var(--hover); }
+  .m-tour-dot { width: 10px; height: 10px; border-radius: 5px; flex: none; }
+  .m-tour-title { flex: 1; font: 500 15px Roboto, sans-serif; color: var(--fg); }
+  .m-tour-n { font: 400 13px Roboto, sans-serif; color: var(--fg3); }
+  .m-home-foot { margin: auto 0 0; padding-top: 16px; text-align: center; font: 400 13px Roboto, sans-serif; color: var(--fg3); }
+
+  .m-scrim { position: fixed; inset: 0; z-index: 80; background: var(--scrim, rgba(0,0,0,.45)); animation: fadeIn .15s ease-out; }
+  .m-sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 81; height: 85vh; height: 85dvh; display: flex; flex-direction: column; background: var(--bg); border-radius: 24px 24px 0 0; box-shadow: 0 -10px 40px var(--menu-shadow); transition: transform .2s ease; animation: mSheetIn .22s ease-out; }
+  @keyframes mSheetIn { from { transform: translateY(40px); opacity: .4 } to { transform: none; opacity: 1 } }
+  .m-handle-zone { display: flex; justify-content: center; padding: 10px 0 6px; touch-action: none; }
+  .m-handle { width: 40px; height: 5px; border-radius: 3px; background: var(--line2); }
+  .m-sheet-head { display: flex; align-items: center; gap: 10px; padding: 0 16px 10px; }
+  .m-seg { flex: 1; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); }
+  .m-seg button { height: 40px; gap: 6px; font: 700 14px Poppins, sans-serif; }
+  .m-close { flex: none; width: 44px; height: 44px; border-radius: 22px; background: var(--panel); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; }
+  .m-search { margin: 0 16px 8px; height: 44px; }
+  .m-search input { font-size: 16px; } /* 16 px: iPhone doesn't zoom in when typing */
+  .m-sheet-body { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 12px 12px; overscroll-behavior: contain; }
+  .m-end-tour { display: block; width: 100%; margin: 4px 0 8px; padding: 12px; border-radius: 14px; text-align: center; font: 700 14px Poppins, sans-serif; color: var(--on-accent); background: var(--accent); }
+  .m-group { border-bottom: 1px solid var(--line); }
+  .m-group-head { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 50px; padding: 0 6px; font: 500 15px Roboto, sans-serif; color: var(--fg); }
+  .m-group-title { flex: 1; text-align: left; }
+  .m-count { font: 500 12px Roboto, sans-serif; color: var(--fg3); background: var(--panel); border-radius: 999px; padding: 2px 8px; }
+  .m-item { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 0 12px 0 32px; border-radius: 12px; text-align: left; }
+  .m-item:active { background: var(--hover); }
+  .m-item.on { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
+  .m-item-title { flex: 1; min-width: 0; font: 400 15px Roboto, sans-serif; color: var(--fg); }
+  .m-item.on .m-item-title { font-weight: 500; }
+  .m-item-code { flex: none; font: 500 11px Roboto, sans-serif; color: var(--fg4, var(--fg3)); }
+  .m-empty { margin: 24px 0; text-align: center; font: 400 14px Roboto, sans-serif; color: var(--fg3); }
+  .m-sheet-foot { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); }
+  .m-sheet-foot button { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 4px; border-radius: 12px; font: 500 12px Roboto, sans-serif; color: var(--fg2); }
+  .m-sheet-foot button:active { background: var(--hover); }
+}
+
+/* ---------- «Versiones»: v3 es lo principal; v1 y v2 quedan como referencia ---------- */
+.vs-page { display: flex; flex-direction: column; gap: 20px; max-width: 1080px; width: 100%; margin: 0 auto; padding: 16px 0 32px; }
+.vs-title { margin: 0; font: 700 26px Poppins, sans-serif; color: var(--fg); }
+.vs-lead { margin: -12px 0 0; font: 400 15px Roboto, sans-serif; color: var(--fg2); }
+.vs-module { display: flex; flex-direction: column; gap: 12px; }
+.vs-module-title { display: flex; align-items: center; gap: 10px; margin: 0; font: 700 18px Poppins, sans-serif; color: var(--fg); }
+.vs-module-title .module-icon { width: 28px; height: 28px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; }
+.vs-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.vs-card { display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 18px; background: var(--panel); border: 1px solid var(--line); }
+.vs-card.main { border-color: var(--v); box-shadow: inset 0 0 0 1px var(--v); background: color-mix(in srgb, var(--v) 10%, var(--panel)); }
+.vs-card-head { display: flex; align-items: center; gap: 8px; font: 700 15px Poppins, sans-serif; color: var(--fg); }
+.vs-card-head .vp-id { background: var(--v); color: #000000; }
+.vs-card:not(.main) .vs-card-head .vp-id { background: transparent; color: var(--v); box-shadow: inset 0 0 0 1.5px var(--v); }
+.vs-main { margin-left: auto; font: 500 11px Roboto, sans-serif; color: #000000; background: var(--v); border-radius: 999px; padding: 2px 8px; }
+.vs-diff { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font: 400 14px/1.4 Roboto, sans-serif; color: var(--fg2); flex: 1; }
+.vs-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; font: 400 12px Roboto, sans-serif; color: var(--fg3); }
+.vs-card-foot .ghost-btn { height: 36px; padding: 0 14px; }
+.ref-note { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border-radius: 14px; background: var(--panel); border: 1px dashed var(--v); }
+.ref-note .vp-id { background: transparent; color: var(--v); box-shadow: inset 0 0 0 1.5px var(--v); }
+.ref-note .primary-btn { justify-content: center; }
+@media (max-width: 900px) { .vs-cards { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .vs-page { padding-top: 8px; } .vs-title { font-size: 22px; } }
+
+/* ---------- phone: Auto v3 presented like Market v3 (same height, same bottom bar) ---------- */
+@media (max-width: 600px) {
+  .presenting .page { height: 100%; min-height: 0; padding: 0; gap: 0; }
+  .presenting .page-topbar { display: none; }
+  .presenting .v3-present { height: 100%; max-width: none; gap: 0; display: flex; flex-direction: column; }
+  .presenting .v3-present > .phone-wrap { flex: 1; min-height: 0; width: 100%; }
+}

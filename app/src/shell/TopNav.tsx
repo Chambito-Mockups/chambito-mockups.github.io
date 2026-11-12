@@ -44,17 +44,19 @@ function ModeTab({
 
 export function TopNav({
   module, onModule, onMenu, ui, onUi,
-  navOn, onNav, appOn, onApp, v3On, onV3,
+  navOn, onNav, appOn, onApp, v3On, vsOn, onVs,
 }: {
   module: Module; onModule: (m: Module) => void; onMenu: () => void;
   ui: UiTheme; onUi: (v: UiTheme) => void;
   navOn?: boolean; onNav?: () => void;
   appOn?: boolean; onApp?: () => void;
-  v3On?: boolean; onV3?: () => void;
+  /** Auto v3 (the main Auto) is open */
+  v3On?: boolean;
+  vsOn?: boolean; onVs?: () => void;
 }) {
-  const away = navOn || appOn || v3On;
-  const autoActive = !away && module === 'auto';
-  const marketActive = !away && module === 'market';
+  const away = navOn || appOn || vsOn;
+  const autoActive = !away && (v3On || module === 'auto');
+  const marketActive = !away && !v3On && module === 'market';
   const { settings, set } = useApp();
 
   return (
@@ -79,8 +81,7 @@ export function TopNav({
           icon={MODULES.auto.icon}
           label={MODULES.auto.label}
           active={autoActive}
-          related={v3On}
-          onClick={() => onModule('auto')}
+                    onClick={() => onModule('auto')}
         />
         <ModeTab
           kind="market"
@@ -104,15 +105,14 @@ export function TopNav({
 
       {/* Acciones secundarias del módulo activo + utilidad Sistema de diseño. */}
       <nav className="topbar-utils" aria-label="Referencia">
-        {(autoActive || v3On) && onV3 && (
+        {onVs && (
           <button
-            className={`util-btn util-mode${v3On ? ' on' : ''}`}
-            style={{ '--mode': MODULE_COLOR.auto } as CSSProperties}
-            onClick={onV3}
-            title="Los mockups del lienzo «Chambito Auto v3», navegables en su propia página"
+            className={`util-btn${vsOn ? ' on' : ''}`}
+            onClick={onVs}
+            title="Diferencias entre v1, v2 y v3 de Auto y Market"
           >
-            <Icon name="car" size={14} color={MODULE_COLOR.auto} />
-            <span>Auto v3 navegable</span>
+            <Icon name="copy" size={14} color={vsOn ? 'var(--fg)' : 'var(--fg2)'} />
+            <span>Versiones</span>
           </button>
         )}
         {onNav && (

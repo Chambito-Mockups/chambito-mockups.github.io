@@ -83,11 +83,11 @@ export function M01() {
                   <Icon name="tag" size={22} color={t.success} />
                 </span>
                 <span style={{ font: P(20), ...pretty }}>Sé de los primeros en vender en tu zona</span>
-                <span style={{ font: R(14), color: t.text2, ...pretty }}>Publicar es gratis y lo ven tus vecinos en Chambito.</span>
+                <span style={{ font: R(14), color: t.text2, ...pretty }}>Publicar es gratis.</span>
                 <Button icon="plus" onClick={vender}>Publicar gratis</Button>
               </div>
               <SectionHead title="Cerca tuyo" />
-              <InfoNote>Hay pocas publicaciones cerca: ampliamos a 50 km</InfoNote>
+              <InfoNote>Ampliamos a 50 km</InfoNote>
               <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: '20px 12px' }}>
                 {wide.map((l) => <ListingCard key={l.id} l={l} onOpen={open} />)}
               </div>
@@ -296,7 +296,7 @@ export function M04() {
               <FilterChip icon="chevronDown" onClick={() => go('M05')}>{filters.sort}</FilterChip>
             </div>
             {results.length === 0 ? (
-              <EmptyBlock icon="search" title={`No hay «${label}» a ${filters.km} km`} text="Ampliá la distancia o publicá una vos: lo primero que se publica en una zona se ve más.">
+              <EmptyBlock icon="search" title={`No hay «${label}» a ${filters.km} km`} text="Ampliá la distancia o publicá una vos.">
                 {filters.km < 50 && <Button onClick={() => setFilters({ ...filters, km: 50 })}>Ampliar a 50 km</Button>}
                 <Button kind={filters.km < 50 ? 'secondary' : 'primary'} onClick={vender}>Publicar algo</Button>
               </EmptyBlock>
@@ -385,7 +385,7 @@ export function M06() {
       <MScreen>
         <MTopBar onBack={back} />
         <div style={{ padding: '60px 20px 0' }}>
-          <EmptyBlock icon="info" title="Esta publicación ya no está disponible" text="El vendedor la borró o la estamos revisando. Hay más cosas parecidas en la Tienda.">
+          <EmptyBlock icon="info" title="Esta publicación ya no está disponible" text="Mirá otras parecidas en la Tienda.">
             <Button onClick={() => go('M01', { replace: true })}>Volver a la Tienda</Button>
           </EmptyBlock>
         </div>
@@ -422,7 +422,7 @@ export function M06() {
             <Button onClick={() => { setQuery(''); setFilters({ ...DEFAULT_FILTERS, category: l.category }); go('M04'); }}>Ver parecidos</Button>
           ) : noStock ? (
             <>
-              <span style={{ font: R(13), color: t.text2 }}>Sin stock: el vendedor todavía no cargó más unidades.</span>
+              <span style={{ font: R(13), color: t.text2 }}>Sin stock por ahora.</span>
               <div style={{ display: 'flex', gap: 12 }}>
                 <HeartButton id={l.id} size={52} onSurface />
                 <Button kind="secondary" icon="bell" style={{ flex: 1 }} onClick={() => showToast('Te avisamos cuando vuelva a haber stock')}>Avisarme cuando haya</Button>
@@ -465,10 +465,10 @@ export function M06() {
         <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }} aria-busy="true"><Skel w="55%" h={28} /><Skel h={18} /><Skel w="60%" h={14} /><Skel h={56} r={12} /></div>
       ) : (
         <div style={{ padding: '16px 20px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ font: P(26) }}>{money(l.price)}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span style={{ font: P(26), whiteSpace: 'nowrap', marginRight: 2 }}>{money(l.price)}</span>
             <span style={{ font: R(12, 500), background: t.mChip, borderRadius: 10, padding: '3px 8px' }}>{l.condition}</span>
-            {!sold && <span style={{ font: R(12, 500), color: noStock ? t.warn : t.text, background: noStock ? 'rgba(255,181,71,0.16)' : t.mChip, borderRadius: 10, padding: '3px 8px' }}>{noStock ? 'Sin stock' : l.stock === 1 ? 'Último disponible' : `Quedan ${l.stock}`}</span>}
+            {!sold && <span style={{ font: R(12, 500), color: noStock ? t.warn : t.text, background: noStock ? 'rgba(255,181,71,0.16)' : t.mChip, borderRadius: 10, padding: '3px 8px' }}>{noStock ? 'Sin stock' : l.stock === 1 ? 'Último' : `Quedan ${l.stock}`}</span>}
           </div>
           <span style={{ font: R(17, 500), ...pretty }}>{l.title}</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -488,8 +488,8 @@ export function M06() {
             <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: 12, borderRadius: 16, background: freeShip ? t.greenSoft : t.mSurface }}>
               <Icon name="shoppingBag" size={20} color={freeShip ? t.success : t.icon} />
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <span style={{ font: R(15, 500) }}>{freeShip ? 'Envío gratis' : 'Envío a cargo del comprador'}</span>
-                <span style={{ font: R(13), color: t.text2, ...pretty }}>{freeShip ? 'Lo paga el vendedor. También podés retirarlo sin costo.' : `Si pedís envío pagás ${money(SHIP_FEE)}. Retirarlo o verse en un punto de encuentro es gratis.`}</span>
+                <span style={{ font: R(15, 500) }}>{freeShip ? 'Envío gratis' : `Envío ${money(SHIP_FEE)}`}</span>
+                <span style={{ font: R(13), color: t.text2, ...pretty }}>{freeShip ? 'Retirarlo también es gratis.' : 'Retirarlo es gratis.'}</span>
               </div>
             </div>
           )}
@@ -674,7 +674,7 @@ export function M11() {
           ))
         ) : items.length === 0 ? (
           <div style={{ paddingTop: 60 }}>
-            <EmptyBlock icon="heart" title="Tocá ♥ en un producto para guardarlo" text="Lo encontrás acá cuando quieras volver a verlo, y te avisamos si baja de precio.">
+            <EmptyBlock icon="heart" title="Tocá ♥ en un producto para guardarlo" text="Te avisamos si baja de precio.">
               <Button onClick={() => go('M01', { replace: true })}>Ir a la Tienda</Button>
             </EmptyBlock>
           </div>
@@ -727,7 +727,7 @@ export function ReportSheet() {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, textAlign: 'center', padding: '8px 0' }}>
           <span style={{ width: 56, height: 56, borderRadius: 28, background: t.greenSoft, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="check" size={26} color={t.success} /></span>
           <span style={{ font: P(22) }}>Gracias, lo vamos a revisar</span>
-          <span style={{ font: R(15), color: t.text2, ...pretty }}>Si confirmamos el problema, damos de baja la {what}. Tu denuncia es anónima.</span>
+          <span style={{ font: R(15), color: t.text2, ...pretty }}>Tu denuncia es anónima.</span>
         </div>
         <Button onClick={close}>Listo</Button>
       </MSheet>
@@ -774,7 +774,7 @@ export function GuestSheet() {
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, textAlign: 'center', padding: '8px 0' }}>
         <span style={{ width: 56, height: 56, borderRadius: 28, background: t.mSurface, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="lock" size={24} /></span>
         <span style={{ font: P(22) }}>Ingresá para {pendingVerb}</span>
-        <span style={{ font: R(15), color: t.text2, ...pretty }}>Podés mirar la Tienda sin cuenta. Para consultar, guardar, publicar o denunciar, ingresá con tu cuenta de Chambito.</span>
+        <span style={{ font: R(15), color: t.text2, ...pretty }}>Para consultar, guardar o publicar.</span>
       </div>
       <Button onClick={() => login('Sesión iniciada')}>Ingresar</Button>
       <Button kind="secondary" onClick={() => login('Cuenta creada')}>Crear cuenta</Button>

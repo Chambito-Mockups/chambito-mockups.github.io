@@ -3,6 +3,7 @@
  * Estado, navegación, datos por país y temporizadores. Las pantallas leen todo con `useVM()` (el mismo contexto que la
  * App integrada), así reutilizan sus componentes (kit.tsx, ds.tsx, chrome.tsx) y sus tokens del sistema de diseño.
  */
+import { openSection } from '../shell/bus';
 import { VM } from '../integrada/model';
 import { tokens } from '../integrada/tokens';
 import { dark as darkTheme, light as lightTheme } from '../theme';
@@ -204,7 +205,7 @@ export function buildV3(p: V3Props, { st, set, get }: V3IO): VM {
       return {
         t, title, icon, hint, on, tag: on ? 'Estás acá' : tag, hasTag: on || !!tag,
         aria: `${title}: ${hint}${on ? ', estás acá' : ''}`,
-        pick: () => (on ? set({ sheet: null }) : k === 'servicios' ? go('X1') : k === 'auto' ? go('A0') : toast('Market está en la App integrada')),
+        pick: () => (on ? set({ sheet: null }) : k === 'servicios' ? go('X1') : k === 'auto' ? go('A0') : (set({ sheet: null }), openSection('market'))),
       };
     }),
   };

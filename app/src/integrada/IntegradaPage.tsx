@@ -6,6 +6,7 @@
  */
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { usePersistent } from '../persist';
+import { PHONE_QUERY, useIsPhone } from '../shell/device';
 import { isTyping } from '../shell/controls';
 import { Icon } from '../ui/kit';
 import { IgPlace, IgScreen, IgSheet, IntegradaHandle, IntegradaPhone } from './IntegradaPhone';
@@ -138,6 +139,7 @@ function useFit() {
     if (!el) return;
     const fit = () => {
       const top = el.getBoundingClientRect().top + window.scrollY;
+      if (window.matchMedia?.(PHONE_QUERY).matches) { setScale(Math.min(1.2, el.clientWidth / 390)); return; }
       setScale(Math.max(0.5, Math.min(1.1, (el.clientWidth - 30) / 412, (window.innerHeight - Math.min(top, 240) - 40) / 866)));
     };
     const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(fit);
@@ -146,7 +148,8 @@ function useFit() {
     window.addEventListener('resize', fit);
     return () => { ro?.disconnect(); window.removeEventListener('resize', fit); };
   }, []);
-  return { box, scale };
+  const bare = useIsPhone();
+  return { box, scale, bare };
 }
 
 function Select({ label, value, options, onChange }: { label: string; value: string; options: string[]; onChange: (v: string) => void }) {
@@ -168,7 +171,7 @@ export function IntegradaPage() {
   const phone = useRef<IntegradaHandle>(null);
   const [key, setKey] = useState<string>(() => keyFromHash() ?? (cfg.navegacion === SELECTOR ? 'X1' : 'inicio'));
   const [query, setQuery] = useState('');
-  const { box, scale } = useFit();
+  const { box, scale, bare } = useFit();
   const navRef = useRef(cfg.navegacion);
   navRef.current = cfg.navegacion;
 
@@ -285,9 +288,9 @@ export function IntegradaPage() {
             <Icon name="chevronRight" size={18} color="var(--fg)" />
           </button>
         </div>
-        <div ref={box} className="ig-phone" style={{ paddingTop: 11 * scale }}>
+        <div ref={box} className="ig-phone" style={{ paddingTop: bare ? 0 : 11 * scale }}>
           <div style={{ width: 390 * scale, height: 844 * scale }}>
-            <div style={{ transform: `scale(${scale})`, transformOrigin: 'top left', width: 390, height: 844, borderRadius: 44, overflow: 'hidden', boxShadow: '0 30px 80px var(--phone-shadow), 0 0 0 10px var(--frame), 0 0 0 11px var(--frame-ring)' }}>
+            <div style={{ transform: `scale(${scale})`, transformOrigin: 'top left', width: 390, height: 844, overflow: 'hidden', ...(bare ? {} : { borderRadius: 44, boxShadow: '0 30px 80px var(--phone-shadow), 0 0 0 10px var(--frame), 0 0 0 11px var(--frame-ring)' }) }}>
               <IntegradaPhone ref={phone} {...cfg} onPlace={onPlace} />
             </div>
           </div>

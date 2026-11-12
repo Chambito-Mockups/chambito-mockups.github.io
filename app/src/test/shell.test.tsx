@@ -14,29 +14,50 @@ const openRefs = () => {
 };
 
 describe('Auto | Market menus', () => {
-  it('starts on Auto with only Auto screens in the side menu', () => {
+  it('starts on Auto v3, the main version', () => {
     start();
     expect(moduleBtn('Auto')).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('navigation', { name: 'Pantallas de Auto v3' })).toBeInTheDocument();
+    expect(window.location.hash).toBe('#autov3/A0');
+  });
+
+  it('keeps the earlier Auto screens as a reference, with only Auto screens in the side menu', () => {
+    start('#A0');
+    expect(moduleBtn('Auto')).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('button', { name: 'Volver a Auto v3' })).toBeInTheDocument();
     const nav = menu('Auto');
     expect(within(nav).getByText('Portada de Auto')).toBeInTheDocument();
     expect(within(nav).queryByText('Inicio de la Tienda')).toBeNull();
   });
 
-  it('switches to Market and back, remembering the last screen of each menu', () => {
+  it('switches between Auto v3 and Market v3, remembering the last Market screen', () => {
     start();
-    fireEvent.click(within(menu('Auto')).getByText('Tu conductor llegó'));
-    expect(heading()).toHaveTextContent('Tu conductor llegó');
-
     fireEvent.click(moduleBtn('Market'));
-    expect(heading()).toHaveTextContent('Inicio de la Tienda');
-    expect(within(menu('Market')).getByText('Filtros')).toBeInTheDocument();
+    expect(heading()).toHaveTextContent('Portada de Market con selector');
+    expect(screen.getByRole('button', { name: /^Sección: Market/ })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir todos' }));
+    fireEvent.click(within(menu('Market')).getByText('Filtros'));
+    expect(heading()).toHaveTextContent('Filtros');
 
     fireEvent.click(moduleBtn('Auto'));
-    expect(heading()).toHaveTextContent('Tu conductor llegó');
+    expect(screen.getByRole('navigation', { name: 'Pantallas de Auto v3' })).toBeInTheDocument();
+    fireEvent.click(moduleBtn('Market'));
+    expect(heading()).toHaveTextContent('Filtros');
+  });
+
+  it('joins both as one app: the section selector of each opens the other', () => {
+    start();
+    fireEvent.click(screen.getByRole('button', { name: /^Sección: Auto/ }));
+    fireEvent.click(screen.getByRole('listitem', { name: /^Chambito Market/ }));
+    expect(heading()).toHaveTextContent('Portada de Market con selector');
+    fireEvent.click(screen.getByRole('button', { name: /^Sección: Market/ }));
+    fireEvent.click(screen.getByRole('listitem', { name: /^Chambito Auto/ }));
+    fireEvent(window, new HashChangeEvent('hashchange'));
+    expect(screen.getByRole('navigation', { name: 'Pantallas de Auto v3' })).toBeInTheDocument();
   });
 
   it('shows the settings of the current menu only', () => {
-    start();
+    start('#A0');
     expect(screen.getByRole('radiogroup', { name: 'Ver la app como' })).toBeInTheDocument();
     expect(screen.queryByLabelText('Cuenta de vendedor')).toBeNull();
     fireEvent.click(moduleBtn('Market'));
@@ -55,7 +76,7 @@ describe('Auto | Market menus', () => {
 
 describe('search', () => {
   it('filters the current menu and opens the first hit with Enter', () => {
-    start();
+    start('#A0');
     const box = screen.getByRole('textbox', { name: 'Buscar pantalla' });
     fireEvent.change(box, { target: { value: 'pin' } });
     const nav = menu('Auto');
@@ -66,7 +87,7 @@ describe('search', () => {
   });
 
   it('ignores accents and offers the other menu when nothing matches', () => {
-    start();
+    start('#A0');
     const box = screen.getByRole('textbox', { name: 'Buscar pantalla' });
     fireEvent.change(box, { target: { value: 'publicacion' } });
     fireEvent.click(screen.getByRole('button', { name: /en Market →/ }));
@@ -77,7 +98,7 @@ describe('search', () => {
 
 describe('toolbar and keyboard', () => {
   it('moves with the arrows through the current menu', () => {
-    start();
+    start('#A0');
     const auto = entriesIn('auto', 'v1');
     expect(screen.getByText(`1 de ${auto.length}`)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Pantalla anterior' })).toBeDisabled();
@@ -91,7 +112,7 @@ describe('toolbar and keyboard', () => {
   });
 
   it('does not steal the arrows while typing', () => {
-    start();
+    start('#A0');
     const box = screen.getByRole('textbox', { name: 'Buscar pantalla' });
     box.focus();
     fireEvent.keyDown(box, { key: 'ArrowRight' });
@@ -308,43 +329,35 @@ describe('versions (v1, v2, v3) to see each way to navigate on its own', () => {
   const nav = () => screen.getByRole('navigation', { name: /^Pantallas de/ });
   const groupNames = () => within(nav()).getAllByRole('button', { expanded: true }).concat(within(nav()).queryAllByRole('button', { expanded: false })).map((b) => b.textContent ?? '');
 
-  it('picks the version next to the phone, not in the side menu', () => {
+  it('compares the versions in «Versiones», with v3 as the main one', () => {
     start('#A0');
-    const sidebar = document.querySelector('.sidebar') as HTMLElement;
-    const main = document.querySelector('.main') as HTMLElement;
-    expect(within(sidebar).queryByRole('radiogroup', { name: 'Versión de Auto' })).toBeNull();
-    const panel = within(main).getByRole('region', { name: 'Versiones de Auto' });
-    const v1 = within(panel).getByRole('radio', { name: 'v1 · Pestaña Auto' });
-    expect(v1).toHaveTextContent('Estás viendo');
-    expect(within(panel).getAllByLabelText('Barra: Inicio, Actividad, Perfil').length).toBeGreaterThan(0);
+    fireEvent.click(within(screen.getByRole('navigation', { name: 'Referencia' })).getByRole('button', { name: /Versiones/ }));
+    expect(window.location.hash).toBe('#versiones');
+    const auto = screen.getByRole('region', { name: 'Versiones de Auto' });
+    expect(within(auto).getAllByRole('article')[0]).toHaveTextContent('Principal');
+    expect(within(auto).getAllByLabelText('Barra: Inicio, Actividad, Perfil').length).toBeGreaterThan(0);
+    expect(screen.getByRole('region', { name: 'Versiones de Market' })).toBeInTheDocument();
   });
 
-  it('shows only the screens of the chosen Auto version and walks them', () => {
-    start('#A0');
-    const versions = screen.getByRole('radiogroup', { name: 'Versión de Auto' });
-    expect(within(versions).getByRole('radio', { name: 'v1 · Pestaña Auto' })).toHaveAttribute('aria-checked', 'true');
-    expect(groupNames().some((g) => g.includes('Explorador'))).toBe(false);
-    expect(screen.getByText(/^v1 · Pestaña Auto$/)).toBeInTheDocument();
-
-    fireEvent.click(within(versions).getByRole('radio', { name: 'v2 · Selector de sección' }));
+  it('opens an earlier Auto version as a reference and walks only its screens', () => {
+    start('#versiones');
+    fireEvent.click(screen.getByRole('button', { name: 'Ver ejemplo de Auto v2' }));
     expect(heading()).toHaveTextContent('Portada de Servicios');
     expect(groupNames().some((g) => g.includes('Explorador'))).toBe(true);
     expect(screen.getByText(`${entriesIn('auto', 'v2').findIndex((e) => e.key === 'X1') + 1} de ${entriesIn('auto', 'v2').length}`)).toBeInTheDocument();
-
-    // v3 opens the Auto v3 navegable prototype (in the shell, not a separate page)
-    fireEvent.click(within(versions).getByRole('radio', { name: 'v3 · Auto v3 navegable' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Volver a Auto v3' }));
     expect(screen.getByRole('navigation', { name: 'Pantallas de Auto v3' })).toBeInTheDocument();
   });
 
-  it('has its own versions in Market: card, tab and section', () => {
-    start('#M01');
-    const versions = screen.getByRole('radiogroup', { name: 'Versión de Market' });
-    fireEvent.click(within(versions).getByRole('radio', { name: 'v2 · Pestaña Tienda' }));
+  it('opens the earlier Market versions too: card and tab', () => {
+    start('#versiones');
+    fireEvent.click(screen.getByRole('button', { name: 'Ver ejemplo de Market v2' }));
     expect(heading()).toHaveTextContent('Tienda con pestaña');
     expect(within(screen.getByRole('navigation', { name: 'Navegación principal' })).getByRole('button', { name: 'Tienda' })).toBeInTheDocument();
-    fireEvent.click(within(versions).getByRole('radio', { name: 'v3 · Market como sección' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Volver a Market v3' }));
     expect(screen.getByRole('button', { name: /^Sección: Market/ })).toBeInTheDocument();
-    fireEvent.click(within(versions).getByRole('radio', { name: 'v1 · Tarjeta en Inicio' }));
+    fireEvent.click(within(screen.getByRole('navigation', { name: 'Referencia' })).getByRole('button', { name: /Versiones/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Ver ejemplo de Market v1' }));
     expect(heading()).toHaveTextContent('Inicio con tarjeta Market');
   });
 });

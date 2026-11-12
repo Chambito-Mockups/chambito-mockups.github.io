@@ -8,7 +8,7 @@ import { useApp } from '../store';
 import { P, R } from '../theme';
 import { Button, Icon, ListRow } from '../ui/kit';
 import {
-  balances, CatKey, calcSale, CLAIM_MAX_DAYS, commissionOf, DISPATCH_HOURS, HOLD_DAYS, isMember, limitTxt, monthTotals, MONTHS, PAYOUT, PAYOUTS, Plan, planName, rateLabel, rules, SALES, saleCalc, SaleStatus, STATUS_LABEL, tierOf, TIERS, usd,
+  balances, CatKey, calcSale, CLAIM_MAX_DAYS, DISPATCH_HOURS, HOLD_DAYS, isMember, limitTxt, monthTotals, MONTHS, PAYOUT, PAYOUTS, Plan, planName, rateLabel, rules, SALES, saleCalc, SaleStatus, STATUS_LABEL, tierOf, TIERS, usd,
 } from '../commission';
 import { useMarket } from './state';
 import { FilterChip, InfoNote, MFooter, MScreen, MTopBar, Photo, pretty } from './kit';
@@ -157,8 +157,8 @@ export function C5() {
             <button style={{ font: R(14, 500), color: t.link }} onClick={() => { setChatListing('trek'); go('M10'); }}>Responder a {first}</button>
           </InfoNote>
         )}
-        {st === 'parcial' && <InfoNote>Se devolvió una parte, así que la comisión se calculó sobre lo que te quedaste.</InfoNote>}
-        {st === 'cancelada' && <InfoNote icon="warning" tone="warn">Si no se despacha en {DISPATCH_HOURS} h, la venta se cancela sola y no cobramos comisión.</InfoNote>}
+        {st === 'parcial' && <InfoNote>Comisión sobre lo que te quedaste.</InfoNote>}
+        {st === 'cancelada' && <InfoNote icon="warning" tone="warn">Despachá en {DISPATCH_HOURS} h o se cancela.</InfoNote>}
         <Label>Cuánto recibís</Label>
         <div style={card(t)}>
           <Line label="Precio del producto" value={c.money(s.price)} />
@@ -172,7 +172,7 @@ export function C5() {
           )}
           <div style={{ height: 1, background: t.border }} />
           <Line label={st === 'pendiente' ? 'Vas a recibir' : st === 'reclamo' ? 'Retenido por el reclamo' : 'Recibís'} value={c.money(k.net)} strong />
-          {st !== 'cancelada' && <span style={{ font: R(13), color: t.text2, ...pretty }}>{k.member ? `Con ${planName(c.plan)} esta venta no paga comisión.` : k.welcome ? 'Es una de tus 3 primeras ventas: no pagás comisión.' : `La comisión de ${c.money(k.fee)} incluye IVA (${c.money(k.iva)}). Va en tu factura del mes.`}</span>}
+          {st !== 'cancelada' && <span style={{ font: R(13), color: t.text2, ...pretty }}>{k.member ? `Con ${planName(c.plan)} esta venta no paga comisión.` : k.welcome ? 'Es una de tus 3 primeras ventas: no pagás comisión.' : `Comisión con IVA incluido.`}</span>}
         </div>
         <Label>Tu dinero</Label>
         <ol aria-label="Estado del dinero" style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column' }}>
@@ -189,7 +189,7 @@ export function C5() {
             </li>
           ))}
         </ol>
-        {st === 'pendiente' && <span style={{ font: R(13), color: t.text2 }}>Si {first} no confirma ni reclama, lo liberamos {HOLD_DAYS} días después de entregado.</span>}
+        {st === 'pendiente' && <span style={{ font: R(13), color: t.text2 }}>Se libera {HOLD_DAYS} días después de entregado.</span>}
       </Pad>
     </MScreen>
   );
@@ -219,7 +219,7 @@ export function C6() {
           <Line label="Te llega" value={c.money(receive)} strong />
           <span style={{ font: R(13), color: t.text2 }}>En {PAYOUT.eta}. {c.fee ? `Ya usaste el retiro gratis de esta semana.` : 'Tenés 1 retiro gratis esta semana.'}</span>
         </div>
-        <InfoNote>El mínimo para retirar es {c.money(PAYOUT.min)}. Solo transferimos a cuentas a tu nombre.</InfoNote>
+        <InfoNote>Mínimo {c.money(PAYOUT.min)}. Solo a cuentas a tu nombre.</InfoNote>
       </Pad>
     </MScreen>
   );
@@ -234,7 +234,7 @@ export function C7() {
       <div style={{ padding: '72px 24px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, textAlign: 'center' }}>
         <span style={{ width: 88, height: 88, borderRadius: 44, background: t.greenSoft, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="wallet" size={40} color={t.success} /></span>
         <span style={{ font: P(28) }}>Retiro en camino</span>
-        <span style={{ font: R(15), color: t.text2, ...pretty }}>Te llegan {c.money(c.cobros.lastPayout || 488000)} a {c.acct} en {PAYOUT.eta}. Te avisamos cuando se acredite.</span>
+        <span style={{ font: R(15), color: t.text2, ...pretty }}>{c.money(c.cobros.lastPayout || 488000)} a {c.acct} en {PAYOUT.eta}.</span>
       </div>
     </MScreen>
   );
@@ -257,7 +257,7 @@ export function C8() {
             <span style={{ minHeight: 52, padding: '14px 16px', boxSizing: 'border-box', borderRadius: 12, boxShadow: `inset 0 0 0 1px ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', font: R(15) }}>{v}<Icon name="edit" size={16} color={t.text2} /></span>
           </label>
         ))}
-        <InfoNote>La cuenta tiene que estar a tu nombre, el mismo que verificaste. No transferimos a cuentas de otras personas.</InfoNote>
+        <InfoNote>Tiene que estar a tu nombre.</InfoNote>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 6 }}>
           <span style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
             <span style={{ font: R(15, 500) }}>Retiro automático</span>
@@ -289,12 +289,16 @@ export function C2() {
           <span style={{ font: R(13), color: t.text2 }}>Hoy tenés: {planName(c.plan)}.</span>
         </div>
         {rules(c.money, c.ar ? 'cuenta (CVU o CBU)' : 'cuenta bancaria').map((r) => (
-          <div key={r.title} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <span style={{ font: P(18) }}>{r.title}</span>
-            <ul style={{ margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 6, font: R(14) }}>
+          // each rule closed by default: only its title shows, a tap opens the detail
+          <details key={r.title} style={{ borderRadius: 16, background: t.mSurface, padding: '12px 16px' }}>
+            <summary style={{ font: P(16), cursor: 'pointer', listStyle: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+              {r.title}
+              <Icon name="chevronDown" size={18} color={t.text2} />
+            </summary>
+            <ul style={{ margin: '10px 0 0', paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 6, font: R(14), color: t.text2 }}>
               {r.items.map((x) => <li key={x} style={pretty}>{x}</li>)}
             </ul>
-          </div>
+          </details>
         ))}
       </Pad>
     </MScreen>
@@ -337,26 +341,24 @@ export function C3() {
     showToast(now ? `Listo: ${planName(pick)}. Desde ahora no pagás comisión` : `Pasás a ${planName(pick)} cuando termine el mes`);
   };
   const ex = calcSale({ price: 300000, cat: 'hogar', plan: 'comision' });
-  const oct = MONTHS[1];
   const onPick = (k: Plan) => c.setCobros({ planPick: k });
   return (
     <MScreen footer={<MFooter><Button onClick={apply}>{pick === c.plan ? `Seguir con ${planName(c.plan)}` : `Elegir ${planName(pick)}`}</Button></MFooter>}>
       <MTopBar title="Cómo pagás al vender" onBack={back} />
       <Pad gap={12}>
-        <span style={{ font: R(14), color: t.text2, ...pretty }}>Elegí entre pagar una membresía fija sin comisiones o pagar solo cuando vendés.</span>
+        <span style={{ font: R(14), color: t.text2, ...pretty }}>Cuota fija o pagá solo al vender.</span>
         <div role="radiogroup" aria-label="Formas de pago" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <Label>A · Membresía sin comisión</Label>
-          <span style={{ font: R(13), color: t.text2, marginTop: -6, ...pretty }}>Pagás un monto fijo por mes y ninguna venta paga comisión. El nivel define cuántas publicaciones activas tenés.</span>
+          <span style={{ font: R(13), color: t.text2, marginTop: -6, ...pretty }}>Cuota fija, sin comisión por venta.</span>
           {TIERS.map((x) => (
-            <Option key={x.key} k={x.key} pick={pick} current={c.plan} onPick={onPick} title={x.name} price={`${usd(x.usd)} por mes`} detail={`${limitTxt(x.key)}. ${x.perks.join('. ')}.`} />
+            <Option key={x.key} k={x.key} pick={pick} current={c.plan} onPick={onPick} title={x.name} price={`${usd(x.usd)} por mes`} detail={`${limitTxt(x.key)}.`} />
           ))}
-          <span style={{ font: R(13), color: t.text2, ...pretty }}>En octubre vendiste por {c.money(monthTotals(oct, 'comision').sold)}: con comisión pagaste {c.money(commissionOf(oct))}. Con membresía, {c.money(0)} de comisión.</span>
           <span style={{ marginTop: 8 }}><Label>B · Comisión por venta</Label></span>
-          <Option k="comision" pick={pick} current={c.plan} onPick={onPick} title="Comisión por venta" price="Sin costo fijo" detail={`${limitTxt('comision')}. Pagás un % solo cuando vendés con compra protegida.`}>
+          <Option k="comision" pick={pick} current={c.plan} onPick={onPick} title="Comisión por venta" price="Sin costo fijo" detail={`${limitTxt('comision')}. Pagás solo al vender.`}>
             <span style={{ font: R(13), color: t.text2 }}>Ej.: en una venta de {c.money(300000)} (Hogar) pagás {c.money(ex.fee)} y recibís {c.money(ex.net)}.</span>
           </Option>
         </div>
-        <InfoNote>Pasar a membresía o subir de nivel aplica al instante. Bajar o volver a comisión, al terminar el mes. La membresía se cobra en dólares con tu tarjeta.</InfoNote>
+        <InfoNote>Subir aplica al instante; bajar, a fin de mes.</InfoNote>
       </Pad>
     </MScreen>
   );
@@ -370,7 +372,7 @@ export function C9() {
     <MScreen>
       <MTopBar title="Resumen y facturas" onBack={back} />
       <Pad>
-        <span style={{ font: R(14), color: t.text2, ...pretty }}>{c.member ? `Con ${planName(c.plan)} tus ventas no pagan comisión. La membresía se factura aparte, en dólares.` : 'Cada mes te mandamos una factura electrónica con el total de comisiones. El IVA ya está incluido.'}</span>
+        <span style={{ font: R(14), color: t.text2, ...pretty }}>{c.member ? `Con ${planName(c.plan)} no pagás comisión.` : 'Una factura por mes, IVA incluido.'}</span>
         {MONTHS.map((m) => {
           const r = monthTotals(m, c.plan);
           return (

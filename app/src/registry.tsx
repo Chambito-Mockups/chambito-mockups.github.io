@@ -113,6 +113,16 @@ export const GROUPS: Group[] = [
     ],
   },
   {
+    title: 'Explorador · Market',
+    module: 'market',
+    versions: ['v3'],
+    icon: 'layers',
+    subtitle: 'Market como sección, con selector',
+    entries: [
+      { key: 'MKm', code: 'MK', title: 'Portada de Market con selector', screen: 'M01', role: P, flags: { navModel: 'explorer', lastSection: 'market' }, uses: 'La portada de la Tienda con SectionSelector «Market», búsqueda, categorías, Cerca tuyo, Recién publicados y Vender.', changes: 'No se apila sobre el Inicio: es una sección con la barra Inicio · Actividad · Perfil. El recorrido completo está en el menú Auto («Explorar Chambito»).' },
+    ],
+  },
+  {
     title: 'Entrada a la Tienda',
     module: 'market',
     icon: 'home',
@@ -220,16 +230,6 @@ export const GROUPS: Group[] = [
       { key: 'MK', code: 'MK', title: 'Portada de Market con selector', screen: 'M01', role: P, flags: { navModel: 'explorer', lastSection: 'market' }, uses: 'La portada de la Tienda con SectionSelector «Market», búsqueda, categorías, Cerca tuyo, Recién publicados y Vender.', changes: 'No se apila sobre el Inicio: es una sección con la barra Inicio · Actividad · Perfil.' },
       { key: 'X2m', code: 'X2', title: 'Explorador desde Market', screen: 'M01', overlay: 'explorer', role: P, flags: { navModel: 'explorer', lastSection: 'market' }, uses: 'El explorador con Market marcada.', changes: 'Desde acá se pasa a Auto o a Servicios sin volver al Inicio.' },
       { key: 'XA11', code: 'A11', title: 'Actividad con todas las secciones', screen: 'A11', role: P, flags: { navModel: 'explorer' }, uses: 'TopBar, ModuleFilter Todo · Servicios · Auto · Market, viajes y servicios (en curso y anteriores) y Mis consultas del Market.', changes: 'El selector Servicios | Tienda pasa a ser un filtro por sección; todo el historial queda en un solo lugar.' },
-    ],
-  },
-  {
-    title: 'Explorador · Market',
-    module: 'market',
-    versions: ['v3'],
-    icon: 'layers',
-    subtitle: 'Market como sección, con selector',
-    entries: [
-      { key: 'MKm', code: 'MK', title: 'Portada de Market con selector', screen: 'M01', role: P, flags: { navModel: 'explorer', lastSection: 'market' }, uses: 'La portada de la Tienda con SectionSelector «Market», búsqueda, categorías, Cerca tuyo, Recién publicados y Vender.', changes: 'No se apila sobre el Inicio: es una sección con la barra Inicio · Actividad · Perfil. El recorrido completo está en el menú Auto («Explorar Chambito»).' },
     ],
   },
 ];

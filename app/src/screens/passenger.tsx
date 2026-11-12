@@ -161,7 +161,7 @@ export function A2() {
         </div>
         <div style={{ background: t.sheet, borderRadius: 20, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 4 }}>
           <span style={{ font: P(18) }}>¿A dónde vas?</span>
-          <span style={{ font: R(14), color: t.text2 }}>Elegí el destino y te mostramos el precio</span>
+          <span style={{ font: R(14), color: t.text2 }}>Elegí el destino</span>
         </div>
       </div>
       <Sheet>
@@ -249,7 +249,7 @@ export function A3() {
           <Icon name="mapPin" size={20} color={t.green} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <span style={{ font: P(18) }}>{address}</span>
-            <span style={{ font: R(14), color: t.text2 }}>Mové el mapa para ajustar el pin</span>
+            <span style={{ font: R(14), color: t.text2 }}>Mové el mapa para ajustar</span>
           </div>
         </div>
       </div>
@@ -293,7 +293,7 @@ export function A4() {
           <span style={{ font: R(13, 500), color: t.text2 }}>Tu viaje</span>
           <RouteSummary from={trip.pickup} to={trip.destination} meta={`${d.trip.km} · ${d.trip.min}`} />
         </div>
-        {d.surge && <Banner>Hay mucha demanda en tu zona: el precio es más alto que lo habitual</Banner>}
+        {d.surge && <Banner>Mucha demanda: precio más alto</Banner>}
         <SectionLabel>Nivel del servicio</SectionLabel>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }} role="radiogroup" aria-label="Nivel del servicio">
           {levels.map((l) => {
@@ -346,7 +346,7 @@ export function A5() {
           </span>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <span style={{ font: P(22) }}>Esperando conductor</span>
-            <span style={{ font: R(14), color: t.text2 }}>Avisando a conductores en un radio de {radius}</span>
+            <span style={{ font: R(14), color: t.text2 }}>Radio de {radius}</span>
           </div>
         </div>
         <LinearProgress value={Math.min(95, 20 + secs * 16)} />
@@ -373,7 +373,7 @@ export function A5b() {
       <Sheet>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <span style={{ font: P(22) }}>No hay conductores cerca</span>
-          <span style={{ font: R(15), color: t.text2, ...pretty }}>Podemos buscar en {d.expanded.radius}. Tarda un poco más y el precio cambia.</span>
+          <span style={{ font: R(15), color: t.text2, ...pretty }}>Buscamos en {d.expanded.radius}, con otro precio.</span>
         </div>
         <div style={{ background: t.card, borderRadius: 16, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -649,7 +649,7 @@ function HistoryCard({ icon, title, detail, amount, status }: { icon: string; ti
 
 /* ================= Overlays: A8b SOS, A10 Detalles, cancel confirm ================= */
 export function SosDialog() {
-  const { t, d, setOverlay, showToast } = useApp();
+  const { t, setOverlay, showToast } = useApp();
   return (
     <>
       <div className="fade-in" onClick={() => setOverlay(null)} style={{ position: 'absolute', inset: 0, background: t.scrimDialog, zIndex: 50 }} />
@@ -658,7 +658,7 @@ export function SosDialog() {
           <Icon name="shield" size={32} color={t.error} />
         </span>
         <span style={{ font: P(22) }}>¿Necesitás ayuda?</span>
-        <span style={{ font: R(15), color: t.text2, ...pretty }}>Llamamos al 911 y avisamos a Soporte Chambito con tu ubicación en vivo y la patente {d.driver.plate}.</span>
+        <span style={{ font: R(15), color: t.text2, ...pretty }}>Llamamos al 911 y avisamos a Soporte con tu ubicación.</span>
         <div style={{ alignSelf: 'stretch', display: 'flex', flexDirection: 'column', gap: 12, marginTop: 4 }}>
           <Button kind="danger" icon="phone" onClick={() => { setOverlay(null); showToast('Llamando al 911 · Soporte avisado'); }}>Llamar al 911</Button>
           <Button kind="secondary" onClick={() => { setOverlay(null); showToast('Avisamos a Soporte con tu ubicación'); }}>Solo avisar a Soporte</Button>
@@ -676,7 +676,7 @@ export function CancelDialog() {
       <div className="fade-in" onClick={() => setOverlay(null)} style={{ position: 'absolute', inset: 0, background: t.scrimDialog, zIndex: 50 }} />
       <div role="dialog" aria-modal className="pop-in" style={{ position: 'absolute', left: 20, right: 20, top: 260, background: t.sheet, borderRadius: 24, padding: '24px 20px 20px', display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'center', textAlign: 'center', zIndex: 51 }}>
         <span style={{ font: P(22) }}>¿Cancelar el viaje?</span>
-        <span style={{ font: R(15), color: t.text2, ...pretty }}>Tu conductor ya está en camino. Si cancelás ahora puede haber un cargo por cancelación.</span>
+        <span style={{ font: R(15), color: t.text2, ...pretty }}>Tu conductor ya viene. Puede haber un cargo.</span>
         <div style={{ alignSelf: 'stretch', display: 'flex', flexDirection: 'column', gap: 12, marginTop: 4 }}>
           <Button kind="secondary" onClick={() => { resetTrip(); go('A0', { replace: true }); showToast('Viaje cancelado'); }}>Sí, cancelar</Button>
           <button onClick={() => setOverlay(null)} style={{ font: R(15, 500), color: t.text2, padding: '8px 0' }}>Seguir con el viaje</button>

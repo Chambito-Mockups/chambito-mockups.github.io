@@ -21,7 +21,7 @@ export function D0() {
         <div style={{ background: t.cardOnBg, borderRadius: 24, padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
           <IconCircle icon="car" size={56} iconSize={40} bg={t.well} />
           <span style={{ font: P(26) }}>Sumate como conductor</span>
-          <span style={{ font: R(15), color: t.text2, ...pretty }}>Usá tu auto para ganar con Chambito, en los horarios que elijas.</span>
+          <span style={{ font: R(15), color: t.text2, ...pretty }}>Ganá con tu auto, cuando quieras.</span>
           <div style={{ background: inner, borderRadius: 16, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 2 }}>
             <span style={{ font: R(13), color: t.text2 }}>Un viaje promedio en {d.avgEarn.city} deja</span>
             <span style={{ font: P(22) }}>{d.currency(d.avgEarn.amount)}</span>
@@ -137,7 +137,7 @@ export function D2() {
           <Icon name="warning" size={18} color={t.warn} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             <span style={{ font: R(14, 500), color: t.warn }}>Tu seguro vence en 12 días</span>
-            <span style={{ font: R(13), color: t.text2 }}>Subí la póliza nueva antes del 16/11 para seguir recibiendo viajes.</span>
+            <span style={{ font: R(13), color: t.text2 }}>Subí la nueva antes del 16/11.</span>
           </div>
         </div>
         <div style={card}><span style={{ font: R(15, 500) }}>Licencia de conducir</span><Badge>Aprobado</Badge></div>
@@ -151,7 +151,7 @@ export function D2() {
               <span style={{ font: R(15, 500) }}>Fotos del auto</span>
               <Badge tone="error" outline>Rechazado</Badge>
             </div>
-            <span style={{ font: R(14), color: t.text2, ...pretty }}>Motivo: en la foto de la patente no se leen los números.</span>
+            <span style={{ font: R(14), color: t.text2, ...pretty }}>No se lee la patente.</span>
             <LinkText onClick={() => { setResent(true); showToast('Fotos enviadas otra vez'); }}>Volver a enviar</LinkText>
           </div>
         )}
@@ -353,7 +353,7 @@ export function D6() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <span style={{ font: P(26) }}>Pedile el PIN a {d.passenger.name}</span>
           <span style={{ font: R(15), color: error ? t.error : t.text2, ...pretty }}>
-            {error ? 'El PIN no coincide. Pedíselo de nuevo.' : 'Son 4 dígitos que ve en su app. Así confirmás que subió la persona correcta.'}
+            {error ? 'El PIN no coincide. Pedíselo de nuevo.' : 'Lo ve en su app.'}
           </span>
         </div>
         <div className={error ? 'shake' : undefined} style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
@@ -435,7 +435,7 @@ export function D8() {
           <span style={{ font: R(15, 500) }}>Tu ganancia</span>
           <span style={{ font: P(22) }}>{d.currency(d.offer.earn)}</span>
         </div>
-        {cash && <span style={{ font: R(13), color: t.warn, ...pretty }}>La comisión se suma a tu deuda y se descuenta en la próxima liquidación.</span>}
+        {cash && <span style={{ font: R(13), color: t.warn, ...pretty }}>Se descuenta en la próxima liquidación.</span>}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <span style={{ font: P(18) }}>¿Cómo fue viajar con {d.passenger.name}?</span>
@@ -469,7 +469,7 @@ export function D9() {
           </div>
           <LinearProgress value={(w.debt / w.cap) * 100} color={t.warn} height={6} track={t.dividerStrong} />
           <span style={{ font: R(13), color: t.text2 }}>
-            {d.cashAllowed ? `Tope ${d.currency(w.cap)}. Si lo alcanzás, dejás de recibir viajes en efectivo.` : 'Sin deuda: en Argentina los viajes se cobran con Mercado Pago.'}
+            {d.cashAllowed ? `Tope ${d.currency(w.cap)} para seguir cobrando en efectivo.` : 'Sin deuda: cobrás con Mercado Pago.'}
           </span>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column' }}>

@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
 import { AppProvider, Settings, useApp } from './store';
-import { ALL_ENTRIES, Entry, MODULE_OF, MODULES, Module, Tour, VERSIONS, Version, entriesIn, versionOf } from './registry';
+import { ALL_ENTRIES, Entry, MODULE_OF, MODULES, Module, Tour, VERSIONS, Version, entriesIn, groupsIn, versionOf } from './registry';
 import { Icon } from './ui/kit';
 import { IntegrationPage } from './integration';
 import { IntegradaPage } from './integrada/IntegradaPage';
@@ -14,8 +14,11 @@ import { TopNav, UiTheme } from './shell/TopNav';
 import { usePersistent } from './persist';
 import { Page, SideMenu } from './shell/SideMenu';
 import { NotesPanel, ScreenToolbar, SideArrows } from './shell/ScreenPanel';
-import { VersionPanel } from './shell/Versions';
 import { PresentBar } from './shell/Presenter';
+import { useIsPhone } from './shell/device';
+import { MobileHome, ScreensSheet } from './shell/MobileNav';
+import { VersionsPage } from './shell/VersionsPage';
+import { link } from './shell/bus';
 
 /* ---------------- Root ---------------- */
 const initialKey = () => {
@@ -35,12 +38,18 @@ const isAppHash = (h: string) => h === APP_HASH || h.startsWith(`${APP_HASH}/`);
 const isSysHash = (h: string) => h === 'sistema' || h.startsWith('sistema/');
 /** #autov3 and #autov3/<código> open the navigable mockups of «Chambito Auto v3», a version of its own */
 const isV3Hash = (h: string) => h === 'autov3' || h.startsWith('autov3/');
+/** #versiones opens «Versiones»: the differences between v1, v2 and v3 of Auto and Market */
+const isVsHash = (h: string) => h === 'versiones';
+/** the main version of each module: Auto v3 (its own page) and Market v3 (Market as a section, with the selector) */
+const MARKET_MAIN = VERSIONS.market.find((v) => v.id === 'v3')!;
+const MARKET_FIRST = MARKET_MAIN.first ?? 'MKm';
 
 export function Shell() {
   const { screen, overlay, go, set, setTrip, resetTrip, setOverlay, settings, showToast } = useApp();
   const [nonce, setNonce] = useState(0); // bumps on «Reiniciar» to remount the screen
   const market = useMarket();
-  const [page, setPage] = useState<Page>({ kind: 'screen', key: 'A0' });
+  // without a link, the prototype opens on Auto v3 (the main version)
+  const [page, setPage] = useState<Page>(() => (window.location.hash.length > 1 ? { kind: 'screen', key: 'A0' } : { kind: 'autov3' }));
   const [module, setModule] = useState<Module>('auto');
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -52,10 +61,16 @@ export function Shell() {
   useEffect(() => { document.documentElement.dataset.ui = ui; }, [ui]);
   const bootKey = useRef(initialKey()).current; // read before the URL is rewritten below
   const bootHash = useRef(decodeURIComponent(window.location.hash.slice(1))).current;
-  const lastKey = useRef<Record<Module, string>>({ auto: MODULES.auto.first, market: MODULES.market.first });
+  const lastKey = useRef<Record<Module, string>>({ auto: MODULES.auto.first, market: MARKET_FIRST });
   // presentation mode (?presentar opens straight in it) and guided flows
   const [present, setPresent] = useState(() => new URLSearchParams(window.location.search).has('presentar') || window.innerWidth < 600); // phones open on the phone only
   const [tour, setTour] = useState<{ t: Tour; step: number } | null>(null);
+  // on a phone: a home screen first (unless the link opens a screen), and a sheet to jump to any screen
+  const isPhone = useIsPhone();
+  const [home, setHome] = useState(() => window.innerWidth <= 600 && ['', 'A0'].includes(decodeURIComponent(window.location.hash.slice(1))));
+  const [sheet, setSheet] = useState(false);
+  // an earlier version (v1, v2) opened from «Versiones» as a reference
+  const [refMode, setRefMode] = useState(false);
   const [playing, setPlaying] = useState(false);
   const simBefore = useRef<boolean | null>(null); // the trip simulation is paused while a flow plays
 
@@ -68,6 +83,8 @@ export function Shell() {
     const inModule = same.filter((e) => MODULE_OF[e.key] === module);
     const pool = inModule.length ? inModule : same;
     const match = pool.find((e) => e.key === page.key) ?? pool.find(fits) ?? pool[0] ?? ALL_ENTRIES.find((e) => e.screen === screen);
+    // in Market v3 the section explorer belongs to Market: don't move to Auto's reference screens
+    if (match && module === 'market' && !refMode && settings.navModel === 'explorer' && MODULE_OF[match.key] !== 'market') return;
     if (match && match.key !== page.key) {
       setPage({ kind: 'screen', key: match.key });
       const m = MODULE_OF[match.key];
@@ -77,10 +94,11 @@ export function Shell() {
   }, [screen, overlay]);
 
   // a link #integrada/<pantalla> must survive the first render, which is still on a screen
-  const bootingApp = useRef(((h: string) => isAppHash(h) || isSysHash(h) || isV3Hash(h))(decodeURIComponent(window.location.hash.slice(1))));
+  const bootingApp = useRef(((h: string) => !h || isAppHash(h) || isSysHash(h) || isV3Hash(h) || isVsHash(h))(decodeURIComponent(window.location.hash.slice(1))));
   // remember the last screen per module, and keep it in the URL for sharing
   useEffect(() => {
-    if (page.kind === 'integrada' || page.kind === 'sistema' || page.kind === 'autov3') bootingApp.current = false;
+    if (page.kind === 'integrada' || page.kind === 'sistema' || page.kind === 'autov3' || page.kind === 'versiones') bootingApp.current = false;
+    if (page.kind === 'versiones') window.history.replaceState(null, '', '#versiones');
     if (bootingApp.current) return;
     if (page.kind === 'integration') window.history.replaceState(null, '', `#${NAV_HASH}`);
     if (page.kind === 'integrada' && !isAppHash(decodeURIComponent(window.location.hash.slice(1)))) window.history.replaceState(null, '', `#${APP_HASH}`); // the page keeps its own #integrada/<pantalla>
@@ -92,7 +110,9 @@ export function Shell() {
 
   const jump = (e: Entry) => {
     const base = { role: e.role, guest: false, locationOff: false, offline: false, otherService: false, almostEmpty: false, atLimit: false, sellerStatus: 'verificado' as const };
-    set({ ...base, ...(e.flags ?? {}) });
+    // a Market screen shared by every version opens in Market v3, unless an earlier version is being viewed
+    const main = MODULE_OF[e.key] === 'market' && !e.versions && !refMode ? MARKET_MAIN.flags ?? {} : {};
+    set({ ...base, ...main, ...(e.flags ?? {}) });
     const mk = e.mk ?? {};
     if (mk.listing) market.openListing(mk.listing);
     if (mk.activity) market.setActivityTab(mk.activity);
@@ -118,7 +138,8 @@ export function Shell() {
     else if (isAppHash(bootHash)) setPage({ kind: 'integrada' });
     else if (isSysHash(bootHash)) setPage({ kind: 'sistema' });
     else if (isV3Hash(bootHash)) setPage({ kind: 'autov3' });
-    else if (bootKey !== 'A0') jumpKey(bootKey);
+    else if (isVsHash(bootHash)) setPage({ kind: 'versiones' });
+    else if (bootHash && (bootKey !== 'A0' || bootHash === 'A0')) jumpKey(bootKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   // a link edited or pasted while the prototype is open also jumps there
@@ -130,18 +151,35 @@ export function Shell() {
       if (isRefHash(h)) { setRefVersion(VERSIONS.auto[2]); setPage({ kind: 'integration' }); }
       else if (isAppHash(h)) setPage({ kind: 'integrada' });
       else if (isSysHash(h)) setPage({ kind: 'sistema' });
-      else if (isV3Hash(h)) setPage({ kind: 'autov3' });
+      else if (isV3Hash(h)) { setModule('auto'); setPage({ kind: 'autov3' }); }
+      else if (isVsHash(h)) setPage({ kind: 'versiones' });
       else jumpRef.current(h);
     };
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
 
+  // Auto opens Auto v3; Market opens Market v3 (its settings, and its last screen if it belongs to v3)
   const switchModule = (m: Module) => {
-    if (m === module && page.kind === 'screen') return;
-    setModule(m);
-    jumpKey(lastKey.current[m]);
+    setMenuOpen(false);
+    setSheet(false);
+    setRefMode(false);
+    if (m === 'auto') { setModule('auto'); setPage({ kind: 'autov3' }); if (isPhone) setPresent(true); return; }
+    if (m === module && page.kind === 'screen' && versionOf('market', settings).id === 'v3') return;
+    setModule('market');
+    set(MARKET_MAIN.flags ?? {});
+    const last = lastKey.current.market;
+    jumpKey(entriesIn('market', 'v3').some((e) => e.key === last) ? last : MARKET_FIRST);
+    if (isPhone) setPresent(true);
   };
+  // the section selector of Auto v3 opens Market v3
+  const switchRef = useRef(switchModule);
+  switchRef.current = switchModule;
+  useEffect(() => {
+    const on = () => switchRef.current('market');
+    window.addEventListener('chambito:section', on);
+    return () => window.removeEventListener('chambito:section', on);
+  }, []);
 
   // the version (v1, v2…) of the module follows the settings; previous / next walk only its screens
   // in «Componentes» the version is the one you came with (or picked there); on screens it follows the settings
@@ -149,6 +187,16 @@ export function Shell() {
   const onRefs = page.kind === 'integration';
   const version = (onRefs && refVersion && VERSIONS[module].some((v) => v.id === refVersion.id) ? VERSIONS[module].find((v) => v.id === refVersion.id)! : null) ?? versionOf(module, settings);
   const list = useMemo(() => entriesIn(module, version.id), [module, version.id]);
+  // a screen of an earlier version (v1, v2) is a reference: Auto's main version is its own page
+  const reference = page.kind === 'screen' && (module === 'auto' || refMode || version.id !== 'v3');
+  link.market = page.kind === 'screen' && module === 'market' && !refMode && version.id === 'v3';
+  const openVersion = (m: Module, v: Version) => {
+    if (v.id === 'v3') { switchModule(m); return; }
+    setRefMode(true);
+    setModule(m);
+    set(v.flags ?? {});
+    if (v.first) jumpKey(v.first);
+  };
   const chooseVersion = (v: Version) => {
     // inside «Componentes»: apply the version and stay, its references change
     if (onRefs) { set(v.flags ?? {}); setRefVersion(v); return; }
@@ -182,10 +230,13 @@ export function Shell() {
     setPlaying(true);
     setPresent(true);
     setMenuOpen(false);
+    setHome(false);
+    setSheet(false);
     jumpKey(t.steps[0]);
   };
   const exitPresent = () => {
     setPresent(false);
+    setSheet(false);
     setTour(null);
     setPlaying(false);
     if (simBefore.current !== null) { set({ simulate: simBefore.current }); simBefore.current = null; }
@@ -216,11 +267,20 @@ export function Shell() {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
+  if (isPhone && home) {
+    return (
+      <MobileHome
+        onModule={(m) => { setHome(false); switchModule(m); }}
+        onTour={startTour}
+      />
+    );
+  }
+
   return (
-    <div className={`shell${menuOpen ? ' menu-open' : ''}${present ? ' presenting' : ''}${page.kind === 'integrada' || page.kind === 'sistema' ? ' wide' : ''}`}>
+    <div className={`shell${menuOpen ? ' menu-open' : ''}${present && (page.kind === 'screen' || (isPhone && page.kind === 'autov3')) ? ' presenting' : ''}${page.kind === 'integrada' || page.kind === 'sistema' ? ' wide' : ''}`}>
       <TopNav module={module} onModule={switchModule} onMenu={() => setMenuOpen((o) => !o)} ui={ui} onUi={setUi} navOn={page.kind === 'integration' || page.kind === 'sistema'} onNav={() => { setPage({ kind: 'sistema' }); setMenuOpen(false); }}
         appOn={page.kind === 'integrada'} onApp={() => { setPage({ kind: 'integrada' }); setMenuOpen(false); }}
-        v3On={page.kind === 'autov3'} onV3={() => { setPage({ kind: 'autov3' }); setMenuOpen(false); }} />
+        v3On={page.kind === 'autov3'} vsOn={page.kind === 'versiones'} onVs={() => { setPage({ kind: 'versiones' }); setMenuOpen(false); }} />
       <div className="scrim" onClick={() => setMenuOpen(false)} />
       {page.kind === 'autov3' ? (
         <AutoV3Sidebar />
@@ -232,7 +292,19 @@ export function Shell() {
           <>
             <ScreenToolbar module={module} version={version} entry={entry} index={index} total={list.length} prevEntry={index > 0 ? list[index - 1] : undefined} nextEntry={index >= 0 && index < list.length - 1 ? list[index + 1] : undefined} onPrev={prev} onNext={next} onReset={reset} onPresent={() => setPresent(true)} />
             <div className="stage">
-              <VersionPanel module={module} version={version} onVersion={chooseVersion} />
+              <aside className="version-panel" aria-label="Versión">
+                {reference ? (
+                  <div className="ref-note" style={{ '--v': version.color } as CSSProperties}>
+                    <span className="vp-top"><span className="vp-id">{version.id}</span><span className="vp-name">{version.label}</span></span>
+                    <span className="vp-meta">Versión de referencia</span>
+                    <button className="primary-btn" onClick={() => switchModule(module)}>Volver a {MODULES[module].label} v3</button>
+                  </div>
+                ) : (
+                  <button className="vp-extra" style={{ '--v': version.color } as CSSProperties} onClick={() => setPage({ kind: 'versiones' })}>
+                    <span className="vp-id">v3</span><span className="vp-name">Ver diferencias con v1 y v2</span><span className="vp-arrow">→</span>
+                  </button>
+                )}
+              </aside>
               <div className="phone-wrap">
                 <SideArrows prevEntry={index > 0 ? list[index - 1] : undefined} nextEntry={index >= 0 && index < list.length - 1 ? list[index + 1] : undefined} onPrev={prev} onNext={next} />
                 <FitPhone nonce={nonce} gutter={112} />
@@ -243,18 +315,22 @@ export function Shell() {
         ) : (
           <div className="page">
             <div className="page-topbar">
-              <button className="back-pill" onClick={() => jumpKey(lastKey.current[module])} title="Volver al prototipo principal">
-                <Icon name="arrowLeft" size={14} color={GREEN} />
-                <span>Volver a Chambito {module === 'auto' ? 'Auto' : 'Market'}</span>
-              </button>
+              {page.kind === 'autov3' ? <span /> : (
+                <button className="back-pill" onClick={() => switchModule(module)} title="Volver al prototipo principal">
+                  <Icon name="arrowLeft" size={14} color={GREEN} />
+                  <span>Volver a Chambito {module === 'auto' ? 'Auto' : 'Market'}</span>
+                </button>
+              )}
               <span className="page-tag">
-                {page.kind === 'autov3' ? 'Auto v3 navegable'
+                {page.kind === 'autov3' ? 'Chambito Auto · v3'
+                  : page.kind === 'versiones' ? 'Versiones'
                   : page.kind === 'integrada' ? 'App Unificada'
                   : page.kind === 'sistema' ? 'Sistema de diseño'
                   : 'Propuestas'}
               </span>
             </div>
-            {page.kind === 'autov3' ? <AutoV3Page />
+            {page.kind === 'autov3' ? <AutoV3Page present={isPhone && present ? { onModule: switchModule, onHome: () => setHome(true), onExit: exitPresent } : undefined} />
+              : page.kind === 'versiones' ? <VersionsPage onOpen={openVersion} />
               : page.kind === 'integrada' ? <IntegradaPage />
               : page.kind === 'sistema' ? <DesignSystemPage onRefs={() => { setRefVersion(versionOf(module, settings)); setPage({ kind: 'integration' }); }} />
               : <IntegrationPage module={module} version={version} onVersion={chooseVersion} />}
@@ -263,7 +339,21 @@ export function Shell() {
       </main>
       {present && page.kind === 'screen' && (
         <PresentBar module={module} entry={entry} tour={tour?.t ?? null} step={tour?.step ?? 0} playing={playing} index={index} total={list.length}
-          onPrev={pPrev} onNext={pNext} onPlay={() => setPlaying((p) => !p)} onExit={exitPresent} onStep={toStep} />
+          onPrev={pPrev} onNext={pNext} onPlay={() => setPlaying((p) => !p)} onExit={exitPresent} onStep={toStep}
+          onMenu={isPhone ? () => setSheet(true) : undefined} />
+      )}
+      {isPhone && sheet && present && page.kind === 'screen' && (
+        <ScreensSheet
+          module={module} current={entry?.key} inTour={!!tour} dark={settings.theme === 'dark'}
+          groups={groupsIn(module, version.id).filter((g) => !g.page).map((g) => ({ title: g.title, icon: g.icon, entries: g.entries.filter((e) => !e.versions || e.versions.includes(version.id)) }))}
+          onModule={switchModule}
+          onPick={(k) => { const e = ALL_ENTRIES.find((x) => x.key === k); if (!e) return; if (tour) { setTour(null); setPlaying(false); } jump(e); setSheet(false); }}
+          onHome={() => { setSheet(false); setTour(null); setPlaying(false); setHome(true); }}
+          onTheme={() => set({ theme: settings.theme === 'dark' ? 'light' : 'dark' })}
+          onExit={exitPresent}
+          onEndTour={() => { setTour(null); setPlaying(false); if (simBefore.current !== null) { set({ simulate: simBefore.current }); simBefore.current = null; } setSheet(false); }}
+          onClose={() => setSheet(false)}
+        />
       )}
     </div>
   );

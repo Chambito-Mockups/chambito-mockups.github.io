@@ -145,12 +145,12 @@ describe('Explorador (Prototipo Auto): section selector and a fixed bar', () => 
     expect(screen.getByRole('button', { name: /^Sección: Servicios/ })).toBeInTheDocument();
   });
 
-  it('switches the navigation with the version (v1 · v2) in the side menu', () => {
-    start('#A0');
+  it('switches the navigation with the version (v1 · v2) opened from «Versiones»', () => {
+    start('#versiones');
+    fireEvent.click(screen.getByRole('button', { name: 'Ver ejemplo de Auto v1' }));
     expect(tabs()).toContain('Auto');
-    fireEvent.click(screen.getByRole('radio', { name: 'v2 · Selector de sección' }));
+    fireEvent.click(within(screen.getByRole('navigation', { name: 'Referencia' })).getByRole('button', { name: /Versiones/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Ver ejemplo de Auto v2' }));
     expect(tabs()).toEqual(['Inicio', 'Actividad', 'Perfil']);
-    fireEvent.click(screen.getByRole('radio', { name: 'v1 · Pestaña Auto' }));
-    expect(tabs()).toContain('Auto');
   });
 });

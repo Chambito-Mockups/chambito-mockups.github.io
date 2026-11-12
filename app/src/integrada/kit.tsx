@@ -24,11 +24,11 @@ export function I({ name, size = 24, style, label }: { name: string; size?: numb
   );
 }
 
-/** Pantalla de 390 × 844. `id` queda en data-screen-label, como en el diseño. */
+/** Pantalla de 390 de ancho y el alto del teléfono (844, o el del celular). `id` queda en data-screen-label, como en el diseño. */
 export function Screen({ id, children }: { id: string; children: ReactNode }) {
   const { t } = useVM();
   return (
-    <div data-screen-label={id} style={{ position: 'absolute', left: 0, top: 0, width: 390, height: 844, display: 'flex', flexDirection: 'column', background: t.bg, overflow: 'hidden' }}>
+    <div data-screen-label={id} style={{ position: 'absolute', left: 0, top: 0, width: 390, height: '100%', display: 'flex', flexDirection: 'column', background: t.bg, overflow: 'hidden' }}>
       {children}
     </div>
   );

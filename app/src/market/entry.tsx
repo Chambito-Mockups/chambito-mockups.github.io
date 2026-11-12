@@ -321,7 +321,7 @@ export function Actividad() {
                   <span style={{ font: R(12, 500), color: t.name === 'dark' ? '#000000' : '#FFFFFF', background: t.warn, borderRadius: 10, padding: '2px 8px' }}>Fase 2</span>
                 </div>
                 <div style={{ border: `1.5px dashed ${t.dashed}`, borderRadius: 16, padding: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <span style={{ font: R(14), color: t.text2, ...pretty }}>Cuando puedas comprar dentro de la app, tus pedidos van a aparecer acá.</span>
+                  <span style={{ font: R(14), color: t.text2, ...pretty }}>Tus compras van a aparecer acá.</span>
                   <button className="press" onClick={() => go('M01')} style={{ alignSelf: 'flex-start', font: R(14, 500), color: t.link }}>Ir a la Tienda</button>
                 </div>
               </div>

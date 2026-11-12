@@ -96,7 +96,7 @@ export function V15() {
       <MScreen footer={<MFooter><Button onClick={proceed}>Preparar mi publicación</Button><Button kind="secondary" onClick={() => go('M01', { replace: true })}>Volver a la Tienda</Button></MFooter>}>
         <MTopBar onBack={back} />
         <div style={{ padding: '40px 20px 0' }}>
-          <EmptyBlock icon="clock" title="Estamos revisando tu cuenta" text="Suele tardar menos de 24 horas y te avisamos por notificación. Mientras, podés dejar tu publicación lista." />
+          <EmptyBlock icon="clock" title="Estamos revisando tu cuenta" text="Tarda menos de 24 h. Te avisamos." />
         </div>
       </MScreen>
     );
@@ -105,7 +105,7 @@ export function V15() {
       <MScreen footer={<MFooter><Button kind="secondary" onClick={() => showToast('Abre las normas de la Tienda')}>Ver normas de la Tienda</Button><Button kind="secondary" onClick={() => showToast('Abre el chat con Soporte')}>Escribir a soporte</Button></MFooter>}>
         <MTopBar onBack={back} />
         <div style={{ padding: '40px 20px 0' }}>
-          <EmptyBlock icon="error" tone="error" title="Tu cuenta de vendedor está suspendida" text="Publicaste productos que no están permitidos. Podés seguir comprando y pidiendo servicios." />
+          <EmptyBlock icon="error" tone="error" title="Tu cuenta de vendedor está suspendida" text="Publicaste productos no permitidos. Podés seguir comprando." />
         </div>
       </MScreen>
     );
@@ -123,7 +123,7 @@ export function V15() {
         <span style={{ width: 64, height: 64, borderRadius: 32, background: t.mSurface, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="shield" size={30} /></span>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <span style={{ font: P(26), ...pretty }}>Verificá tu identidad para vender</span>
-          <span style={{ font: R(15), color: t.text2, ...pretty }}>Es la misma verificación que usás para pedir servicios. Tarda unos 3 minutos.</span>
+          <span style={{ font: R(15), color: t.text2, ...pretty }}>Tarda unos 3 minutos.</span>
         </div>
         {['Tu cédula, frente y dorso', 'Una selfie'].map((x) => (
           <div key={x} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -184,7 +184,7 @@ export function V16() {
       <PublishHeader step={1} />
       <div style={{ padding: '0 20px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
         <span style={{ font: P(22) }}>Agregá fotos</span>
-        <span style={{ font: R(15), color: t.text2, ...pretty }}>Hasta 10. La primera es la portada. Tocá una foto lista para hacerla portada.</span>
+        <span style={{ font: R(15), color: t.text2, ...pretty }}>Hasta 10. La primera es la portada.</span>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,minmax(0,1fr))', gap: 8 }}>
           {photos.map((p, i) => (
             <div key={p.id} style={{ position: 'relative', aspectRatio: '1', borderRadius: 14, overflow: 'hidden', border: p.state === 'no-permitida' ? `2px solid ${t.error}` : 'none', boxSizing: 'border-box' }}>
@@ -219,7 +219,7 @@ export function V16() {
           )}
         </div>
         <span style={{ font: R(13), color: t.text2 }}>{photos.length} de 10 fotos</span>
-        {blocked && <InfoNote icon="warning" tone="error">Una foto no está permitida porque muestra datos personales. Reemplazala para seguir.</InfoNote>}
+        {blocked && <InfoNote icon="warning" tone="error">Una foto muestra datos personales. Cambiala.</InfoNote>}
       </div>
     </MScreen>
   );
@@ -279,7 +279,7 @@ function DataForm({ d, onChange }: { d: Draft; onChange: (p: Partial<Draft>) => 
           </Field>
         ))}
       </div>
-      <Field label="Stock" hint="Unidades que tenés para vender. Cada venta descuenta una.">
+      <Field label="Stock" hint="Cada venta descuenta una.">
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <button type="button" aria-label="Restar una unidad" className="press" onClick={() => onChange({ stock: Math.max(1, (d.stock ?? 1) - 1) })} style={{ width: 44, height: 44, borderRadius: 22, background: t.mSurface, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="minus" size={18} /></button>
           <span aria-live="polite" style={{ font: P(20), minWidth: 32, textAlign: 'center' }}>{d.stock ?? 1}</span>
@@ -287,14 +287,14 @@ function DataForm({ d, onChange }: { d: Draft; onChange: (p: Partial<Draft>) => 
           <span style={{ font: R(14), color: t.text2 }}>{(d.stock ?? 1) === 1 ? 'unidad' : 'unidades'}</span>
         </div>
       </Field>
-      <Field label="¿Quién paga el envío?" hint="El comprador lo ve en la publicación antes de comprar.">
+      <Field label="¿Quién paga el envío?">
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <FilterChip selected={(d.shipping ?? 'comprador') === 'comprador'} onClick={() => onChange({ shipping: 'comprador' })}>Lo paga el comprador</FilterChip>
           <FilterChip selected={d.shipping === 'vendedor'} onClick={() => onChange({ shipping: 'vendedor' })}>Lo pago yo (envío gratis)</FilterChip>
         </div>
       </Field>
       <Field label="Descripción">
-        <textarea value={d.description} onChange={(e) => onChange({ description: e.target.value })} rows={3} placeholder="Contá el estado, qué incluye y por qué lo vendés." style={{ ...input, padding: 14, resize: 'none', border: 0, outline: 'none', fontFamily: 'Roboto, sans-serif' }} />
+        <textarea value={d.description} onChange={(e) => onChange({ description: e.target.value })} rows={3} placeholder="Estado y qué incluye." style={{ ...input, padding: 14, resize: 'none', border: 0, outline: 'none', fontFamily: 'Roboto, sans-serif' }} />
       </Field>
       <Field label="Zona" hint="Mostramos sólo la zona aproximada">
         <div style={{ ...input, gap: 8 }}><Icon name="mapPin" size={18} color={t.text2} />{d.zone}</div>
@@ -361,7 +361,7 @@ export function V18() {
           <button className="press" onClick={() => go('V16', { replace: true })} style={{ display: 'flex', alignItems: 'center', gap: 6, font: R(15, 500), color: t.link, minHeight: 44 }}><Icon name="edit" size={16} color={t.link} />Editar fotos</button>
           <button className="press" onClick={() => go('V17', { replace: true })} style={{ display: 'flex', alignItems: 'center', gap: 6, font: R(15, 500), color: t.link, minHeight: 44 }}><Icon name="edit" size={16} color={t.link} />Editar datos</button>
         </div>
-        <InfoNote>Revisamos cada publicación antes de mostrarla. Suele tardar unos minutos.</InfoNote>
+        <InfoNote>La revisamos en unos minutos.</InfoNote>
       </div>
     </MScreen>
   );
@@ -388,7 +388,7 @@ export function V19() {
           <Icon name={review ? 'clock' : 'check'} size={36} color={review ? t.warn : t.success} />
         </span>
         <span style={{ font: P(26) }}>{review ? 'Lo estamos revisando' : '¡Publicado!'}</span>
-        <span style={{ font: R(15), color: t.text2, ...pretty }}>{review ? 'Te avisamos cuando esté activa. Suele tardar menos de una hora.' : 'Ya está en la Tienda y la ven tus vecinos.'}</span>
+        <span style={{ font: R(15), color: t.text2, ...pretty }}>{review ? 'Te avisamos cuando esté activa.' : 'Ya está en la Tienda.'}</span>
         {lp && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: t.mSurface, borderRadius: 16, padding: 10, width: '100%', textAlign: 'left', marginTop: 8 }}>
             <div style={{ width: 56, flex: 'none' }}><Photo ph={0} radius={10} iconSize={18} /></div>
@@ -436,7 +436,7 @@ export function V21() {
       </div>
       <div style={{ padding: '14px 20px 40px', display: 'flex', flexDirection: 'column', gap: 14 }}>
         {mine.length === 0 ? (
-          <EmptyBlock icon="tag" title="Publicá tu primer producto" text="Es gratis y te lleva menos de 2 minutos. Lo ven tus vecinos verificados.">
+          <EmptyBlock icon="tag" title="Publicá tu primer producto" text="Es gratis y lleva 2 minutos.">
             <Button icon="plus" onClick={vender}>Publicar gratis</Button>
           </EmptyBlock>
         ) : rows.length === 0 ? (
@@ -520,7 +520,7 @@ export function V22() {
     <MScreen footer={<MFooter><Button onClick={save}>Guardar cambios</Button></MFooter>}>
       <MTopBar title="Editar publicación" onBack={() => { setDraft(null); back(); }} />
       <div style={{ padding: '0 20px 24px', display: 'flex', flexDirection: 'column', gap: 18 }}>
-        <InfoNote icon="warning" tone="warn">Si cambiás título, precio o fotos, la revisamos de nuevo antes de mostrarla.</InfoNote>
+        <InfoNote icon="warning" tone="warn">Si cambiás título, precio o fotos, la revisamos de nuevo.</InfoNote>
         {m?.status === 'Rechazadas' && <InfoNote tone="error">Motivo del rechazo: {m.reason}</InfoNote>}
         <div className="scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto' }}>
           {draft.photos.map((p, i) => (

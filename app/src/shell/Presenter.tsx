@@ -1,14 +1,31 @@
 /** Presentation mode: phone only, full screen, with a floating bar to move and play guided flows. */
-import { useEffect, useRef } from 'react';
-import { Entry, MODULES, Module, TOURS, Tour } from '../registry';
+import { TouchEvent, useEffect, useRef } from 'react';
+import { usePersistent } from '../persist';
+import { MODULES, Module, TOURS, Tour } from '../registry';
 import { Icon } from '../ui/kit';
 
 export const TOUR_STEP_MS = 6000;
 
-export function PresentBar({ module, entry, tour, step, playing, index, total, onPrev, onNext, onPlay, onExit, onStep }: {
-  module: Module; entry?: Entry; tour: Tour | null; step: number; playing: boolean; index: number; total: number;
+export function PresentBar({ module, entry, tour, step, playing, index, total, onPrev, onNext, onPlay, onExit, onStep, onMenu }: {
+  module: Module; entry?: { code: string; title: string }; tour: Tour | null; step: number; playing: boolean; index: number; total: number;
   onPrev: () => void; onNext: () => void; onPlay: () => void; onExit: () => void; onStep: (i: number) => void;
+  /** on a phone: the first button opens the screens sheet instead of leaving */
+  onMenu?: () => void;
 }) {
+  // on a phone a sideways swipe on the bar moves to the previous / next screen; a hint shows until the first swipe
+  const [swiped, setSwiped] = usePersistent<boolean>('swiped', () => false);
+  const touch = useRef<{ x: number; y: number } | null>(null);
+  const onTouchStart = (ev: TouchEvent) => { const t0 = ev.touches[0]; touch.current = { x: t0.clientX, y: t0.clientY }; };
+  const onTouchEnd = (ev: TouchEvent) => {
+    const s0 = touch.current;
+    touch.current = null;
+    if (!s0) return;
+    const t1 = ev.changedTouches[0];
+    const dx = t1.clientX - s0.x, dy = t1.clientY - s0.y;
+    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return;
+    (dx < 0 ? onNext : onPrev)();
+    if (!swiped) setSwiped(true);
+  };
   // autoplay: next step every few seconds; stops on the last one.
   // The callback goes through a ref so re-renders don't restart the timer.
   const nextRef = useRef(onNext);
@@ -22,16 +39,24 @@ export function PresentBar({ module, entry, tour, step, playing, index, total, o
   const atStart = tour ? step <= 0 : index <= 0;
   const atEnd = tour ? step >= tour.steps.length - 1 : index < 0 || index >= total - 1;
   return (
-    <div className="present-bar" role="toolbar" aria-label="Presentación">
-      <button className="pb-btn" onClick={onExit} aria-label="Salir de la presentación" title="Salir (Esc)">
-        <Icon name="close" size={16} color="var(--fg)" />
-      </button>
+    <div className="present-bar" role="toolbar" aria-label="Presentación" onTouchStart={onMenu ? onTouchStart : undefined} onTouchEnd={onMenu ? onTouchEnd : undefined}>
+      {onMenu ? (
+        <button className="pb-btn pb-menu" onClick={onMenu} aria-label="Pantallas" aria-haspopup="dialog">
+          <Icon name="menu" size={20} color="var(--fg)" />
+        </button>
+      ) : (
+        <button className="pb-btn" onClick={onExit} aria-label="Salir de la presentación" title="Salir (Esc)">
+          <Icon name="close" size={16} color="var(--fg)" />
+        </button>
+      )}
       <button className="pb-btn" onClick={onPrev} disabled={atStart} aria-label="Pantalla anterior" title="Anterior (←)">
         <Icon name="chevronRight" size={18} color="var(--fg)" style={{ transform: 'rotate(180deg)' }} />
       </button>
       <div className="pb-info">
-        <span className="pb-kicker">{tour ? `${tour.title} · ${step + 1} de ${tour.steps.length}` : `${MODULES[module].label} · ${index + 1} de ${total}`}</span>
-        <span className="pb-title">{entry ? `${entry.code} · ${entry.title}` : 'Pantalla'}</span>
+        <span className="pb-kicker pb-long">{tour ? `${tour.title} · ${step + 1} de ${tour.steps.length}` : `${MODULES[module].label} · ${index + 1} de ${total}`}</span>
+        <span className="pb-title pb-long">{entry ? `${entry.code} · ${entry.title}` : 'Pantalla'}</span>
+        <span className="pb-title pb-short" aria-hidden="true">{entry ? entry.title : 'Pantalla'}<small>{tour ? `${step + 1}/${tour.steps.length}` : `${index + 1}/${total}`}</small></span>
+        {onMenu && !swiped && <span className="pb-hint" aria-hidden="true">‹ deslizá para pasar ›</span>}
         {tour && (
           <div className="pb-dots" role="tablist" aria-label="Pasos del recorrido">
             {tour.steps.map((k, i) => (

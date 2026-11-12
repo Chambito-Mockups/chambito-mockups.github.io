@@ -51,7 +51,7 @@ export function E2() {
       <AutoMap variant="none" drop />
       <HubTopChrome onSearch={() => go('A2')} onProfile={() => go('perfil')} />
       <Sheet bottomPad={112}>
-        <EmptyState icon="mapPin" title="Activá tu ubicación" text="La usamos solo mientras usás la app, para marcar dónde te buscan." />
+        <EmptyState icon="mapPin" title="Activá tu ubicación" text="Para saber dónde buscarte." />
         <Button onClick={() => { set({ locationOff: false }); go('A0', { replace: true }); showToast('Ubicación activada'); }}>Activar ubicación</Button>
         <Button kind="secondary" onClick={() => go('A2')}>Escribir la dirección</Button>
       </Sheet>
@@ -71,7 +71,7 @@ export function E3() {
         <span style={{ font: R(14, 500), color: t.warn }}>Sin conexión. Reintentando…</span>
       </div>
       <Sheet bottomPad={112}>
-        <EmptyState icon="refresh" title="No pudimos cargar Auto" text="Revisá tus datos o el wifi. Si tenés un viaje activo, sigue en curso." />
+        <EmptyState icon="refresh" title="No pudimos cargar Auto" text="Revisá tu conexión." />
         <Button
           onClick={() => {
             set({ offline: false });
@@ -98,7 +98,7 @@ export function E4() {
           <IconCircle icon="info" size={48} iconSize={24} bg={t.well} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             <span style={{ font: P(22) }}>Ya tenés un servicio en curso</span>
-            <span style={{ font: R(15), color: t.text2, ...pretty }}>Esperá a que termine o cancelalo antes de pedir un viaje.</span>
+            <span style={{ font: R(15), color: t.text2, ...pretty }}>Terminalo o cancelalo para pedir otro.</span>
           </div>
         </div>
         <button className="press" onClick={() => go('A11')} style={{ background: t.card, borderRadius: 20, padding: 14, display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left' }}>

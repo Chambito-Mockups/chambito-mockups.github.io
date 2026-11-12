@@ -6,6 +6,7 @@
  * The bar stays Inicio · Actividad · Perfil in every section, and the app reopens in the last section used.
  */
 import { useState } from 'react';
+import { link, openSection } from '../shell/bus';
 import { Section, useApp } from '../store';
 import { P, R } from '../theme';
 import { AutoMap } from './AutoMap';
@@ -23,6 +24,8 @@ import { ServiceSheet } from '../market/entry';
 export function useGoSection() {
   const { go, set, autoRoot, setOverlay } = useApp();
   return (s: Section) => {
+    // en Market v3 (la versión principal), Servicios y Auto se abren en Auto v3
+    if (link.market && s !== 'market') { setOverlay(null); openSection(s); return; }
     set({ lastSection: s });
     setOverlay(null);
     go(s === 'auto' ? autoRoot() : s === 'market' ? 'M01' : 'inicio', { replace: true });
