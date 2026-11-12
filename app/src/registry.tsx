@@ -299,12 +299,15 @@ export interface Tour {
   title: string;
   hint: string;
   steps: string[];
+  /** the steps are screens of Auto v3 (its own page), not of the viewer's index */
+  v3?: boolean;
 }
 
 export const TOURS: Tour[] = [
-  { id: 'explorar', module: 'auto', title: 'Explorar Chambito', hint: 'Servicios → Market → Auto con el selector', steps: ['X1', 'X2s', 'MK', 'X2m', 'XA0', 'X2a', 'X1'] },
-  { id: 'viaje', module: 'auto', title: 'Pedir un viaje', hint: 'De «¿A dónde vas?» a la calificación', steps: ['A0', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A8b', 'A9', 'A11'] },
-  { id: 'conductor', module: 'auto', title: 'Manejar con Chambito', hint: 'Alta, oferta, PIN y cobro', steps: ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9'] },
+  // Auto: screens of Auto v3, the main version
+  { id: 'explorar', module: 'auto', v3: true, title: 'Explorar Chambito', hint: 'Servicios, el selector y Viaje · Moto · Envío', steps: ['X1', 'X2', 'A0', 'V1', 'V2'] },
+  { id: 'viaje', module: 'auto', v3: true, title: 'Pedir un viaje', hint: 'De «¿A dónde vas?» a la calificación', steps: ['A0', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A8b', 'A9', 'A11'] },
+  { id: 'conductor', module: 'auto', v3: true, title: 'Manejar con Chambito', hint: 'Alta, oferta, PIN y cobro', steps: ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9'] },
   { id: 'comprar', module: 'market', title: 'Comprar en la Tienda', hint: 'Buscar, ver, consultar y guardar', steps: ['EB1', 'M01', 'M03', 'M04', 'M05', 'M06', 'M10', 'M11'] },
   { id: 'vender', module: 'market', title: 'Vender en la Tienda', hint: 'De la bienvenida a Mis publicaciones', steps: ['V14', 'V15a', 'V16', 'V17', 'V18', 'V19a', 'V21'] },
 ];

@@ -6,6 +6,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Icon } from '../ui/kit';
 import { V3_ENTRIES, V3_GROUPS, V3Entry } from './AutoV3Page';
+import { Tour } from '../registry';
+import { TourList } from '../shell/Presenter';
 
 const MODULE_COLOR = '#4BAC4F';
 const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -15,7 +17,7 @@ function keyFromHash(): string | null {
   return h.startsWith('autov3/') ? h.slice('autov3/'.length) : null;
 }
 
-export function AutoV3Sidebar() {
+export function AutoV3Sidebar({ onStartTour }: { onStartTour?: (t: Tour) => void }) {
   const [query, setQuery] = useState('');
   const [key, setKey] = useState<string>(() => keyFromHash() ?? 'A0');
   const searchRef = useRef<HTMLInputElement>(null);
@@ -81,6 +83,8 @@ export function AutoV3Sidebar() {
         ))}
         {!groups.length && <div className="empty"><Icon name="search" size={28} color="var(--fg4)" /><span>Nada para «{query}».</span></div>}
       </nav>
+
+      {!q && onStartTour && <TourList module="auto" onStart={onStartTour} />}
 
       <div className="shortcuts" style={{ marginTop: 'auto' }}>
         <span>{V3_ENTRIES.length} pantallas en el lienzo</span>

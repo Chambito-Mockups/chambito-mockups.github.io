@@ -9,7 +9,7 @@ import { PHONE_QUERY, useIsPhone } from '../shell/device';
 import { isTyping } from '../shell/controls';
 import { Icon } from '../ui/kit';
 import { dark as darkTheme, light as lightTheme } from '../theme';
-import { Module } from '../registry';
+import { Module, Tour } from '../registry';
 import { useBareSize } from '../shell/Phone';
 import { PresentBar } from '../shell/Presenter';
 import { ScreensSheet } from '../shell/MobileNav';
@@ -71,7 +71,7 @@ function useFit() {
     const fit = () => {
       const top = el.getBoundingClientRect().top;
       const availW = el.clientWidth - 20;
-      const availH = window.innerHeight - top - 40;
+      const availH = window.innerHeight - top - (el.closest('.presenting') ? 120 : 40); // la barra del recorrido va abajo
       if (window.matchMedia?.(PHONE_QUERY).matches) { setScale(Math.min(1.2, el.clientWidth / 390)); return; }
       setScale(Math.max(0.6, Math.min(1.25, availW / 412, availH / 866)));
     };
@@ -103,7 +103,13 @@ function BareV3({ phone, cfg, onPlace }: { phone: RefObject<AutoV3Handle>; cfg: 
   );
 }
 
-export function AutoV3Page({ present }: { present?: V3Present }) {
+/** Un recorrido guiado de Auto que se está reproduciendo (el estado vive en el visor). */
+export interface V3Tour {
+  t: Tour; step: number; playing: boolean;
+  onPrev: () => void; onNext: () => void; onPlay: () => void; onStep: (i: number) => void; onExit: () => void; onEnd: () => void;
+}
+
+export function AutoV3Page({ present, tour }: { present?: V3Present; tour?: V3Tour }) {
   const [sheet, setSheet] = useState(false);
   const [cfg, setCfg] = usePersistent<{ country: Country; dark: boolean; sim: boolean }>('autov3', () => ({ country: 'PY', dark: true, sim: true }));
   const set = (o: Partial<typeof cfg>) => setCfg((c) => ({ ...c, ...o }));
@@ -139,11 +145,12 @@ export function AutoV3Page({ present }: { present?: V3Present }) {
   const nextE = index >= 0 && index < V3_ENTRIES.length - 1 ? V3_ENTRIES[index + 1] : undefined;
   const groupOf = (en?: V3Entry) => V3_GROUPS.find((g) => en && g.entries.includes(en));
 
-  const step = useRef({ prevE, nextE, open });
-  step.current = { prevE, nextE, open };
+  const step = useRef({ prevE, nextE, open, touring: !!tour });
+  step.current = { prevE, nextE, open, touring: !!tour };
   useEffect(() => {
     const onKey = (ev: KeyboardEvent) => {
-      if (ev.metaKey || ev.ctrlKey || ev.altKey || isTyping(document.activeElement)) return;
+      // during a guided flow the viewer moves the steps with ← →
+      if (ev.metaKey || ev.ctrlKey || ev.altKey || isTyping(document.activeElement) || step.current.touring) return;
       const { prevE: p, nextE: n, open: o } = step.current;
       if (ev.key === 'ArrowLeft' && p) { ev.preventDefault(); o(p); }
       else if (ev.key === 'ArrowRight' && n) { ev.preventDefault(); o(n); }
@@ -152,27 +159,36 @@ export function AutoV3Page({ present }: { present?: V3Present }) {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
+  // the same bar as Market; during a guided flow, its steps, dots and play / pause
+  const barProps = {
+    module: 'auto' as const, entry: cur ? { code: cur.key, title: cur.title } : undefined, index, total: V3_ENTRIES.length,
+    ...(tour
+      ? { tour: tour.t, step: tour.step, playing: tour.playing, onPrev: tour.onPrev, onNext: tour.onNext, onPlay: tour.onPlay, onStep: tour.onStep, onExit: tour.onExit }
+      : { tour: null, step: 0, playing: false, onPrev: () => { if (prevE) open(prevE); }, onNext: () => { if (nextE) open(nextE); }, onPlay: () => {}, onStep: () => {}, onExit: present?.onExit ?? (() => {}) }),
+  };
+  // the trip simulation pauses while a flow plays, so the screens don't move on their own
+  const phoneCfg = { ...cfg, sim: cfg.sim && !tour };
+
   if (present) {
     return (
       <div className="v3-stage v3-present">
         <div className="phone-wrap">
-          <BareV3 phone={phone} cfg={cfg} onPlace={onPlace} />
+          <BareV3 phone={phone} cfg={phoneCfg} onPlace={onPlace} />
         </div>
         <PresentBar
-          module="auto" entry={cur ? { code: cur.key, title: cur.title } : undefined} tour={null} step={0} playing={false} index={index} total={V3_ENTRIES.length}
-          onPrev={() => prevE && open(prevE)} onNext={() => nextE && open(nextE)} onPlay={() => {}} onExit={present.onExit} onStep={() => {}}
+          {...barProps}
           onMenu={() => setSheet(true)}
         />
         {sheet && (
           <ScreensSheet
             module="auto" groups={V3_GROUPS.map((g) => ({ title: g.title, entries: g.entries.map((x) => ({ key: x.key, code: x.key, title: x.title })) }))}
-            current={key} inTour={false} dark={cfg.dark}
+            current={key} inTour={!!tour} dark={cfg.dark}
             onModule={(m) => { setSheet(false); if (m !== 'auto') present.onModule(m); }}
-            onPick={(k) => { const en = V3_ENTRIES.find((x) => x.key === k); if (en) open(en); setSheet(false); }}
+            onPick={(k) => { const en = V3_ENTRIES.find((x) => x.key === k); tour?.onEnd(); if (en) open(en); setSheet(false); }}
             onHome={() => { setSheet(false); present.onHome(); }}
             onTheme={() => set({ dark: !cfg.dark })}
             onExit={() => { setSheet(false); present.onExit(); }}
-            onEndTour={() => {}}
+            onEndTour={() => { tour?.onEnd(); setSheet(false); }}
             onClose={() => setSheet(false)}
           />
         )}
@@ -211,10 +227,11 @@ export function AutoV3Page({ present }: { present?: V3Present }) {
       <div ref={box} className="ig-phone" style={{ paddingTop: bare ? 0 : 11 * scale }}>
         <div style={{ width: 390 * scale, height: 844 * scale }}>
           <div style={{ transform: `scale(${scale})`, transformOrigin: 'top left', width: 390, height: 844, overflow: 'hidden', ...(bare ? {} : { borderRadius: 44, boxShadow: '0 30px 80px var(--phone-shadow), 0 0 0 10px var(--frame), 0 0 0 11px var(--frame-ring)' }) }}>
-            <AutoV3Phone ref={phone} {...cfg} onPlace={onPlace} />
+            <AutoV3Phone ref={phone} {...phoneCfg} onPlace={onPlace} />
           </div>
         </div>
       </div>
+      {tour && <PresentBar {...barProps} />}
       <div className="v3-notes">
         {groupOf(cur)?.note && <p className="v3-note">{groupOf(cur)!.note}</p>}
         <p className="v3-note muted">PIN: <b>{cfg.country === 'PY' ? '4827' : '3156'}</b></p>

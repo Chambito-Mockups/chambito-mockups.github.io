@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import App from '../App';
 import { TOURS, ALL_ENTRIES, MODULE_OF } from '../registry';
+import { V3_ENTRIES } from '../autov3/AutoV3Page';
 import { clearDemo, load, save } from '../persist';
 import { TOUR_STEP_MS } from '../shell/Presenter';
 
@@ -78,20 +79,27 @@ describe('presentation mode', () => {
 describe('guided flows', () => {
   it('only lists real screens of their own module', () => {
     for (const t of TOURS) for (const k of t.steps) {
+      // Auto's flows walk Auto v3, the main version
+      if (t.v3) { expect(t.module).toBe('auto'); expect(V3_ENTRIES.some((e) => e.key === k), `${t.id}:${k}`).toBe(true); continue; }
       expect(ALL_ENTRIES.some((e) => e.key === k), `${t.id}:${k}`).toBe(true);
       expect(MODULE_OF[k], `${t.id}:${k}`).toBe(t.module);
     }
+    expect(TOURS.filter((t) => t.module === 'auto').every((t) => t.v3)).toBe(true);
   });
 
   it('plays a flow step by step and stops at the end', () => {
     vi.useFakeTimers();
     try {
-      start('#A0');
+      start();
       fireEvent.click(screen.getByRole('button', { name: 'Presentar: Manejar con Chambito' }));
       const tour = TOURS.find((t) => t.id === 'conductor')!;
       expect(within(bar()).getByText(`Manejar con Chambito · 1 de ${tour.steps.length}`)).toBeInTheDocument();
+      // it plays inside Auto v3
+      expect(window.location.hash).toBe('#autov3/D0');
+      expect(within(bar()).getByText(/^D0 · /)).toBeInTheDocument();
       act(() => { vi.advanceTimersByTime(TOUR_STEP_MS + 50); });
       expect(within(bar()).getByText(`Manejar con Chambito · 2 de ${tour.steps.length}`)).toBeInTheDocument();
+      expect(within(bar()).getByText(/^D1 · /)).toBeInTheDocument();
       // pause with the space bar: it stays put
       fireEvent.keyDown(window, { key: ' ' });
       act(() => { vi.advanceTimersByTime(TOUR_STEP_MS * 2); });
@@ -105,11 +113,26 @@ describe('guided flows', () => {
   });
 
   it('restores the trip simulation when the flow ends', () => {
-    start('#A0');
-    fireEvent.click(screen.getByRole('button', { name: 'Presentar: Pedir un viaje' }));
+    start('#M01');
+    fireEvent.click(screen.getByRole('button', { name: 'Presentar: Comprar en la Tienda' }));
     fireEvent.click(within(bar()).getByRole('button', { name: 'Salir de la presentación' }));
+    // the switch lives in Auto's index (the earlier screens)
+    window.location.hash = '#A0';
+    fireEvent(window, new HashChangeEvent('hashchange'));
     fireEvent.click(screen.getByRole('button', { name: /Simular situaciones/ }));
     expect(screen.getByRole('switch', { name: /Viaje en tiempo real/ })).toHaveAttribute('aria-checked', 'true');
+  });
+
+  it('plays the Auto flows in Auto v3 and leaves its simulation as it was', () => {
+    start();
+    fireEvent.click(screen.getByRole('button', { name: 'Presentar: Pedir un viaje' }));
+    expect(window.location.hash).toBe('#autov3/A0');
+    expect(document.querySelector('.shell')).toHaveClass('presenting');
+    fireEvent.click(within(bar()).getByRole('button', { name: 'Pantalla siguiente' }));
+    expect(window.location.hash).toBe('#autov3/A2');
+    fireEvent.click(within(bar()).getByRole('button', { name: 'Salir de la presentación' }));
+    expect(screen.queryByRole('toolbar', { name: 'Presentación' })).toBeNull();
+    expect(screen.getByRole('switch', { name: /Simular/ })).toHaveAttribute('aria-checked', 'true');
   });
 });
 

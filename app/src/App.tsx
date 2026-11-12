@@ -215,24 +215,41 @@ export function Shell() {
     showToast('Pantalla reiniciada');
   };
 
+  // a step of a guided flow: Auto's flows open Auto v3 (through its link), the others a screen of the index
+  const showStep = (t: Tour, key: string) => {
+    if (!t.v3) { jumpKey(key); return; }
+    setModule('auto');
+    setRefMode(false);
+    setPage({ kind: 'autov3' });
+    window.history.replaceState(null, '', `#autov3/${key}`);
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  };
   const toStep = (i: number) => {
     if (!tour) return;
     const last = tour.t.steps.length - 1;
     const s = Math.max(0, Math.min(last, i));
     setTour({ ...tour, step: s });
-    jumpKey(tour.t.steps[s]);
+    showStep(tour.t, tour.t.steps[s]);
     if (s >= last) setPlaying(false);
   };
   const startTour = (t: Tour) => {
-    if (simBefore.current === null) simBefore.current = settings.simulate;
-    set({ simulate: false });
+    // the trip simulation of the index pauses while a flow plays (Auto v3 pauses its own)
+    if (!t.v3) {
+      if (simBefore.current === null) simBefore.current = settings.simulate;
+      set({ simulate: false });
+    }
     setTour({ t, step: 0 });
     setPlaying(true);
     setPresent(true);
     setMenuOpen(false);
     setHome(false);
     setSheet(false);
-    jumpKey(t.steps[0]);
+    showStep(t, t.steps[0]);
+  };
+  const endTour = () => {
+    setTour(null);
+    setPlaying(false);
+    if (simBefore.current !== null) { set({ simulate: simBefore.current }); simBefore.current = null; }
   };
   const exitPresent = () => {
     setPresent(false);
@@ -277,13 +294,13 @@ export function Shell() {
   }
 
   return (
-    <div className={`shell${menuOpen ? ' menu-open' : ''}${present && (page.kind === 'screen' || (isPhone && page.kind === 'autov3')) ? ' presenting' : ''}${page.kind === 'integrada' || page.kind === 'sistema' ? ' wide' : ''}`}>
+    <div className={`shell${menuOpen ? ' menu-open' : ''}${present && (page.kind === 'screen' || (page.kind === 'autov3' && (isPhone || !!tour))) ? ' presenting' : ''}${page.kind === 'integrada' || page.kind === 'sistema' ? ' wide' : ''}`}>
       <TopNav module={module} onModule={switchModule} onMenu={() => setMenuOpen((o) => !o)} ui={ui} onUi={setUi} navOn={page.kind === 'integration' || page.kind === 'sistema'} onNav={() => { setPage({ kind: 'sistema' }); setMenuOpen(false); }}
         appOn={page.kind === 'integrada'} onApp={() => { setPage({ kind: 'integrada' }); setMenuOpen(false); }}
         v3On={page.kind === 'autov3'} vsOn={page.kind === 'versiones'} onVs={() => { setPage({ kind: 'versiones' }); setMenuOpen(false); }} />
       <div className="scrim" onClick={() => setMenuOpen(false)} />
       {page.kind === 'autov3' ? (
-        <AutoV3Sidebar />
+        <AutoV3Sidebar onStartTour={startTour} />
       ) : (
         <SideMenu module={module} page={page} onJump={jump} onModule={switchModule} query={query} setQuery={setQuery} searchRef={searchRef} onStartTour={startTour} version={version} />
       )}
@@ -329,7 +346,12 @@ export function Shell() {
                   : 'Propuestas'}
               </span>
             </div>
-            {page.kind === 'autov3' ? <AutoV3Page present={isPhone && present ? { onModule: switchModule, onHome: () => setHome(true), onExit: exitPresent } : undefined} />
+            {page.kind === 'autov3' ? (
+              <AutoV3Page
+                present={isPhone && present ? { onModule: switchModule, onHome: () => { endTour(); setHome(true); }, onExit: exitPresent } : undefined}
+                tour={tour?.t.v3 ? { t: tour.t, step: tour.step, playing, onPrev: pPrev, onNext: pNext, onPlay: () => setPlaying((p) => !p), onStep: toStep, onExit: exitPresent, onEnd: endTour } : undefined}
+              />
+            )
               : page.kind === 'versiones' ? <VersionsPage onOpen={openVersion} />
               : page.kind === 'integrada' ? <IntegradaPage />
               : page.kind === 'sistema' ? <DesignSystemPage onRefs={() => { setRefVersion(versionOf(module, settings)); setPage({ kind: 'integration' }); }} />
@@ -351,7 +373,7 @@ export function Shell() {
           onHome={() => { setSheet(false); setTour(null); setPlaying(false); setHome(true); }}
           onTheme={() => set({ theme: settings.theme === 'dark' ? 'light' : 'dark' })}
           onExit={exitPresent}
-          onEndTour={() => { setTour(null); setPlaying(false); if (simBefore.current !== null) { set({ simulate: simBefore.current }); simBefore.current = null; } setSheet(false); }}
+          onEndTour={() => { endTour(); setSheet(false); }}
           onClose={() => setSheet(false)}
         />
       )}

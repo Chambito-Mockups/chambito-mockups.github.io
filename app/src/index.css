@@ -665,3 +665,10 @@ kbd { font: 500 11px Roboto, sans-serif; color: var(--fg2); background: var(--li
   .presenting .v3-present { height: 100%; max-width: none; gap: 0; display: flex; flex-direction: column; }
   .presenting .v3-present > .phone-wrap { flex: 1; min-height: 0; width: 100%; }
 }
+
+/* ---------- guided flows of Auto: they play inside Auto v3, on the computer too ---------- */
+.presenting .page-topbar, .presenting .v3-bar, .presenting .v3-notes { display: none; }
+@media (min-width: 601px) {
+  .presenting .main:has(.page) { padding: 24px 16px 110px; }
+  .presenting .page { width: 100%; min-height: 0; }
+}
